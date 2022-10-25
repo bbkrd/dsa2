@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1666171356193.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "78F16090",
+    "lastKnownWriteTime" : 1666173211,
+    "last_content_update" : 1666173211,
+    "path" : "R:/Zentrale/Projekte/FB-S/Daten/DA/JDemetra/Anwendungen/DSA2/MVP_auxiliary.R",
+    "project_path" : "MVP_auxiliary.R",
+    "properties" : {
+        "cursorPosition" : "10,17",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

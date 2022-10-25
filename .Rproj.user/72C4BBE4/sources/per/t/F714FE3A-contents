@@ -1,0 +1,100 @@
+Sys.setenv("JAVA_HOME"="C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7")
+.libPaths("C:\\Workspace\\R\\JD_lib")
+
+library(rjd3highfreq)
+library(bbkplot)
+set.seed(1235)
+mseries <- tssim::sim_monthly(10)$original
+wseries <- s45::aggregate_to(tssim::sim_daily(5)$original, to="week")
+dseries <- tssim::sim_daily(5)$original
+
+# Monthly series ----------------------------------------------------------
+
+
+# Default-Einstellungen, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(mseries), period=12, multiplicative = FALSE, swindow=7) #, weight.function = c("TRICUBE")
+classic <- stats::stl(tsbox::ts_ts(mseries), s.window=7, robust=TRUE)
+
+classic_s <- tsbox::ts_xts(classic$time.series[,1])
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+# robust=FALSE, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(mseries), period=12, multiplicative = FALSE, ninnerloop = 2, nouterloop = 0, swindow=7) # St?rzt ab, wenn swindow gesetzt wird.
+classic <- stats::stl(tsbox::ts_ts(mseries), s.window=7, robust=FALSE)
+
+classic_s <- tsbox::ts_xts(classic$time.series[,1])
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+
+# robust=FALSE, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(mseries), period=12, multiplicative = FALSE, ninnerloop = 2, nouterloop = 0, swindow=7) 
+classic <- stats::stl(tsbox::ts_ts(mseries), s.window=7, robust=FALSE)
+
+classic_s <- tsbox::ts_xts(classic$time.series[,1])
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+
+
+# Weekly series -----------------------------------------------------------
+
+# Default-Einstellungen, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(wseries), period=52, multiplicative = FALSE, swindow=7)
+classic <- stats::stl(ts(as.numeric(wseries), frequency=52), s.window=7, robust=TRUE)
+
+classic_s <- xts::xts(classic$time.series[,1], zoo::index(wseries))
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+# robust=FALSE, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(wseries), period=52, multiplicative = FALSE, ninnerloop = 2, nouterloop = 0, swindow=7)
+classic <- stats::stl(ts(as.numeric(wseries), frequency=52), s.window=7, robust=FALSE)
+
+classic_s <- xts::xts(classic$time.series[,1], zoo::index(wseries))
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+
+# robust=FALSE, multiplicative=FALSE, s.window=7 per default
+
+new <- stl(as.numeric(wseries), period=52, multiplicative = FALSE, ninnerloop = 2, nouterloop = 0) 
+classic <- stats::stl(ts(as.numeric(wseries), frequency = 52, start=c(2010,1)), s.window=7, robust=FALSE)
+
+classic_s <- xts::xts(classic$time.series[,1], zoo::index(wseries))
+new_s <- xts::xts(new$decomposition[,4], zoo::index(classic_s))
+g <- tsplot(merge(classic_s, new_s), add_bbkplot=FALSE, names=c("stats::stl", "rj3highfreq::stl"))
+g2 <- tsplot(classic_s - new_s, add_bbkplot=FALSE, names=c("difference"), color="yellow")
+multiplot(g, g2)
+
+
+# Fractional Airline Model ------------------------------------------------
+
+model <- fractionalAirlineEstimation(dseries, periods=c(7, 365.25))
+
+model$model$y
+
+
+
+
