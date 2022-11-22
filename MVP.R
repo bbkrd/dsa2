@@ -28,9 +28,9 @@ dsa2 <- function(x, xreg=NULL, Log=TRUE, swindow7=13, swindow31=13, swindow365=1
   xlin <- xts::xts(model$model$linearized, zoo::index(x)) # calendar adjusted
   cfac <- Descaler(Scaler(x, Log=Log)-Scaler(xlin, Log=Log), Log=Log) # calendar factor
   
-  cfac2 <- xts::xts(Descaler(xreg %*% model$model$b, Log=Log), zoo::index(x))
-  cfac2 <- xts::xts(Descaler(model$model$b * xreg, Log=Log), zoo::index(x))
-  
+  # cfac2 <- xts::xts(Descaler(xreg %*% model$model$b, Log=Log), zoo::index(x))
+  # cfac2 <- xts::xts(Descaler(model$model$b * xreg, Log=Log), zoo::index(x))
+
   # s7 ----------------------------------------------------------------------
   if (!is.null(swindow7)) {
     s7_model <- rjd3stl::stl(xlin, period=7, multiplicative=Log, swindow=swindow7)
