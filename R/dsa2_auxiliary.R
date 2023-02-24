@@ -47,3 +47,12 @@ Scaler <- function (x, Diff = 0, Log = FALSE) { # Copied from {dsa}
     x = diff(x, differences = Diff)
   return(stats::na.omit(x))
 }
+
+
+plot.dsa2 <- function() {
+  
+}
+
+print.dsa2 <- function() {
+  
+}

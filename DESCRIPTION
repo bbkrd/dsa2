@@ -1,0 +1,38 @@
+Package: dsa2
+Title: Seasonal adjustment of daily time series
+Version: 0.0.1
+Authors@R: 
+    c(person(given = "Daniel",
+             family = "Ollech",
+             role = c("aut", "cre"),
+             email = "daniel.ollech@bundesbank.de"),
+	person(given = "Martin",
+             family = "Stefan",
+             role = "aut",
+             email = "martin.stefan@bundesbank.de"),
+        person(given = "Julian",
+             family = "LeCrone",
+             role = "aut",
+             email = "julian.lecrone@bundesbank.de"),
+        person(given = "Hofer",
+             family = "Christiane",
+             role = "aut",
+             email = "christiane.hofer@bundesbank.de"),
+      person(given = "Witthohn",
+             family = "Thomas",
+             role = "aut",
+             email = "thomas.witthohn@bundesbank.de"))
+Maintainer: Daniel Ollech <daniel.ollech@bundesbank.de>
+Description: This package contains functions to conduct a seasonal adjustment of daily time series using the dsa2 procedure. The dsa2 builds on the the dsa procedure developed by Ollech (2021), but adds further features and a quicker implementation, as it uses routines implemented in Java / JDemetra+3.
+License: GPL-3
+Depends: 
+    R (>= 3.1.0)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    xts,
+    zoo,
+    dsa,
+    stats
