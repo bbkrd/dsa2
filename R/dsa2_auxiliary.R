@@ -4,7 +4,7 @@ delete_29 <- function(x) {
 }
 
 
-Descaler <- function (x, y = NA, Diff = 0,  Log = FALSE, Lag = NA) { # Copied from {dsa}
+Descaler <- function (x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
   .diffinv_xts <- function(x, y, lag = 1, differences = 1, 
                            stepsize = "days", ...) {
     if (all(class(y) != "xts")) {
@@ -17,7 +17,7 @@ Descaler <- function (x, y = NA, Diff = 0,  Log = FALSE, Lag = NA) { # Copied fr
                                                   by = stepsize, length.out = length(values)))
     return(series)
   }
-  if (Log) {
+  if (log) {
     ysave = y
     y = log(y)
   }
@@ -30,7 +30,7 @@ Descaler <- function (x, y = NA, Diff = 0,  Log = FALSE, Lag = NA) { # Copied fr
       x <- .diffinv_xts(x, y, differences = Diff)
     }
   }
-  if (Log) 
+  if (log) 
     x = exp(x)
   if (any(class(x) == "numeric")) {
     x <- xts::xts(x, order.by = seq.Date(from = as.Date(stats::start(y)), 
@@ -40,8 +40,8 @@ Descaler <- function (x, y = NA, Diff = 0,  Log = FALSE, Lag = NA) { # Copied fr
 }
 
 
-Scaler <- function (x, Diff = 0, Log = FALSE) { # Copied from {dsa}
-  if (Log) 
+Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
+  if (log) 
     x = log(x)
   if (Diff > 0) 
     x = diff(x, differences = Diff)

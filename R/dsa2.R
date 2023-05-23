@@ -9,13 +9,16 @@
 #' @param s365 method or specification used for adjustment of day-of-the-year
 #' @param outliers should outliers be identified using regarima models
 #' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
-#' @param pre_processing Optionally include pre-processing results
+#' @param h number of days to forecast
+#' @param pre_processing Optionally include pre-processing results computed earlier
 #' @author Daniel Ollech
-#' 
 #' @examples dsa2(dsa::daily_sim(n=5, year_effect=5)$original)  
-#' @details This function implements the DSA2 procedure that facilitates the seasonal adjustment of daily time series.
-#' @references Ollech, Daniel (2018). Seasonal adjustment of daily time series. Bundesbank Discussion Paper 41/2018.
-#' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics 13 (2), 235-264.
+#' @details This function implements the DSA2 procedure that facilitates the 
+#' seasonal adjustment of daily time series.
+#' @references Ollech, Daniel (2018). Seasonal Adjustment of Daily Time Series. 
+#' Bundesbank Discussion Paper 41/2018.
+#' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. 
+#' Journal of Time Series Econometrics 13 (2), 235-264.
 #' @export
 
 
@@ -23,11 +26,12 @@
 dsa2 <- function(series, 
                  xreg = NULL,
                  log = TRUE,
-                 s7 = c("x11", "stl", "seats")[1],
+                 s7 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
                  s31 = NULL,
-                 s365 = c("x11", "stl", "seats")[1],
+                 s365 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
                  outliers = c("AO", "LS", "TC"),
                  n_iterations = 1,
+                 h = 365,
                  pre_processing = NULL) {
   
   parameters <- as.list(environment(), all=TRUE)
@@ -37,16 +41,18 @@ dsa2 <- function(series,
   
   # pre-processing ----------------------------------------------------------
   if (!is.null(pre_processing)) { # Standard_case
-    model <- rjd3highfreq::fractionalAirlineEstimation(y=x, 
+    model <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(y=x, 
                                                        periods=c(7, 365.25), 
                                                        x=xreg, 
+                                                       nfcasts = h,
                                                        outliers=outliers)
     
     xlin <- xts::xts(model$model$linearized, zoo::index(x)) # calendar adjusted
-    calComp <- model$calComp # calendar factor # NOTE(DO): not available yet
+    calComp <- component_userdef_reg_variables # calendar factor # NOTE(DO): Should it be centered?
     
   } else {
-    xlin = pre_processing$xlin # NOTE(DO): Put here the linearised series
+    model = pre_processing$preProcessing
+    xlin = model$model$linearized  
   }
   
   # Preliminary seasonal component
@@ -70,32 +76,37 @@ dsa2 <- function(series,
     
     # TODO(Thomas): Adding interpolation ####
     
-    xlinx <- compute_seasadj(xlin, 
-                               seasComp7=seasComp7, 
-                               seasComp31=NULL, 
-                               seasComp365=seasComp365, 
-                               log=log)
-    frequency(xlinx) <- 31
-    s31Result <- adjust(method=s31, series=xlinx) 
-    seasComp31 <- s31Result$seasComp
+    zlinz <- compute_seasadj(xlin, 
+                             seasComp7=seasComp7, 
+                             seasComp31=NULL, 
+                             seasComp365=seasComp365, 
+                             log=log)
+    
+    xlinx <- ts(rjd3bbksplines::interpolate31(zlinz, 
+                           interpolator = "CUBIC_SPLINE"),
+                frequency = 31)
+                
+    s31Result <- adjust(method=s31, series=zlinz) 
+    
+    seasComp31 <- rjd3bbksplines::reduce31(s31Result$seasComp, zlinz)
     
     # S365 --------------------------------------------------------------------
-    
-    # TODO(Alle): Dealing with 29.2 ####
     
     xlinx <- compute_seasadj(xlin, 
                                seasComp7=seasComp7, 
                                seasComp31=seasComp31, 
                                seasComp365=NULL, 
                                log=log)
+    
+    zlinz <- delete_29(xlinx)
     frequency(xlinx) <- 365
-    s365Result <- adjust(method=s365, series=xlinx) 
+    s365Result <- adjust(method=s365, series=zlinz) 
     seasComp365 <- s365Result$seasComp
   }
   
   
   # Create output -----------------------------------------------------------
-  original <- series # NOTE(DO): add forecasts
+  original <- model$model$y  
   seas_adj <- compute_seasadj(xlin, 
                                 seasComp7=seasComp7, 
                                 seasComp31=seasComp31, 
@@ -175,8 +186,8 @@ x11_method <- function(period = stats::frequency(series),   # NOTE(DO): Assumes 
 }
 
 
-seats_method <- function(period = stats::frequency(series),  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3highfreq::multiAirlineDecomposition instead
-                         log=TRUE, # NOTE(DO): Currently not implemented in rjd3highfreq::fractionalAirlineDecomposition
+seats_method <- function(period = stats::frequency(series),  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3bbkhighfreqforecast::multiAirlineDecomposition instead
+                         log=TRUE, # NOTE(DO): Currently not implemented in rjd3bbkhighfreqforecast::fractionalAirlineDecomposition
                          sn = FALSE,
                          stde = FALSE,
                          nbcasts = 0,
@@ -216,7 +227,7 @@ adjust.x11_method <- function(method, series) {
 }
 
 adjust.seats_method <- function(method, series) { 
-  adjustment <- do.call(IRGENDEINE_X11_METHODE, append(list(series),
+  adjustment <- do.call(IRGENDEINE_seats_METHODE, append(list(series),
                                                        method))
   return(list(adjustment=adjustment, seasComp=adjustment$seasComp)) 
 }
@@ -280,6 +291,6 @@ compute_seasadj <- function(xlinx, seasComp7=seasComp7, seasComp31=seasComp31,
 # Theoretical Examples -------------------------------------------------------------
 
 
-output <- dsa2(bip)
+#output <- dsa2(bip)
 
-dsa2(bip, preProcessing = output$model) # This is how we want to work in the Tagesgeschaeft with a fixed pre_processing
+#dsa2(bip, preProcessing = output$model) # This is how we want to work in the Tagesgeschaeft with a fixed pre_processing

@@ -35,4 +35,6 @@ Imports:
     xts,
     zoo,
     dsa,
-    stats
+    stats,
+    rjd3bbkhighfreqforecast,
+    rjd3bbksplines
