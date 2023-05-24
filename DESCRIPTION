@@ -37,4 +37,6 @@ Imports:
     dsa,
     stats,
     rjd3bbkhighfreqforecast,
-    rjd3bbksplines
+    rjd3bbksplines,
+    rjd3highfreq,
+    rjd3stl

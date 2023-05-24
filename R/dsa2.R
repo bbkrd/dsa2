@@ -22,8 +22,6 @@
 #' Journal of Time Series Econometrics 13 (2), 235-264.
 #' @export
 
-
-
 dsa2 <- function(series, 
                  xreg = NULL,
                  log = TRUE,
@@ -54,12 +52,22 @@ dsa2 <- function(series,
     
     
     
-    xLinear <- xts::xts(model$model$linearized, zoo::index(series)) # calendar adjusted
-    calComp <- component_userdef_reg_variables # calendar factor # NOTE(DO): Should it be centered?
+    xLinear <- xts::xts(model$model$linearized, 
+                        seq.Date(from=as.Date(stats::start(series)), 
+                                by="days", 
+                                length.out=length(model$model$y))) # linearized series
+    
+    if (is.null(model$component_userdef_reg_variables)) {
+      model$component_userdef_reg_variables <- xLinear*0 + ifelse(log, 1, 0)
+    }
+    
+    calComp <- xts::xts(model$component_userdef_reg_variables,
+                        zoo::index(xLinear))# calendar factor # NOTE(DO): Should it be centered?
     
     if (log){### NOTE(DO): Should be handled in Java
       series <- exp(series) 
       calComp <- exp(calComp)
+      model$model$linearized  <- exp(model$model$linearized)
     } 
     
   } else {
@@ -75,12 +83,13 @@ dsa2 <- function(series,
   for (j in seq(n_iterations)) {
     
     # S7 --------------------------------------------------------------------
-    xLinx <- compute_seasadj(xLinear, 
+    xLinx <<- compute_seasadj(xLinear, 
                                seasComp7=NULL, 
                                seasComp31=seasComp31, 
                                seasComp365=seasComp365, 
                                log=log)
-    frequency(xLinx) <- 7
+    xLinx <<- ts(xLinx, frequency=7)
+    
     s7Result <- adjust(method=s7, series=xLinx) 
     seasComp7 <- s7Result$seasComp
     
@@ -109,7 +118,7 @@ dsa2 <- function(series,
                                log=log)
     
     zLinz <- delete_29(xLinx)
-    frequency(zLinz) <- 365
+    zLinz <- ts(zLinz, frequency=365)
     s365Result <- adjust(method=s365, series=zLinz) 
     seasComp365 <- s365Result$seasComp
     seasComp365 <- zoo::na.locf(merge(seasComp365, seasComp7)[,1]) # Filling up the seasonal component with a value for 29.Feb. Should be handled in Java
@@ -120,7 +129,7 @@ dsa2 <- function(series,
   original <- xts::xts(model$model$y, 
                        seq.Date(from=as.Date(stats::start(series)), 
                                 by="days", 
-                                length.out=length(model$model$y)) 
+                                length.out=length(model$model$y))) 
                        
   seas_adj <- compute_seasadj(original, 
                                 seasComp7=seasComp7, 
@@ -132,7 +141,7 @@ dsa2 <- function(series,
   series <- xts::merge.xts(original=original, seas_adj = seas_adj)
   components <- xts::merge.xts(calComp = xts::xts(calComp, 
                                                   zoo::index(original)), 
-                               seasComp7=xts::xts(seasComp7 
+                               seasComp7=xts::xts(seasComp7, 
                                                   zoo::index(original)), 
                                seasComp31=xts::xts(seasComp31, 
                                                    zoo::index(original)), 
@@ -150,7 +159,20 @@ dsa2 <- function(series,
   return(out)
 }
 
-
+#' Handler for stl
+#' 
+#' Handler for stl
+#' @param period period
+#' @param swindow swindow
+#' @param log log
+#' @param twindow twindow
+#' @param ninnerloop ninnerloop
+#' @param nouterloop nouterloop
+#' @param nojump nojump
+#' @param weight.threshold weight.threshold
+#' @param weight.function weight.function
+#' @author Daniel Ollech
+#' @export
 
 stl_method  <- function(period = stats::frequency(series), 
                         swindow = 13, 
@@ -178,6 +200,19 @@ stl_method  <- function(period = stats::frequency(series),
   return(parameters)  
 }
 
+#' Handler for x-11
+#' 
+#' Handler for x-11
+#' @param period period
+#' @param log log
+#' @param sma sma
+#' @param trend.horizon t
+#' @param trend.kernel t
+#' @param trend.asymmetric t
+#' @param sigma sigma
+#' @author Daniel Ollech
+#' @export
+
 x11_method <- function(period = stats::frequency(series),   # NOTE(DO): Assumes use of rjd3highfreq::x11
                        log=TRUE, # NOTE(DO): Umbenennung von mul
                        sma=c("S3X3", "S3X1", "S3X5", "S3X9", "S3X15"), 
@@ -204,6 +239,17 @@ x11_method <- function(period = stats::frequency(series),   # NOTE(DO): Assumes 
   
 }
 
+#' Handler for seats
+#' 
+#' Handler for seats
+#' @param period period
+#' @param log log
+#' @param sn sn
+#' @param stde stde
+#' @param nbcasts nbcasts
+#' @param nfcasts nfcasts
+#' @author Daniel Ollech
+#' @export
 
 seats_method <- function(period = stats::frequency(series),  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3bbkhighfreqforecast::multiAirlineDecomposition instead
                          log=TRUE, # NOTE(DO): Currently not implemented in rjd3bbkhighfreqforecast::fractionalAirlineDecomposition
@@ -225,51 +271,107 @@ seats_method <- function(period = stats::frequency(series),  # NOTE(DO): Assumes
 }
 
 
+#' Generic for adjusting a seasonal time series
+#' 
+#' Generic for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
 
 ### NOTE(DO): Maybe the following line(s) have to be loaded at package
 ###           start-up once this thingy becomes a dsa2 package
 adjust <- function(method, series) {UseMethod("adjust")} # This is how we define generics in S3
+
+#' Default method for adjusting a seasonal time series
+#' 
+#' Default method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
+
 adjust.default <- function(method, series) {
   message("The method should either be one of 'x11', 'stl' or 'seats' or a call to stl_method(), x11_method() or seats_method()")
 }
 
+#' STL method for adjusting a seasonal time series
+#' 
+#' STL method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
+
 adjust.stl_method <- function(method, series) { 
   adjustment <- do.call(rjd3stl::stl, append(list(series),
                                              method))
-  return(list(adjustment=adjustment, seasComp=adjustment$seasComp))
+  return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4]))
 }
+
+#' X-11 method for adjusting a seasonal time series
+#' 
+#' X-11 method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
 
 adjust.x11_method <- function(method, series) { 
   adjustment <- do.call(rjd3highfreq::x11, append(list(series),
                                                        method))
-  return(list(adjustment=adjustment, seasComp=adjustment$seasComp))
+  return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4]))
 }
 
+#' Seats method for adjusting a seasonal time series
+#' 
+#' Seats method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
+
 adjust.seats_method <- function(method, series) { 
-  adjustment <- do.call(IRGENDEINE_seats_METHODE, append(list(series),
+  adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
                                                        method))
-  return(list(adjustment=adjustment, seasComp=adjustment$seasComp)) 
+  return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4])) 
 }
+
+#' Character method for adjusting a seasonal time series
+#' 
+#' Character method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
 
 adjust.character <- function(method, series) { 
   if (method == "stl") {
     adjustment <- do.call(rjd3stl::stl, append(list(series),
                                                stl_method()))
-    return(list(adjustment=adjustment, seasComp=adjustment$seasComp)) 
+    return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4])) 
   }
   
   if (method == "x11") {
-    adjustment <- do.call(IRGENDEINE_X11_METHODE, append(list(series),
+    adjustment <- do.call(rjd3highfreq::x11, append(list(series),
                                                          x11_method()))
-    return(list(adjustment=adjustment, seasComp=adjustment$seasComp)) 
+    return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4])) 
   }
   
   if (method == "seats") {
-    adjustment <- do.call(IRGENDEINE_Seats_METHODE, append(list(series),
+    adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
                                                            seats_method()))
-    return(list(adjustment=adjustment, seasComp=adjustment$seasComp)) 
+    return(list(adjustment=adjustment, seasComp=adjustment$decomposition[,4])) 
   }
 }
+
+#' NULL method for adjusting a seasonal time series
+#' 
+#' NULL method for adjusting a seasonal time series
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+#' @export
 
 adjust.NULL <- function(method, series) {
   return(list(adjustment=NULL, seasComp=series*NA)) 
@@ -277,8 +379,18 @@ adjust.NULL <- function(method, series) {
 
 
 
+#' Compute calendar and seasonally adjusted time series
+#' 
+#' Compute calendar and seasonally adjusted time series
+#' @param xLinx basic series
+#' @param seasComp7 day-of-the-week component
+#' @param seasComp31 day-of-the-month component
+#' @param seasComp365 day-of-the-year component
+#' @param calComp calendar component
+#' @author Daniel Ollech
+#' @export
 
-compute_seasadj <- function(xLinx, seasComp7=seasComp7, seasComp31=seasComp31, 
+compute_seasadj <- function(xLinear, seasComp7=seasComp7, seasComp31=seasComp31, 
                             seasComp365=seasComp365, calComp=NULL, log=TRUE) {
   
   if (is.null(seasComp7) | all(is.na(seasComp7))) {seasComp7 <- series * 0 + ifelse(log, 1, 0)}
@@ -286,30 +398,15 @@ compute_seasadj <- function(xLinx, seasComp7=seasComp7, seasComp31=seasComp31,
   if (is.null(seasComp365) | all(is.na(seasComp365))) {seasComp365 <- series * 0 + ifelse(log, 1, 0)}
   if (is.null(calComp) | all(is.na(seasComp365))) {calComp <- series * 0 + ifelse(log, 1, 0)}
   
-  xout <- Descaler(Scaler(xLin, log=log) - 
+  xout <- Descaler(Scaler(xLinear, log=log) - 
                    Scaler(calComp, log=log) - 
                    Scaler(seasComp7, log=log) - 
                    Scaler(seasComp31, log=log) - 
                    Scaler(seasComp365, log=log), log=log) 
-  
+
   return(xout)
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-# Theoretical Examples -------------------------------------------------------------
-
-
-#output <- dsa2(bip)
-
-#dsa2(bip, preProcessing = output$model) # This is how we want to work in the Tagesgeschaeft with a fixed pre_processing
