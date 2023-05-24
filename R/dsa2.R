@@ -11,7 +11,8 @@
 #' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
 #' @param h number of days to forecast
 #' @param pre_processing Optionally include pre-processing results computed earlier
-#' @author Daniel Ollech
+#' @param ... additional parameters from fractionalAirlineEstimation
+#' @author Daniel Ollech, Martin Stefan
 #' @examples dsa2(dsa::daily_sim(n=5, year_effect=5)$original)  
 #' @details This function implements the DSA2 procedure that facilitates the 
 #' seasonal adjustment of daily time series.
@@ -32,7 +33,8 @@ dsa2 <- function(series,
                  outliers = c("AO", "LS", "TC"),
                  n_iterations = 1,
                  h = 365,
-                 pre_processing = NULL) {
+                 pre_processing = NULL,
+                 ...) {
   
   parameters <- as.list(environment(), all=TRUE)
   
@@ -40,19 +42,29 @@ dsa2 <- function(series,
   
   
   # pre-processing ----------------------------------------------------------
-  if (!is.null(pre_processing)) { # Standard_case
-    model <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(y=x, 
+  if (is.null(pre_processing)) { # Standard_case
+    
+    if (log) series <- log(series) ### NOTE(DO): Should be handled in Java
+    model <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(y=series, 
                                                        periods=c(7, 365.25), 
                                                        x=xreg, 
                                                        nfcasts = h,
-                                                       outliers=outliers)
+                                                       outliers=outliers,
+                                                       ...)
     
-    xlin <- xts::xts(model$model$linearized, zoo::index(x)) # calendar adjusted
+    
+    
+    xLinear <- xts::xts(model$model$linearized, zoo::index(series)) # calendar adjusted
     calComp <- component_userdef_reg_variables # calendar factor # NOTE(DO): Should it be centered?
+    
+    if (log){### NOTE(DO): Should be handled in Java
+      series <- exp(series) 
+      calComp <- exp(calComp)
+    } 
     
   } else {
     model = pre_processing$preProcessing
-    xlin = model$model$linearized  
+    xLinear = model$model$linearized  
   }
   
   # Preliminary seasonal component
@@ -63,51 +75,54 @@ dsa2 <- function(series,
   for (j in seq(n_iterations)) {
     
     # S7 --------------------------------------------------------------------
-    xlinx <- compute_seasadj(xlin, 
+    xLinx <- compute_seasadj(xLinear, 
                                seasComp7=NULL, 
                                seasComp31=seasComp31, 
                                seasComp365=seasComp365, 
                                log=log)
-    frequency(xlinx) <- 7
-    s7Result <- adjust(method=s7, series=xlinx) 
+    frequency(xLinx) <- 7
+    s7Result <- adjust(method=s7, series=xLinx) 
     seasComp7 <- s7Result$seasComp
     
     # S31 --------------------------------------------------------------------
     
-    # TODO(Thomas): Adding interpolation ####
-    
-    zlinz <- compute_seasadj(xlin, 
+    zLinz <- compute_seasadj(xLinear, 
                              seasComp7=seasComp7, 
                              seasComp31=NULL, 
                              seasComp365=seasComp365, 
                              log=log)
     
-    xlinx <- ts(rjd3bbksplines::interpolate31(zlinz, 
+    xLinx <- ts(rjd3bbksplines::interpolate31(zLinz, 
                            interpolator = "CUBIC_SPLINE"),
                 frequency = 31)
                 
-    s31Result <- adjust(method=s31, series=zlinz) 
+    s31Result <- adjust(method=s31, series=zLinz) 
     
-    seasComp31 <- rjd3bbksplines::reduce31(s31Result$seasComp, zlinz)
+    seasComp31 <- rjd3bbksplines::reduce31(s31Result$seasComp, zLinz)
     
     # S365 --------------------------------------------------------------------
     
-    xlinx <- compute_seasadj(xlin, 
+    xLinx <- compute_seasadj(xLinear, 
                                seasComp7=seasComp7, 
                                seasComp31=seasComp31, 
                                seasComp365=NULL, 
                                log=log)
     
-    zlinz <- delete_29(xlinx)
-    frequency(xlinx) <- 365
-    s365Result <- adjust(method=s365, series=zlinz) 
+    zLinz <- delete_29(xLinx)
+    frequency(zLinz) <- 365
+    s365Result <- adjust(method=s365, series=zLinz) 
     seasComp365 <- s365Result$seasComp
+    seasComp365 <- zoo::na.locf(merge(seasComp365, seasComp7)[,1]) # Filling up the seasonal component with a value for 29.Feb. Should be handled in Java
   }
   
   
   # Create output -----------------------------------------------------------
-  original <- model$model$y  
-  seas_adj <- compute_seasadj(xlin, 
+  original <- xts::xts(model$model$y, 
+                       seq.Date(from=as.Date(stats::start(series)), 
+                                by="days", 
+                                length.out=length(model$model$y)) 
+                       
+  seas_adj <- compute_seasadj(original, 
                                 seasComp7=seasComp7, 
                                 seasComp31=seasComp31, 
                                 seasComp365=seasComp365, 
@@ -115,10 +130,14 @@ dsa2 <- function(series,
   
   
   series <- xts::merge.xts(original=original, seas_adj = seas_adj)
-  components <- xts::merge.xts(calComp = calComp, 
-                               seasComp7=seasComp7, 
-                               seasComp31=seasComp31, 
-                               seasComp365=seasComp365)
+  components <- xts::merge.xts(calComp = xts::xts(calComp, 
+                                                  zoo::index(original)), 
+                               seasComp7=xts::xts(seasComp7 
+                                                  zoo::index(original)), 
+                               seasComp31=xts::xts(seasComp31, 
+                                                   zoo::index(original)), 
+                               seasComp365=xts::xts(seasComp365,  
+                                                    zoo::index(original)))
   
   
   out <- list(series=series, 
@@ -221,7 +240,7 @@ adjust.stl_method <- function(method, series) {
 }
 
 adjust.x11_method <- function(method, series) { 
-  adjustment <- do.call(IRGENDEINE_X11_METHODE, append(list(series),
+  adjustment <- do.call(rjd3highfreq::x11, append(list(series),
                                                        method))
   return(list(adjustment=adjustment, seasComp=adjustment$seasComp))
 }
@@ -259,7 +278,7 @@ adjust.NULL <- function(method, series) {
 
 
 
-compute_seasadj <- function(xlinx, seasComp7=seasComp7, seasComp31=seasComp31, 
+compute_seasadj <- function(xLinx, seasComp7=seasComp7, seasComp31=seasComp31, 
                             seasComp365=seasComp365, calComp=NULL, log=TRUE) {
   
   if (is.null(seasComp7) | all(is.na(seasComp7))) {seasComp7 <- series * 0 + ifelse(log, 1, 0)}
@@ -267,7 +286,7 @@ compute_seasadj <- function(xlinx, seasComp7=seasComp7, seasComp31=seasComp31,
   if (is.null(seasComp365) | all(is.na(seasComp365))) {seasComp365 <- series * 0 + ifelse(log, 1, 0)}
   if (is.null(calComp) | all(is.na(seasComp365))) {calComp <- series * 0 + ifelse(log, 1, 0)}
   
-  xout <- Descaler(Scaler(xlin, log=log) - 
+  xout <- Descaler(Scaler(xLin, log=log) - 
                    Scaler(calComp, log=log) - 
                    Scaler(seasComp7, log=log) - 
                    Scaler(seasComp31, log=log) - 
