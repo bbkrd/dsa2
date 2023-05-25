@@ -49,10 +49,41 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 }
 
 
-plot.dsa2 <- function() {
+plot.dsa2 <- function(dsa2_object) {
+  plot(dsa2_object$series, main = "Netter Titel")
+}
+
+print.dsa2 <- function(dsa2_object) {
+  cat("Something interesting")
+  cat("\n") ## New line
+  cat(dsa2_object$parameters$h)
+}
+
+
+summary.dsa2 <- function() {
   
 }
 
-print.dsa2 <- function() {
+
+compare_plot <- function(dsa2_object1, dsa2_object2) {
+  result1 <- head(dsa2_object1$series, 
+                  nrow(dsa2_object1$series)-dsa2_object1$parameters$h)
+  result2 <- head(dsa2_object2$series, 
+                  nrow(dsa2_object2$series)-dsa2_object2$parameters$h)
   
+  if (all(result1[,1] == result2[,2])) {
+    result <- xts::merge.xts(result1, result2[,2])
+  } else {
+    result <- xts::merge.xts(result1, result2)
+  }
+  
+  plot(result[,ncol(result):1], col=c("darkgrey", "red", "blue", "orange")[1:ncol(result)],
+       main="Comparison")
 }
+
+
+
+
+
+
+
