@@ -454,21 +454,37 @@ adjust.NULL <- function(method, series) {
 #' @author Daniel Ollech
 #' @export
 
-compute_seasadj <- function(xLinear, seasComp7, seasComp31, 
-                            seasComp365, calComp = NULL, log = TRUE) {
+compute_seasadj <- function(xLinear, 
+                            seasComp7, 
+                            seasComp31, 
+                            seasComp365, 
+                            calComp = NULL, 
+                            log = TRUE) {
   
-  if (is.null(seasComp7) | all(is.na(seasComp7))) {seasComp7 <- xLinear * 0 + ifelse(log, 1, 0)}
-  if (is.null(seasComp31) | all(is.na(seasComp31))) {seasComp31 <- xLinear * 0 + ifelse(log, 1, 0)}
-  if (is.null(seasComp365) | all(is.na(seasComp365))) {seasComp365 <- xLinear * 0 + ifelse(log, 1, 0)}
-  if (is.null(calComp) | all(is.na(seasComp365))) {calComp <- xLinear * 0 + ifelse(log, 1, 0)}
+  # Replace NULL or NA components
+  if (is.null(seasComp7) | all(is.na(seasComp7))) {
+    seasComp7 <- xLinear * 0 + ifelse(log, 1, 0)
+  }
+  if (is.null(seasComp31) | all(is.na(seasComp31))) {
+    seasComp31 <- xLinear * 0 + ifelse(log, 1, 0)
+  }
+  if (is.null(seasComp365) | all(is.na(seasComp365))) {
+    seasComp365 <- xLinear * 0 + ifelse(log, 1, 0)
+  }
+  if (is.null(calComp) | all(is.na(seasComp365))) {
+    calComp <- xLinear * 0 + ifelse(log, 1, 0)
+  }
   
+  # Compute adjusted figures
   xout <- Descaler(Scaler(xLinear, log = log) - 
                    Scaler(calComp, log = log) - 
                    Scaler(seasComp7, log = log) - 
                    Scaler(seasComp31, log = log) - 
                    Scaler(seasComp365, log = log), log = log) 
 
+  # Return
   return(xout)
+  
 }
 
 
