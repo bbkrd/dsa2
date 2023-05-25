@@ -52,55 +52,69 @@ dsa2 <- function(series,
   
   parameters <- as.list(environment(), all = TRUE)
   
-  # pre-processing ----------------------------------------------------------
-  if (is.null(pre_processing)) { # Standard_case
+  # Vector of dates (needed for xts conversion)
+  dates   <- seq.Date(from = as.Date(stats::start(series)),
+                      by = "days",
+                      length.out = length(series) + h)
+  
+  # Pre-processing -------------------------------------------------------------
+  
+  # User has not provided pre-processing results
+  if (is.null(pre_processing)) {
     
-    if (log) series <- log(series) ### NOTE(DO): Should be handled in Java
-    
-    model <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(y = series, 
-                                                       periods = c(7, 365.25), 
-                                                       x = xreg, 
-                                                       nfcasts = h,
-                                                       outliers = outliers,
-                                                       ...)
-    
-    
-    
-    xLinear <- xts::xts(model$model$linearized, 
-                        seq.Date(from = as.Date(stats::start(series)), 
-                                by = "days", 
-                                length.out = length(model$model$y))) # linearized series
-    
-    if (is.null(model$component_userdef_reg_variables)) {
-      model$component_userdef_reg_variables <- xLinear*0 + ifelse(log, 1, 0)
+    # Take logs
+    # NOTE(Daniel): Should be handled in Java
+    if (log) {
+      series <- log(series) 
     }
     
-    calComp <- xts::xts(model$component_userdef_reg_variables,
-                        zoo::index(xLinear))# calendar factor # NOTE(DO): Should it be centered?
+    # Run fractional airline estimation
+    fracAirline <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(
+      y = series, 
+      periods = c(7, 365.25), 
+      x = xreg, 
+      nfcasts = h,
+      outliers = outliers,
+      ...)
     
-    if (log) { ### NOTE(DO): Should be handled in Java
-      series <- exp(series) 
-      model$model$linearized  <- exp(model$model$linearized)
-      xLinear <- exp(xLinear)
+    # Undo logs
+    # NOTE(DO): Should be handled in Java
+    if (log) {
+      series  <- exp(series) 
+      fracAirline$model$linearized <- exp(fracAirline$model$linearized)
     } 
     
+    # Extract calendar adjusted series and calendar component 
+    # TODO(Daniel): Find out if calendar component should be centered?
+    xLinear <- fracAirline$model$linearized
+    calComp <- fracAirline$model$component_userdef_reg_variables
+    if (is.null(calComp)) {
+      calComp <- xLinear*0 + ifelse(log, 1, 0)
+    }
+    
+    # Convert to xts-format
+    xLinear <- xts::xts(xLinear, order.by = dates)
+    calComp <- xts::xts(calComp, order.by = dates)
+    
+    
   } else {
-    model <- pre_processing$preProcessing
-    xLinear <- xts::xts(model$model$linearized, 
-                        seq.Date(from = as.Date(stats::start(series)), 
-                                 by = "days", 
-                                 length.out = length(model$model$y)))  
+    fracAirline <- pre_processing$preProcessing
+    xLinear <- xts::xts(fracAirline$model$linearized, order.by = dates)  
     calComp <- pre_processing$components$calComp
   }
   
   # Preliminary seasonal components
-  seasComp7 <- seasComp31 <- seasComp365 <- 0 * calComp + ifelse(log, 1, 0)
+  seasComp7   <- 0 * calComp + ifelse(log, 1, 0)
+  seasComp31  <- 0 * calComp + ifelse(log, 1, 0)
+  seasComp365 <- 0 * calComp + ifelse(log, 1, 0)
   
-  # Seasonal adjustment -----------------------------------------------------
+  
+  
+  # Seasonal adjustment --------------------------------------------------------
   
   for (j in seq(n_iterations)) {
     
-    # S7 --------------------------------------------------------------------
+    # S7 -----------------------------------------------------------------------
     xLinx <- compute_seasadj(xLinear, 
                                seasComp7 = NULL, 
                                seasComp31 = seasComp31, 
@@ -112,7 +126,7 @@ dsa2 <- function(series,
     seasComp7 <- xts::xts(s7Result$seasComp, 
                           zoo::index(seasComp7))
     
-    # S31 --------------------------------------------------------------------
+    # S31 ----------------------------------------------------------------------
     
     zLinz <- compute_seasadj(xLinear, 
                              seasComp7 = seasComp7, 
@@ -129,7 +143,7 @@ dsa2 <- function(series,
     seasComp31 <- xts::xts(rjd3bbksplines::reduce31(zLinz, s31Result$seasComp), 
                            zoo::index(seasComp31))
     
-    # S365 --------------------------------------------------------------------
+    # S365 ---------------------------------------------------------------------
     
     xLinx <- compute_seasadj(xLinear, 
                                seasComp7 = seasComp7, 
@@ -145,7 +159,7 @@ dsa2 <- function(series,
   }
   
   
-  # Create output -----------------------------------------------------------
+  # Create output --------------------------------------------------------------
   original <- xts::xts(model$model$y, 
                        seq.Date(from = as.Date(stats::start(series)), 
                                 by = "days", 
