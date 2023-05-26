@@ -88,17 +88,3 @@
 "daily_data"
 
 
-#' Exemplary dsa outputs
-#' 
-#' The dsa results for the three time series that have been analysed by Ollech (2021). Details on the specification can be found in the vignette.
-#' @format A list containing the following three objects
-#' \describe{
-#' \item{cic_dsa}{Results from a call to dsa() for the currency in circulation in Germany, in billion Euros, sum of small denominations: i.e. 5 Euro + 10 Euro + 20 Euro + 50 Euro. Series compiled by Deutsche Bundesbank. }
-#' \item{elec_dsa}{Results from a call to dsa() for the electricity consumption in Germany in GWh. Compiled by Bundesnetzagentur (German Federal Network Agency)}
-#' \item{no2_dsa}{Results from a call to dsa() for the nitrogen dioxide (NO2) immissions averaged over all available measuring stations in Europe that are made available by the European Environment Agency (EEA)}
-#' }
-#' @source Own calculations, Deutsche Bundesbank, Bundesnetzagentur, EEA
-#' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics (forthcoming).
-#' @author Daniel Ollech
-"dsa_examples"
-

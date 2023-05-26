@@ -10,12 +10,11 @@
 #' @param outliers should outliers be identified using regarima models
 #' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
 #' @param h number of days to forecast
+#' @param interpolator either "CUBIC_SPLINE" or "NONE" (inherited from rjd3bbksplines::interpolate31)
 #' @param pre_processing Optionally include pre-processing results computed earlier
 #' @param ... additional parameters from fractionalAirlineEstimation
 #' @author Daniel Ollech, Martin Stefan
 #' @examples 
-#' Sys.setenv("JAVA_HOME"="C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
-#' .libPaths("C:\\Workspace\\R\\JD_lib")
 #' ## Create time series 
 #' set.seed(2358)
 #' all <- tssim::sim_daily(N=5)
@@ -30,6 +29,9 @@
 #' 
 #' ## Use STL and X11 in combination
 #' result3 <- dsa2(series, s7 = "stl", s365 = "x11")
+#' 
+#' ## Compare results
+#' compare_plot(result2, result3)
 #' @details This function implements the DSA2 procedure that facilitates the 
 #' seasonal adjustment of daily time series.
 #' @references Ollech, Daniel (2018). Seasonal Adjustment of Daily Time Series. 
@@ -47,6 +49,7 @@ dsa2 <- function(series,
                  outliers = c("AO", "LS", "TC"),
                  n_iterations = 1,
                  h = 365,
+                 interpolator = "CUBIC_SPLINE",
                  pre_processing = NULL,
                  ...) {
   
@@ -89,19 +92,20 @@ dsa2 <- function(series,
     xLinear <- fracAirline$model$linearized
     calComp <- fracAirline$model$component_userdef_reg_variables
     if (is.null(calComp)) {
-      calComp <- xLinear*0 + ifelse(log, 1, 0)
+      calComp <- xLinear*0 # NOTE(DO): '+ ifelse(log, 1, 0)' has to be readded, once the exp/log is handled correctly in the fractional airline
     }
     
-    # Convert to xts-format
-    xLinear <- xts::xts(xLinear, order.by = dates)
-    calComp <- xts::xts(calComp, order.by = dates)
-    
+    if (log) calComp <- exp(calComp) # NOTE(DO): Should be handled in Java
     
   } else {
     fracAirline <- pre_processing$preProcessing
-    xLinear <- xts::xts(fracAirline$model$linearized, order.by = dates)  
+    xLinear <- fracAirline$model$linearized  
     calComp <- pre_processing$components$calComp
   }
+  
+  # Convert to xts-format
+  xLinear <- xts::xts(xLinear, order.by = dates)
+  calComp <- xts::xts(calComp, order.by = dates)
   
   # Preliminary seasonal components
   seasComp7   <- 0 * calComp + ifelse(log, 1, 0)
@@ -135,7 +139,7 @@ dsa2 <- function(series,
                              log = log)
     
     xLinx <- ts(rjd3bbksplines::interpolate31(zLinz, 
-                           interpolator = "CUBIC_SPLINE"),
+                           interpolator = interpolator),
                 frequency = 31)
                 
     s31Result <- adjust(method = s31, series = xLinx) 
@@ -160,10 +164,10 @@ dsa2 <- function(series,
   
   
   # Create output --------------------------------------------------------------
-  original <- xts::xts(model$model$y, 
+  original <- xts::xts(fracAirline$model$y, 
                        seq.Date(from = as.Date(stats::start(series)), 
                                 by = "days", 
-                                length.out = length(model$model$y))) 
+                                length.out = length(fracAirline$model$y))) 
   
   if (log) original <- exp(original) # Should be handled before in fracAirline/Java
   
@@ -194,7 +198,7 @@ dsa2 <- function(series,
   
   out <- list(series = series, 
               components = components, 
-              preProcessing = model, 
+              preProcessing = fracAirline, 
               parameters = parameters)
   
   class(out) <- "dsa2"

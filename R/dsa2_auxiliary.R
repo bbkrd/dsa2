@@ -49,9 +49,36 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 }
 
 
+#' Plot generic for dsa2
+#' 
+#' Plot generic for dsa2
+#' @param x
+#' @author x
+#' @export
+
 plot.dsa2 <- function(dsa2_object) {
-  plot(dsa2_object$series, main = "Netter Titel")
+  plot(dsa2_object$series[,1], main = "Netter Titel", col="#2F4858")
+  lines(dsa2_object$series[,2], col="#D54444")
 }
+
+
+#' Summary generic for dsa2
+#' 
+#' Summary generic for dsa2
+#' @param x
+#' @author x
+#' @export
+summary.dsa2 <- function() {
+  
+}
+
+
+#' Print generic for dsa2
+#' 
+#' Print generic for dsa2
+#' @param x
+#' @author x
+#' @export
 
 print.dsa2 <- function(dsa2_object) {
   cat("Something interesting")
@@ -59,30 +86,50 @@ print.dsa2 <- function(dsa2_object) {
   cat(dsa2_object$parameters$h)
 }
 
-
+#' Summary generic for dsa2
+#' 
+#' Summary generic for dsa2
+#' @param x
+#' @author x
+#' @export
 summary.dsa2 <- function() {
   
 }
 
 
-compare_plot <- function(dsa2_object1, dsa2_object2) {
-  result1 <- head(dsa2_object1$series, 
-                  nrow(dsa2_object1$series)-dsa2_object1$parameters$h)
-  result2 <- head(dsa2_object2$series, 
-                  nrow(dsa2_object2$series)-dsa2_object2$parameters$h)
-  
-  if (all(result1[,1] == result2[,2])) {
-    result <- xts::merge.xts(result1, result2[,2])
+
+#' Function to compare two dsa2 results
+#' 
+#' Create a plot of the original and adjusted series from two different adjustments
+#' @param dsa2_object1 first dsa2 output object
+#' @param dsa2_object2 second dsa2 output object
+#' @example set.seed(2358)
+#' all <- tssim::sim_daily(N=5)
+#' series <- all$original
+#' result <- dsa2(series, outliers=NULL)
+#' result2 <- dsa2(series,s7 = "x11", pre_processing = result)
+#' compare_plot(result, result2)
+#' @author Daniel Ollech
+#' @export
+
+compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts=FALSE) {
+  if (include_forecasts) {
+    minus_h <- 0
   } else {
-    result <- xts::merge.xts(result1, result2)
+    minus_h <- dsa2_object1$parameters$h
   }
+  result1 <- head(dsa2_object1$series, 
+                  nrow(dsa2_object1$series)-minus_h)
+  result2 <- head(dsa2_object2$series, 
+                  nrow(dsa2_object2$series)-minus_h)
   
-  plot(result[,ncol(result):1], col=c("darkgrey", "red", "blue", "orange")[1:ncol(result)],
-       main="Comparison")
+  plot(result1[,1], type="l", col="#2F4858", main="Comparison", lwd=2) # https://mycolor.space/
+  if (!all(result1[,1] == result2[,1])) {
+    lines(result2[,1], col="#BFA5A2", lwd=2)
+  }
+  lines(result1[,2], col="#D54444", lwd=2)
+  lines(result2[,2], col="#80AFE1", lwd=2)
 }
-
-
-
 
 
 
