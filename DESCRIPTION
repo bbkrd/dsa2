@@ -1,6 +1,6 @@
 Package: dsa2
 Title: Seasonal adjustment of daily time series
-Version: 0.0.4
+Version: 0.0.5
 Authors@R: 
     c(person(given = "Daniel",
              family = "Ollech",
