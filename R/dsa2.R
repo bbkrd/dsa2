@@ -10,9 +10,11 @@
 #' @param outliers should outliers be identified using regarima models
 #' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
 #' @param h number of days to forecast
-#' @param interpolator either "CUBIC_SPLINE" or "NONE" (inherited from rjd3bbksplines::interpolate31)
+#' @param interpolator either "default", "CUBIC_SPLINE" or "NONE" (the last two inherited from rjd3bbksplines::interpolate31). See details
 #' @param pre_processing Optionally include pre-processing results computed earlier
 #' @param ... additional parameters from fractionalAirlineEstimation
+#' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
+#' For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
 #' @author Daniel Ollech, Martin Stefan
 #' @examples 
 #' ## Create time series 
@@ -21,26 +23,24 @@
 #' series <- all$original 
 #' 
 #' ## Default adjustment
-#' result <- dsa2(series)
+#' result <- dsa(series)
 #' plot(result)
 #' 
 #' ## Set STL parameters to be used
-#' result2 <- dsa2(series, s7 = stl_method(swindow = 31, twindow=9))
+#' result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9))
 #' 
 #' ## Use STL and X11 in combination
-#' result3 <- dsa2(series, s7 = "stl", s365 = "x11")
+#' result3 <- dsa(series, s7 = "stl", s365 = "x11")
 #' 
 #' ## Compare results
 #' compare_plot(result2, result3)
-#' @details This function implements the DSA2 procedure that facilitates the 
-#' seasonal adjustment of daily time series.
 #' @references Ollech, Daniel (2018). Seasonal Adjustment of Daily Time Series. 
 #' Bundesbank Discussion Paper 41/2018.
 #' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. 
 #' Journal of Time Series Econometrics 13 (2), 235-264.
 #' @export
 
-dsa2 <- function(series, 
+dsa <- function(series, ### NOTE(DO): Rename to dsa() ???
                  xreg = NULL,
                  log = TRUE,
                  s7 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
@@ -49,7 +49,7 @@ dsa2 <- function(series,
                  outliers = c("AO", "LS", "TC"),
                  n_iterations = 1,
                  h = 365,
-                 interpolator = "CUBIC_SPLINE",
+                 interpolator = "default",
                  pre_processing = NULL,
                  ...) {
   
@@ -137,6 +137,14 @@ dsa2 <- function(series,
                              seasComp31 = NULL, 
                              seasComp365 = seasComp365, 
                              log = log)
+    
+    if (interpolator == "default") {
+      if (class(s31)=="stl_method" | (class(s31)=="character" && s31 == "stl")) {
+        interpolator <- "NONE"
+      } else {
+        interpolator <- "CUBIC_SPLINE" 
+      }
+    }
     
     xLinx <- ts(rjd3bbksplines::interpolate31(zLinz, 
                            interpolator = interpolator),
@@ -272,6 +280,10 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3highfreq::x
                        trend.asymmetric = c("CutAndNormalize"),
                        sigma = c(1.5,2.5)) # NOTE(DO): Umbenennung von extreme.lsig, extreme.usig
 {
+  if (class(sma) == "numeric") {
+    sma <- paste0("S3X", sma)
+  }
+  
   parameters <- list(period = stats::frequency(series), 
                      mul = log, 
                      trend.horizon = trend.horizon, 
