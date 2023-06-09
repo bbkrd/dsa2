@@ -56,21 +56,24 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @author x
 #' @export
 
-plot.dsa2 <- function(dsa2_object) {
+plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", ...) {
   opar <- par(no.readonly = TRUE)
-  par(mar=c(6, 4, 4, 2), xpd=TRUE)
+  par(mar=c(10, 1.75, 1.75, 0.5), xpd=TRUE)
   dates <- zoo::index(dsa2_object$series)
   series1 <- as.numeric(dsa2_object$series[,1])
   series2 <- as.numeric(dsa2_object$series[,2])
-  plot(dates, series1,type = "l", ylab = "")
-  legend("bottom", inset=c(0, -0.3), col=c("#2F4858", "#D54444"), lty=c(1,1), legend=c("original", "adjusted"),
-         box.lty=0, horiz=TRUE)
-  par(xpd = FALSE)
-  abline(v = axis.Date(1,dates), col = "gray", lty = 3, lwd = 2)
+  plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
+  legend("bottom", inset=c(0, -0.3), col=c("#2F4858", "#D54444"), lty=c(1,1), 
+         legend=c("Original", "Adjusted"), box.lty=0, horiz=TRUE)
+  par(xpd = FALSE, cex.axis=0.75)
+  abline(v = axis.Date(1,dates), col = "#949098", lty = 1)
+  axis(2, tck = 1, col = "#949098", lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = "Result seasonal adjustment of daily time series", col="#2F4858")
+       main = main, col="#2F4858", bty= "n", col.tick="#949098" ,...)
   lines(dates, series2, col="#D54444")
+  #axis(2, col.ticks = "#949098")
+  box(col = "#949098")
   on.exit(par(opar))
 }
 
