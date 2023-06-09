@@ -57,8 +57,21 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @export
 
 plot.dsa2 <- function(dsa2_object) {
-  plot(dsa2_object$series[,1], main = "Result seasonal adjustment of daily time series", col="#2F4858")
-  lines(dsa2_object$series[,2], col="#D54444")
+  opar <- par(no.readonly = TRUE)
+  par(mar=c(6, 4, 4, 2), xpd=TRUE)
+  dates <- zoo::index(dsa2_object$series)
+  series1 <- as.numeric(dsa2_object$series[,1])
+  series2 <- as.numeric(dsa2_object$series[,2])
+  plot(dates, series1,type = "l", ylab = "")
+  legend("bottom", inset=c(0, -0.3), col=c("#2F4858", "#D54444"), lty=c(1,1), legend=c("original", "adjusted"),
+         box.lty=0, horiz=TRUE)
+  par(xpd = FALSE)
+  abline(v = axis.Date(1,dates), col = "gray", lty = 3, lwd = 2)
+  par(new = TRUE)
+  plot(dates, series1, type = "l", xlab = "", ylab = "", 
+       main = "Result seasonal adjustment of daily time series", col="#2F4858")
+  lines(dates, series2, col="#D54444")
+  on.exit(par(opar))
 }
 
 
@@ -84,16 +97,6 @@ print.dsa2 <- function(dsa2_object) {
   cat("Something interesting")
   cat("\n") ## New line
   cat(dsa2_object$parameters$h)
-}
-
-#' Summary generic for dsa2
-#' 
-#' Summary generic for dsa2
-#' @param x
-#' @author x
-#' @export
-summary.dsa2 <- function() {
-  
 }
 
 
