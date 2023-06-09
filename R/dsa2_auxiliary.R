@@ -57,7 +57,7 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @export
 
 plot.dsa2 <- function(dsa2_object) {
-  plot(dsa2_object$series[,1], main = "Netter Titel", col="#2F4858")
+  plot(dsa2_object$series[,1], main = "Result seasonal adjustment of daily time series", col="#2F4858")
   lines(dsa2_object$series[,2], col="#D54444")
 }
 
