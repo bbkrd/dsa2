@@ -66,13 +66,15 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   legend("bottom", inset=c(0, -0.3), col=c("#2F4858", "#D54444"), lty=c(1,1), 
          legend=c("Original", "Adjusted"), box.lty=0, horiz=TRUE)
   par(xpd = FALSE, cex.axis=0.75)
-  abline(v = axis.Date(1,dates), col = "#949098", lty = 1)
+  abline(v = axis.Date(1,dates), col = "#949098", lty = 1, xaxt = "n")
   axis(2, tck = 1, col = "#949098", lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = main, col="#2F4858", bty= "n", col.tick="#949098" ,...)
+       main = main, col="#2F4858", bty= "n")
   lines(dates, series2, col="#D54444")
-  #axis(2, col.ticks = "#949098")
+  par(col.axis="transparent")
+  axis(1, col.ticks = "#949098", axis.Date(1,dates))
+  axis(2, col.ticks = "#949098")
   box(col = "#949098")
   on.exit(par(opar))
 }
