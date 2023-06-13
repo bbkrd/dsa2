@@ -56,15 +56,21 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @author x
 #' @export
 
+.add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0),
+              mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+
 plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", ...) {
   opar <- par(no.readonly = TRUE)
-  par(mar=c(10, 1.75, 1.75, 0.5), xpd=TRUE)
+  par(mar=c(4, 2, 2, 0.5), xpd=TRUE)
   dates <- zoo::index(dsa2_object$series)
   series1 <- as.numeric(dsa2_object$series[,1])
   series2 <- as.numeric(dsa2_object$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
-  legend("bottom", inset=c(0, -0.3), col=c("#2F4858", "#D54444"), lty=c(1,1), 
-         legend=c("Original", "Adjusted"), box.lty=0, horiz=TRUE)
   par(xpd = FALSE, cex.axis=0.75)
   abline(v = axis.Date(1,dates), col = "#949098", lty = 1, xaxt = "n")
   axis(2, tck = 1, col = "#949098", lty = 1)
@@ -76,6 +82,9 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   axis(1, col.ticks = "#949098", axis.Date(1,dates))
   axis(2, col.ticks = "#949098")
   box(col = "#949098")
+  .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),# pch=20,
+              col=c("#2F4858", "#D54444"),
+              horiz=TRUE, bty='n', cex=0.8)
   on.exit(par(opar))
 }
 
