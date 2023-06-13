@@ -52,7 +52,7 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' Plot generic for dsa2
 #' 
 #' Plot generic for dsa2
-#' @param x
+#' @param ... additional parameters from plot() function
 #' @author x
 #' @export
 
