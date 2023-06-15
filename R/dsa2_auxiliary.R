@@ -118,7 +118,7 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
   axis(2, col.ticks = dsa2color("grey"))
   box(col = .dsa2color("grey"))
-  .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),# pch=20,
+  .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),
               col = .dsa2color("darkblue", "red"),
               horiz=TRUE, bty='n', cex=0.8)
   on.exit(par(opar))
@@ -144,9 +144,25 @@ summary.dsa2 <- function() {
 #' @export
 
 print.dsa2 <- function(dsa2_object) {
-  cat("Something interesting")
+  cat("Pre-processing")
   cat("\n") ## New line
-  cat(dsa2_object$parameters$h)
+  cat("Fractional Airline Coefficients:")
+  cat(dsa2_object$preProcessing$estimation$parameters)
+  cat("\n") ## New line
+ # cat("Calendar Regressors") 
+ # cat()
+  cat("Outliers")
+  cat("\n")
+  cat("AO:")
+  cat() #hier folgt der Code
+  cat("\n")
+  cat("LS:")
+  cat() #hier folgt der Code
+  cat("\n")
+  cat("TC:")
+  cat() #hier folgt der Code
+  cat("\n")
+  # cat("Seasonality Test")
 }
 
 
@@ -196,7 +212,7 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts=FALSE) {
   axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
   axis(2, col.ticks = dsa2color("grey"))
   box(col = .dsa2color("grey"))
-  .add_legend("bottom", legend=c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),# pch=20,
+  .add_legend("bottom", legend=c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),
               col = .dsa2color("darkblue", "red", "orange"),
               horiz=TRUE, bty='n', cex=0.8)
   on.exit(par(opar))
