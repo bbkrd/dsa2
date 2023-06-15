@@ -50,7 +50,8 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 
 
 # Color palette
-dsa2color <- function(color, ...){
+# https://mycolor.space/
+.dsa2color <- function(color, ...){
  if (missing(...)){
    bc <- color
  } 
@@ -74,6 +75,11 @@ dsa2color <- function(color, ...){
   lightgreen = c("#91dc69"), 
   black = c("#000000"),  
   pink = c("#ff79a3"), stringsAsFactors = F)
+  for (j in 1:length(bc)) {
+    if (bc[j] %in% colnames(colorset)) {
+      bc[j] <- gsub(bc[j], colorset[bc[j]], bc[j])
+    }
+  }
   bc <- gsub("\\t","",bc)
   return(bc)
 }
@@ -102,18 +108,18 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   series2 <- as.numeric(dsa2_object$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
   par(xpd = FALSE, cex.axis=0.75)
-  abline(v = axis.Date(1,dates), col = dsa2color("grey"), lty = 1, xaxt = "n")
+  abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = main, col = dsa2color("darkblue"), bty= "n")
-  lines(dates, series2, col = dsa2color("red"))
+       main = main, col = .dsa2color("darkblue"), bty= "n")
+  lines(dates, series2, col = .dsa2color("red"))
   par(col.axis = "transparent")
   axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
   axis(2, col.ticks = dsa2color("grey"))
   box(col = .dsa2color("grey"))
   .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),# pch=20,
-              col = dsa2color("darkblue", "red"),
+              col = .dsa2color("darkblue", "red"),
               horiz=TRUE, bty='n', cex=0.8)
   on.exit(par(opar))
 }
@@ -159,6 +165,7 @@ print.dsa2 <- function(dsa2_object) {
 #' @author Daniel Ollech
 #' @export
 
+
 compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts=FALSE) {
   if (include_forecasts) {
     minus_h <- 0
@@ -170,14 +177,29 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts=FALSE) {
   result2 <- head(dsa2_object2$series, 
                   nrow(dsa2_object2$series)-minus_h)
   
-  plot(result1[,1], type="l", col="#2F4858", main="Comparison", lwd=2) # https://mycolor.space/
-  if (!all(result1[,1] == result2[,1])) {
-    lines(result2[,1], col="#BFA5A2", lwd=2)
-  }
-  lines(result1[,2], col="#D54444", lwd=2)
-  lines(result2[,2], col="#80AFE1", lwd=2)
+  opar <- par(no.readonly = TRUE)
+  par(mar=c(4, 2, 2, 0.5), xpd=TRUE)
+  dates <- zoo::index(result1)
+  series1 <- as.numeric(result1[,1])
+  series2 <- as.numeric(result1[,2])
+  series3 <- as.numeric(result2[,2])
+  plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n")
+  par(xpd = FALSE, cex.axis=0.75)
+  abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
+  axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
+  par(new = TRUE)
+  plot(dates, series1, type = "l", xlab = "", ylab = "", 
+       main = "Comparison", col = .dsa2color("darkblue"), bty= "n")
+  lines(dates, series2, col = .dsa2color("red"))
+  lines(dates, series3, col = .dsa2color("orange"))
+  par(col.axis = "transparent")
+  axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
+  axis(2, col.ticks = dsa2color("grey"))
+  box(col = .dsa2color("grey"))
+  .add_legend("bottom", legend=c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),# pch=20,
+              col = .dsa2color("darkblue", "red", "orange"),
+              horiz=TRUE, bty='n', cex=0.8)
+  on.exit(par(opar))
 }
-
-
 
 
