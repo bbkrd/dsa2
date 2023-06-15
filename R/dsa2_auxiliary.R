@@ -49,6 +49,36 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 }
 
 
+# Color palette
+dsa2color <- function(color, ...){
+ if (missing(...)){
+   bc <- color
+ } 
+  else{
+    bc <- c(color, ...)
+  }
+  colorset <- data.frame(blue = c("#3a6699"), 
+  darkblue = c("#2f4858"),                      
+  grey = c("#949098"), 
+  gray = c("#949098"), 
+  darkgrey = c("#727073"), 
+  darkgray = c("#727073"), 
+  yellow = c("#f9f34d"), 
+  orange = c("#ef972c"), 
+  brown = c("#98724d"), 
+  red = c("#d54444"),
+  violet = c("#934884"), 
+  petrol = c("#006e7f"), 
+  green = c("#00ac54"), 
+  darkgreen = c("#007460"), 
+  lightgreen = c("#91dc69"), 
+  black = c("#000000"),  
+  pink = c("#ff79a3"), stringsAsFactors = F)
+  bc <- gsub("\\t","",bc)
+  return(bc)
+}
+  
+
 #' Plot generic for dsa2
 #' 
 #' Plot generic for dsa2
@@ -72,18 +102,18 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   series2 <- as.numeric(dsa2_object$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
   par(xpd = FALSE, cex.axis=0.75)
-  abline(v = axis.Date(1,dates), col = "#949098", lty = 1, xaxt = "n")
-  axis(2, tck = 1, col = "#949098", lty = 1)
+  abline(v = axis.Date(1,dates), col = dsa2color("grey"), lty = 1, xaxt = "n")
+  axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = main, col="#2F4858", bty= "n")
-  lines(dates, series2, col="#D54444")
-  par(col.axis="transparent")
-  axis(1, col.ticks = "#949098", axis.Date(1,dates))
-  axis(2, col.ticks = "#949098")
-  box(col = "#949098")
+       main = main, col = dsa2color("darkblue"), bty= "n")
+  lines(dates, series2, col = dsa2color("red"))
+  par(col.axis = "transparent")
+  axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
+  axis(2, col.ticks = dsa2color("grey"))
+  box(col = .dsa2color("grey"))
   .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),# pch=20,
-              col=c("#2F4858", "#D54444"),
+              col = dsa2color("darkblue", "red"),
               horiz=TRUE, bty='n', cex=0.8)
   on.exit(par(opar))
 }
