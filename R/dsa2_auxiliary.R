@@ -153,17 +153,35 @@ summary.dsa2 <- function() {
   names(lookup) <- c("id")
   df <- cbind(df, lookup)
   names(df) <- c("o","coefficient","t_value","id")
+  out <- subset(df, !grepl("x-", df$o) )
   dates <- zoo::index(dsa2_object$series)
   dates <- data.frame(dates)
   dates$id <- seq.int(nrow(dates))
   base <- (merge(lookup, dates, by = "id" ))
-  df2 <- (merge(df, base, by = "id"))
+  df2 <- (merge(out, base, by = "id"))
   result <- data.frame(substr(df2$o,1,2))
   names(result) <- c("outliertype")
   df2 <- cbind(df2, result)
   df2 <- subset(df2, select=c("outliertype", "dates", "coefficient", "t_value"))  
   return(df2)
   }
+
+.outCalendar <- function(dsa2_object){
+  for (i in length(dsa2_object$preProcessing$model$variables)) {
+    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
+  }
+  dsa2_object$preProcessing$model$t <- t_value
+  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b,dsa2_object$preProcessing$model$t)
+  df <- t(df)
+  lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
+  names(lookup) <- c("id")
+  df <- cbind(df, lookup)
+  names(df) <- c("o","coefficient","t_value","id")
+  cal <- subset(df, grepl("x-", df$o) )
+  cal2 <- subset(cal, select=c("o", "coefficient", "t_value"))  
+  names(cal2) <- c("regressor", "coefficient", "t_value")
+  return(cal2)  # TO DO: give regressors their proper titles
+}
 
 print.dsa2 <- function(dsa2_object) {
   cat("Pre-processing")
@@ -172,9 +190,12 @@ print.dsa2 <- function(dsa2_object) {
   cat(dsa2_object$preProcessing$estimation$parameters)
   cat("\n") ## New line
   cat("\n") ## New line
- # cat("Calendar Regressors") 
- # cat()
+  cat("Calendar Regressors") 
+  cat("\n") ## New line
+  print(.outCalendar(dsa2_object))
+  cat("\n") ## New line
   cat("Outliers")
+  cat("\n") ## New line
   print(.outOutlier(dsa2_object))
   cat("\n")
   # cat("Seasonality Test")
