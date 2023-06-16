@@ -139,33 +139,33 @@ summary.dsa2 <- function() {
 #' Print generic for dsa2
 #' 
 #' Print generic for dsa2
-#' @param x
+#' @param dsa_object dsa2 output object
 #' @author x
 #' @export
 .outOutlier <- function(dsa2_object){
-  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b)
+  for (i in length(dsa2_object$preProcessing$model$variables)) {
+    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
+  }
+  dsa2_object$preProcessing$model$t <- t_value
+  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b,dsa2_object$preProcessing$model$t)
   df <- t(df)
   lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
   names(lookup) <- c("id")
   df <- cbind(df, lookup)
-  names(df) <- c("o","coefficient","id")
+  names(df) <- c("o","coefficient","t_value","id")
   dates <- zoo::index(dsa2_object$series)
   dates <- data.frame(dates)
   dates$id <- seq.int(nrow(dates))
   base <- (merge(lookup, dates, by = "id" ))
   df2 <- (merge(df, base, by = "id"))
   result <- data.frame(substr(df2$o,1,2))
-  names(result) <- c("outlier")
+  names(result) <- c("outliertype")
   df2 <- cbind(df2, result)
-  df2 <- subset(df2, select=c("outliertype", "dates", "coefficient"))  
+  df2 <- subset(df2, select=c("outliertype", "dates", "coefficient", "t_value"))  
   dsa2_object$outliers <- df2
   }
 
 print.dsa2 <- function(dsa2_object) {
-  # Calculate t values for calendar effects and outliers
-  for (i in length(dsa2_object$preProcessing$model$variables)) {
-    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-  }
   cat("Pre-processing")
   cat("\n") ## New line
   cat("Fractional Airline Coefficients:")
