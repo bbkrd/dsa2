@@ -142,6 +142,24 @@ summary.dsa2 <- function() {
 #' @param x
 #' @author x
 #' @export
+.outOutlier <- function(dsa2_object){
+  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b)
+  df <- t(df)
+  lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
+  names(lookup) <- c("id")
+  df <- cbind(df, lookup)
+  names(df) <- c("o","coefficient","id")
+  dates <- zoo::index(dsa2_object$series)
+  dates <- data.frame(dates)
+  dates$id <- seq.int(nrow(dates))
+  base <- (merge(lookup, dates, by = "id" ))
+  df2 <- (merge(df, base, by = "id"))
+  result <- data.frame(substr(df2$o,1,2))
+  names(result) <- c("outlier")
+  df2 <- cbind(df2, result)
+  df2 <- subset(df2, select=c("outliertype", "dates", "coefficient"))  
+  dsa2_object$outliers <- df2
+  }
 
 print.dsa2 <- function(dsa2_object) {
   cat("Pre-processing")
@@ -149,18 +167,11 @@ print.dsa2 <- function(dsa2_object) {
   cat("Fractional Airline Coefficients:")
   cat(dsa2_object$preProcessing$estimation$parameters)
   cat("\n") ## New line
+  cat("\n") ## New line
  # cat("Calendar Regressors") 
  # cat()
   cat("Outliers")
-  cat("\n")
-  cat("AO:")
-  cat() #hier folgt der Code
-  cat("\n")
-  cat("LS:")
-  cat() #hier folgt der Code
-  cat("\n")
-  cat("TC:")
-  cat() #hier folgt der Code
+  print(dsa2_object$outliers)
   cat("\n")
   # cat("Seasonality Test")
 }
