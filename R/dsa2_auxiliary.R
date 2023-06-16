@@ -162,7 +162,7 @@ summary.dsa2 <- function() {
   names(result) <- c("outliertype")
   df2 <- cbind(df2, result)
   df2 <- subset(df2, select=c("outliertype", "dates", "coefficient", "t_value"))  
-  dsa2_object$outliers <- df2
+  return(df2)
   }
 
 print.dsa2 <- function(dsa2_object) {
@@ -175,7 +175,7 @@ print.dsa2 <- function(dsa2_object) {
  # cat("Calendar Regressors") 
  # cat()
   cat("Outliers")
-  print(dsa2_object$outliers)
+  print(.outOutlier(dsa2_object))
   cat("\n")
   # cat("Seasonality Test")
 }
