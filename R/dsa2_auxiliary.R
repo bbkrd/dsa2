@@ -162,6 +162,10 @@ summary.dsa2 <- function() {
   }
 
 print.dsa2 <- function(dsa2_object) {
+  # Calculate t values for calendar effects and outliers
+  for (i in length(dsa2_object$preProcessing$model$variables)) {
+    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
+  }
   cat("Pre-processing")
   cat("\n") ## New line
   cat("Fractional Airline Coefficients:")
