@@ -178,6 +178,7 @@ summary.dsa2 <- function() {
   df <- cbind(df, lookup)
   names(df) <- c("o","coefficient","t_value","id")
   cal <- subset(df, grepl("x-", df$o) )
+  cal$o <- colnames(result_strom_cal$parameters$xreg)
   cal2 <- subset(cal, select=c("o", "coefficient", "t_value"))  
   names(cal2) <- c("regressor", "coefficient", "t_value")
   return(cal2)  # TO DO: give regressors their proper titles
