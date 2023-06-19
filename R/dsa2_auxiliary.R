@@ -115,8 +115,8 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
        main = main, col = .dsa2color("darkblue"), bty= "n")
   lines(dates, series2, col = .dsa2color("red"))
   par(col.axis = "transparent")
-  axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
-  axis(2, col.ticks = dsa2color("grey"))
+  axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
+  axis(2, col.ticks = .dsa2color("grey"))
   box(col = .dsa2color("grey"))
   .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),
               col = .dsa2color("darkblue", "red"),
@@ -178,10 +178,10 @@ summary.dsa2 <- function() {
   df <- cbind(df, lookup)
   names(df) <- c("o","coefficient","t_value","id")
   cal <- subset(df, grepl("x-", df$o) )
-  cal$o <- colnames(result_strom_cal$parameters$xreg)
+  cal$o <- colnames(dsa2_object$parameters$xreg)
   cal2 <- subset(cal, select=c("o", "coefficient", "t_value"))  
   names(cal2) <- c("regressor", "coefficient", "t_value")
-  return(cal2)  # TO DO: give regressors their proper titles
+  return(cal2)  
 }
 
 print.dsa2 <- function(dsa2_object) {
