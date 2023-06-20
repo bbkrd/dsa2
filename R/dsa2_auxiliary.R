@@ -4,7 +4,7 @@ delete_29 <- function(x) {
 }
 
 
-Descaler <- function (x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
+Descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
   .diffinv_xts <- function(x, y, lag = 1, differences = 1, 
                            stepsize = "days", ...) {
     if (all(class(y) != "xts")) {
@@ -40,7 +40,7 @@ Descaler <- function (x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied fr
 }
 
 
-Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
+Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
   if (log) 
     x = log(x)
   if (Diff > 0) 
@@ -52,7 +52,7 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 # Color palette
 # https://mycolor.space/
 .dsa2color <- function(color, ...){
- if (missing(...)){
+ if (missing(...)) {
    bc <- color
  } 
   else{
@@ -92,36 +92,45 @@ Scaler <- function (x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @author x
 #' @export
 
-.add_legend <- function(...) {
-  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0),
-              mar=c(0, 0, 0, 0), new=TRUE)
-  on.exit(par(opar))
-  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
-  legend(...)
-}
-
-plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", ...) {
+plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, ...) {
   opar <- par(no.readonly = TRUE)
-  par(mar=c(4, 2, 2, 0.5), xpd=TRUE)
+  par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
+  
+  if (include_forecasts) {
+    minus_h <- 0
+  } else {
+    minus_h <- dsa2_object$parameters$h
+  }
+  dsa2_object$series <- head(dsa2_object$series, 
+                  nrow(dsa2_object$series) - minus_h)
+  
   dates <- zoo::index(dsa2_object$series)
   series1 <- as.numeric(dsa2_object$series[,1])
   series2 <- as.numeric(dsa2_object$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
-  par(xpd = FALSE, cex.axis=0.75)
+  par(xpd = FALSE, cex.axis = 0.75)
   abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = main, col = .dsa2color("darkblue"), bty= "n")
+       main = main, col = .dsa2color("darkblue"), bty = "n")
   lines(dates, series2, col = .dsa2color("red"))
   par(col.axis = "transparent")
   axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
   axis(2, col.ticks = .dsa2color("grey"))
   box(col = .dsa2color("grey"))
-  .add_legend("bottom", legend=c("Original", "Adjusted"), lty = c(1,1),
+  .add_legend("bottom", legend = c("Original", "Adjusted"), lty = c(1,1),
               col = .dsa2color("darkblue", "red"),
-              horiz=TRUE, bty='n', cex=0.8)
+              horiz = TRUE, bty = 'n', cex = 0.8)
   on.exit(par(opar))
+}
+
+.add_legend <- function(...) {
+  opar <- par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0),
+              mar = c(0, 0, 0, 0), new = TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
+  legend(...)
 }
 
 
@@ -131,8 +140,8 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
 #' @param x
 #' @author x
 #' @export
-summary.dsa2 <- function() {
-  
+summary.dsa2 <- function(dsa2_object) {
+  print(dsa2_object)
 }
 
 
@@ -142,53 +151,12 @@ summary.dsa2 <- function() {
 #' @param dsa_object dsa2 output object
 #' @author x
 #' @export
-.outOutlier <- function(dsa2_object){
-  for (i in length(dsa2_object$preProcessing$model$variables)) {
-    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-  }
-  dsa2_object$preProcessing$model$t <- t_value
-  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b,dsa2_object$preProcessing$model$t)
-  df <- t(df)
-  lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-  names(lookup) <- c("id")
-  df <- cbind(df, lookup)
-  names(df) <- c("o","coefficient","t_value","id")
-  out <- subset(df, !grepl("x-", df$o) )
-  dates <- zoo::index(dsa2_object$series)
-  dates <- data.frame(dates)
-  dates$id <- seq.int(nrow(dates))
-  base <- (merge(lookup, dates, by = "id" ))
-  df2 <- (merge(out, base, by = "id"))
-  result <- data.frame(substr(df2$o,1,2))
-  names(result) <- c("outliertype")
-  df2 <- cbind(df2, result)
-  df2 <- subset(df2, select=c("outliertype", "dates", "coefficient", "t_value"))  
-  return(df2)
-  }
-
-.outCalendar <- function(dsa2_object){
-  for (i in length(dsa2_object$preProcessing$model$variables)) {
-    t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-  }
-  dsa2_object$preProcessing$model$t <- t_value
-  df <- rbind(dsa2_object$preProcessing$model$variables, dsa2_object$preProcessing$model$b,dsa2_object$preProcessing$model$t)
-  df <- t(df)
-  lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-  names(lookup) <- c("id")
-  df <- cbind(df, lookup)
-  names(df) <- c("o","coefficient","t_value","id")
-  cal <- subset(df, grepl("x-", df$o) )
-  cal$o <- colnames(dsa2_object$parameters$xreg)
-  cal2 <- subset(cal, select=c("o", "coefficient", "t_value"))  
-  names(cal2) <- c("regressor", "coefficient", "t_value")
-  return(cal2)  
-}
 
 print.dsa2 <- function(dsa2_object) {
   cat("Pre-processing")
   cat("\n") ## New line
   cat("Fractional Airline Coefficients:")
-  cat(dsa2_object$preProcessing$estimation$parameters)
+  cat(round(dsa2_object$preProcessing$estimation$parameters,3))
   cat("\n") ## New line
   cat("\n") ## New line
   cat("Calendar Regressors") 
@@ -202,6 +170,57 @@ print.dsa2 <- function(dsa2_object) {
   # cat("Seasonality Test")
 }
 
+.outOutlier <- function(dsa2_object){
+  if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
+    return("No outliers found")
+  } else {
+    for (i in length(dsa2_object$preProcessing$model$variables)) {
+      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
+    }
+    dsa2_object$preProcessing$model$t <- t_value
+    df <- rbind(dsa2_object$preProcessing$model$variables, round(dsa2_object$preProcessing$model$b, 3), round(dsa2_object$preProcessing$model$t,3))
+    df <- t(df)
+    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
+    names(lookup) <- c("id")
+    df <- cbind(df, lookup)
+    names(df) <- c("o","coefficient","t_value","id")
+    out <- subset(df, !grepl("x-", df$o) )
+    dates <- zoo::index(dsa2_object$series)
+    dates <- data.frame(dates)
+    dates$id <- seq.int(nrow(dates))
+    base <- (merge(lookup, dates, by = "id" ))
+    df2 <- (merge(out, base, by = "id"))
+    result <- data.frame(substr(df2$o,1,2))
+    names(result) <- c("outliertype")
+    df2 <- cbind(df2, result)
+    df2 <- subset(df2, select = c("outliertype", "dates", "coefficient", "t_value"))  
+    return(df2)
+  }
+}
+
+.outCalendar <- function(dsa2_object){
+  if (is.null(dsa2_object$parameters$xreg)) {
+    return("No calendar adjustment conducted")
+  } else {
+    for (i in length(dsa2_object$preProcessing$model$variables)) {
+      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
+    }
+    dsa2_object$preProcessing$model$t <- t_value
+    df <- rbind(dsa2_object$preProcessing$model$variables, round(dsa2_object$preProcessing$model$b,3), round(dsa2_object$preProcessing$model$t,3))
+    df <- t(df)
+    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
+    names(lookup) <- c("id")
+    df <- cbind(df, lookup)
+    names(df) <- c("o","coefficient","t_value","id")
+    cal <- subset(df, grepl("x-", df$o) )
+    cal$o <- colnames(dsa2_object$parameters$xreg)
+    cal2 <- subset(cal, select = c("o", "coefficient", "t_value"))  
+    names(cal2) <- c("regressor", "coefficient", "t_value")
+    return(cal2)  
+  }
+}
+
+
 
 
 #' Function to compare two dsa2 results
@@ -210,48 +229,48 @@ print.dsa2 <- function(dsa2_object) {
 #' @param dsa2_object1 first dsa2 output object
 #' @param dsa2_object2 second dsa2 output object
 #' @example set.seed(2358)
-#' all <- tssim::sim_daily(N=5)
+#' all <- tssim::sim_daily(N = 5)
 #' series <- all$original
-#' result <- dsa2(series, outliers=NULL)
+#' result <- dsa2(series, outliers = NULL)
 #' result2 <- dsa2(series,s7 = "x11", pre_processing = result)
 #' compare_plot(result, result2)
 #' @author Daniel Ollech
 #' @export
 
 
-compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts=FALSE) {
+compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) {
   if (include_forecasts) {
     minus_h <- 0
   } else {
     minus_h <- dsa2_object1$parameters$h
   }
   result1 <- head(dsa2_object1$series, 
-                  nrow(dsa2_object1$series)-minus_h)
+                  nrow(dsa2_object1$series) - minus_h)
   result2 <- head(dsa2_object2$series, 
-                  nrow(dsa2_object2$series)-minus_h)
+                  nrow(dsa2_object2$series) - minus_h)
   
-  opar <- par(no.readonly = TRUE)
-  par(mar=c(4, 2, 2, 0.5), xpd=TRUE)
+  opar <- par(no.readonly  =  TRUE)
+  par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
   dates <- zoo::index(result1)
   series1 <- as.numeric(result1[,1])
   series2 <- as.numeric(result1[,2])
   series3 <- as.numeric(result2[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n")
-  par(xpd = FALSE, cex.axis=0.75)
+  par(xpd = FALSE, cex.axis = 0.75)
   abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = "Comparison", col = .dsa2color("darkblue"), bty= "n")
+       main = "Comparison", col = .dsa2color("darkblue"), bty = "n")
   lines(dates, series2, col = .dsa2color("red"))
-  lines(dates, series3, col = .dsa2color("orange"))
+  lines(dates, series3, col = .dsa2color("green"))
   par(col.axis = "transparent")
-  axis(1, col.ticks = dsa2color("grey"), axis.Date(1,dates))
-  axis(2, col.ticks = dsa2color("grey"))
+  axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
+  axis(2, col.ticks = .dsa2color("grey"))
   box(col = .dsa2color("grey"))
-  .add_legend("bottom", legend=c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),
+  .add_legend("bottom", legend = c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),
               col = .dsa2color("darkblue", "red", "orange"),
-              horiz=TRUE, bty='n', cex=0.8)
+              horiz = TRUE, bty = 'n', cex = 0.8)
   on.exit(par(opar))
 }
 

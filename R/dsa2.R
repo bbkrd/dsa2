@@ -15,7 +15,7 @@
 #' @param ... additional parameters from fractionalAirlineEstimation
 #' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
 #' For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
-#' @author Daniel Ollech, Martin Stefan
+#' @author Daniel Ollech, Christiane Hofer, Martin Stefan, Thomas Witthohn
 #' @examples 
 #' ## Create time series 
 #' set.seed(2358)
@@ -27,10 +27,10 @@
 #' plot(result)
 #' 
 #' ## Set STL parameters to be used
-#' result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9))
+#' result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9), pre_processing = result)
 #' 
 #' ## Use STL and X11 in combination
-#' result3 <- dsa(series, s7 = "stl", s365 = "x11")
+#' result3 <- dsa(series, s7 = "x11", s365 = "stl", pre_processing = result) 
 #' 
 #' ## Compare results
 #' compare_plot(result2, result3)
@@ -40,13 +40,13 @@
 #' Journal of Time Series Econometrics 13 (2), 235-264.
 #' @export
 
-dsa <- function(series, ### NOTE(DO): Rename to dsa() ???
+dsa <- function(series,  
                  xreg = NULL,
                  log = TRUE,
                  s7 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
                  s31 = NULL,
                  s365 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
-                 outliers = c("AO", "LS", "TC"),
+                 outliers = c("AO", "LS", "WO"),
                  n_iterations = 1,
                  h = 365,
                  interpolator = "default",
@@ -55,10 +55,14 @@ dsa <- function(series, ### NOTE(DO): Rename to dsa() ???
   
   parameters <- as.list(environment(), all = TRUE)
   
-  # Vector of dates (needed for xts conversion)
+  # Preliminary checks -----------------------------------------------------
+  .preliminary_checks(series, outliers)
+  
+  # Vector of dates (needed for xts conversion) -------------------------------
   dates   <- seq.Date(from = as.Date(stats::start(series)),
                       by = "days",
                       length.out = length(series) + h)
+  
   
   # Pre-processing -------------------------------------------------------------
   
@@ -139,7 +143,7 @@ dsa <- function(series, ### NOTE(DO): Rename to dsa() ???
                              log = log)
     
     if (interpolator == "default") {
-      if (class(s31)=="stl_method" | (class(s31)=="character" && s31 == "stl")) {
+      if (class(s31) == "stl_method" | (class(s31) == "character" && s31 == "stl")) {
         interpolator <- "NONE"
       } else {
         interpolator <- "CUBIC_SPLINE" 
@@ -164,7 +168,7 @@ dsa <- function(series, ### NOTE(DO): Rename to dsa() ???
                                log = log)
     
     zLinz <- delete_29(xLinx)
-    yLiny <- ts(zLinz, frequency = 365)
+    yLiny <- ts(as.numeric(zLinz), frequency = 365)
     s365Result <- adjust(method = s365, series = yLiny)
     seasComp365 <- xts::xts(s365Result$seasComp, zoo::index(zLinz))
     seasComp365 <- zoo::na.locf(xts::merge.xts(seasComp365, xLinear)[,1]) # Filling up the seasonal component with a value for 29.Feb. Should be handled in Java ## na.locf makes that value on 29.2 = value on 28.2
@@ -284,7 +288,7 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3highfreq::x
     sma <- paste0("S3X", sma)
   }
   
-  parameters <- list(period = stats::frequency(series), 
+  parameters <- list(period = period, 
                      mul = log, 
                      trend.horizon = trend.horizon, 
                      trend.degree = trend.degree,
@@ -313,8 +317,8 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3highfreq::x
 #' @author Daniel Ollech
 #' @export
 
-seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3bbkhighfreqforecast::multiAirlineDecomposition instead
-                         log = TRUE, # NOTE(DO): Currently not implemented in rjd3bbkhighfreqforecast::fractionalAirlineDecomposition
+seats_method <- function(period = period,  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3bbkhighfreqforecast::multiAirlineDecomposition instead
+                         log = FALSE, # NOTE(DO): Currently not implemented in rjd3bbkhighfreqforecast::fractionalAirlineDecomposition
                          sn = FALSE,
                          stde = FALSE,
                          nbcasts = 0,
@@ -326,6 +330,8 @@ seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::
                      stde = stde, 
                      nbcasts = nbcasts, 
                      nfcasts = nfcasts)
+  
+  stop("Seats is currently not fully implemented, but we are working to implement it.")
   
   class(parameters) <- c("seats_method")
   
@@ -390,7 +396,7 @@ adjust.x11_method <- function(method, series) {
   
   adjustment <- do.call(rjd3highfreq::x11, append(list(series),
                                                        method))
-  return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4]))
+  return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s))
 }
 
 #' Seats method for adjusting a seasonal time series
@@ -504,5 +510,22 @@ compute_seasadj <- function(xLinear,
 }
 
 
-
+.preliminary_checks <- function(series, outliers) {
+  if (is.null(series)) { 
+    stop("Series is NULL")
+  }
+  if (length(series) < 365*2 + 1) { 
+    if (length(series) < 15) {
+      stop("Series is too short to use dsa2 on it.")
+    } else {
+      warning("Series it too short to estimate a day-of-the-year effect, 
+              and probably is too short for a good forecast. 
+              We would like more than 2 years of observations.")
+    }
+  }
+  
+  if (any(outliers == "TC")) {
+    warning("The outlier type TC is not implemented in the Fractional Airline Estimation function")
+  }
+}
 
