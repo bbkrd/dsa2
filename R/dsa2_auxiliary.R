@@ -149,7 +149,8 @@ summary.dsa2 <- function(dsa2_object) {
 #' 
 #' Print generic for dsa2
 #' @param dsa_object dsa2 output object
-#' @author x
+#' @details Print.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
+#' @author Sindy Brakemeier, Lea Hengen
 #' @export
 
 print.dsa2 <- function(dsa2_object) {
