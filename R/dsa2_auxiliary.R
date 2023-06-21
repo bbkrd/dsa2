@@ -279,21 +279,69 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' Output generic for dsa2
 #' 
 #' Output generic for dsa2
-#' @param x
+#' @param dsa2 output object
+#' @details Generates a .Rdm file that is rendered into an html document
 #' @author x
 #' @export
 
 output <- function(dsa2_object) {
-  # DOES SOMETHING
+
+  if (dsa2_object$parameters$log == TRUE){
+    model <- "multiplicative"
+  } else {
+    model <- "additive"
+  }
+  
+  if (is.null(dsa2_object$parameters$xreg)){
+    regressors <- "not in use"
+  } else{
+    regressors <- colnames(dsa2_object$parameters$xreg)
+  }
+  
+  if (is.null(dsa2_object$parameters$outliers)){
+    outliers <- "not in use"
+  } else{
+    outliers <- dsa2_object$parameters$outliers
+  }
+  
+  if (is.null(dsa2_object$parameters$pre_processing)){
+    pre_processing_ex <- "not in use"
+  } else {
+    pre_processing_ex <- "in use"
+  }
+  
+  if (is.null(dsa2_object$parameters$s31)){
+    model_s31 <- "none"
+  } else{
+    model_s31 <- dsa2_object$parameters$s31
+  }
   
   cat("---
 title: \"Title\"
 date: \'`r Sys.Date()`\'
 output: html_document
 ---
-      Here is some plain text 
+**Time series information**
+\n
+      Name:
+      Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`
+      Number of values: `r length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h`
+\n
+**Parameters**
+\n
+      Number of iterations: `r dsa2_object$parameters$n_iterations`
+      Model: `r model`
+      Length of forecast: `r dsa2_object$parameters$h` days
+      Regressors: `r regressors`
+      Outlier types: `r outliers`
+      External pre-processing: `r pre_processing_ex`
+      Interpolation method: `r dsa2_object$parameters$interpolator`
+      Adjustment method day-of-the-week: `r dsa2_object$parameters$s7`
+      Adjustment method day-of-the-month: `r model_s31`
+      Adjustment method day-of-the--year: `r dsa2_object$parameters$s365`
       ",
       
       file = "output.Rmd")
   rmarkdown::render("output.Rmd")
 }
+
