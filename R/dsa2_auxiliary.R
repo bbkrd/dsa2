@@ -276,3 +276,24 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 }
 
 
+#' Output generic for dsa2
+#' 
+#' Output generic for dsa2
+#' @param x
+#' @author x
+#' @export
+
+output <- function(dsa2_object) {
+  # DOES SOMETHING
+  
+  cat("---
+title: \"Title\"
+date: \'`r Sys.Date()`\'
+output: html_document
+---
+      Here is some plain text 
+      ",
+      
+      file = "output.Rmd")
+  rmarkdown::render("output.Rmd")
+}
