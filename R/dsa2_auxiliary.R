@@ -147,9 +147,8 @@ summary.dsa2 <- function(dsa2_object) {
 
 #' Print generic for dsa2
 #' 
-#' Print generic for dsa2
+#' Print generic for dsa2, lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
 #' @param dsa_object dsa2 output object
-#' @details Print.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
 
@@ -280,7 +279,7 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' 
 #' Output generic for dsa2
 #' @param dsa2 output object
-#' @details Generates a .Rdm file that is rendered into an html document
+#' @details Generates a .Rdm file that is rendered into an html document.
 #' @author x
 #' @export
 
@@ -332,13 +331,13 @@ output: html_document
       Number of iterations: `r dsa2_object$parameters$n_iterations`
       Model: `r model`
       Length of forecast: `r dsa2_object$parameters$h` days
-      Regressors: `r regressors`
+      Calendar regressors: `r regressors`
       Outlier types: `r outliers`
       External pre-processing: `r pre_processing_ex`
       Interpolation method: `r dsa2_object$parameters$interpolator`
       Adjustment method day-of-the-week: `r dsa2_object$parameters$s7`
       Adjustment method day-of-the-month: `r model_s31`
-      Adjustment method day-of-the--year: `r dsa2_object$parameters$s365`
+      Adjustment method day-of-the-year: `r dsa2_object$parameters$s365`
       ",
       
       file = "output.Rmd")
