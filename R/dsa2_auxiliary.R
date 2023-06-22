@@ -87,14 +87,18 @@ Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 
 #' Plot generic for dsa2
 #' 
-#' Plot generic for dsa2
+#' Creates a plot of original and seasonally adjusted series.
+#' @param dsa_object dsa2 output object
+#' @param include_forecasts display forecast data
+#' @param main title of the plot
 #' @param ... additional parameters from plot() function
-#' @author x
+#' @details The function uses the base plot package. 
+#' @author Sindy Brakemeier, Daniel Ollech
 #' @export
 
 plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, ...) {
-  opar <- par(no.readonly = TRUE)
-  par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
+  opar <- graphics::par(no.readonly = TRUE)
+  graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
   
   if (include_forecasts) {
     minus_h <- 0
@@ -108,27 +112,27 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   series1 <- as.numeric(dsa2_object$series[,1])
   series2 <- as.numeric(dsa2_object$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
-  par(xpd = FALSE, cex.axis = 0.75)
-  abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
-  axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
-  par(new = TRUE)
+  graphics::par(xpd = FALSE, cex.axis = 0.75)
+  graphics::abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
+  graphics::axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
+  graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
        main = main, col = .dsa2color("darkblue"), bty = "n")
-  lines(dates, series2, col = .dsa2color("red"))
-  par(col.axis = "transparent")
-  axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
-  axis(2, col.ticks = .dsa2color("grey"))
+  graphics::lines(dates, series2, col = .dsa2color("red"))
+  graphics::par(col.axis = "transparent")
+  graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
+  graphics::axis(2, col.ticks = .dsa2color("grey"))
   box(col = .dsa2color("grey"))
   .add_legend("bottom", legend = c("Original", "Adjusted"), lty = c(1,1),
               col = .dsa2color("darkblue", "red"),
               horiz = TRUE, bty = 'n', cex = 0.8)
-  on.exit(par(opar))
+  on.exit(graphics::par(opar))
 }
 
 .add_legend <- function(...) {
-  opar <- par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0),
+  opar <- graphics::par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0),
               mar = c(0, 0, 0, 0), new = TRUE)
-  on.exit(par(opar))
+  on.exit(graphics::par(opar))
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
   legend(...)
 }
@@ -136,9 +140,9 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
 
 #' Summary generic for dsa2
 #' 
-#' Summary generic for dsa2
-#' @param x
-#' @author x
+#' Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
+#' @param dsa_object dsa2 output object
+#' @author Sindy Brakemeier, Lea Hengen
 #' @export
 summary.dsa2 <- function(dsa2_object) {
   print(dsa2_object)
@@ -249,29 +253,29 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   result2 <- head(dsa2_object2$series, 
                   nrow(dsa2_object2$series) - minus_h)
   
-  opar <- par(no.readonly  =  TRUE)
-  par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
+  opar <- graphics::par(no.readonly  =  TRUE)
+  graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
   dates <- zoo::index(result1)
   series1 <- as.numeric(result1[,1])
   series2 <- as.numeric(result1[,2])
   series3 <- as.numeric(result2[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n")
-  par(xpd = FALSE, cex.axis = 0.75)
-  abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
-  axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
-  par(new = TRUE)
+  graphics::par(xpd = FALSE, cex.axis = 0.75)
+  graphics::abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
+  graphics::axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
+  graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
        main = "Comparison", col = .dsa2color("darkblue"), bty = "n")
-  lines(dates, series2, col = .dsa2color("red"))
-  lines(dates, series3, col = .dsa2color("green"))
-  par(col.axis = "transparent")
-  axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
-  axis(2, col.ticks = .dsa2color("grey"))
+  graphics::lines(dates, series2, col = .dsa2color("red"))
+  graphics::lines(dates, series3, col = .dsa2color("green"))
+  graphics::par(col.axis = "transparent")
+  graphics::axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
+  graphics::axis(2, col.ticks = .dsa2color("grey"))
   box(col = .dsa2color("grey"))
   .add_legend("bottom", legend = c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),
               col = .dsa2color("darkblue", "red", "orange"),
               horiz = TRUE, bty = 'n', cex = 0.8)
-  on.exit(par(opar))
+  on.exit(graphics::par(opar))
 }
 
 
