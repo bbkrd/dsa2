@@ -283,11 +283,13 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' 
 #' Output generic for dsa2
 #' @param dsa2 output object
-#' @details Generates a .Rdm file that is rendered into an html document.
+#' @details Generates a .Rdm file that is rendered into an html document saved in the working directory.
 #' @author x
 #' @export
 
 output <- function(dsa2_object) {
+  
+  # TODO(LH): Name der Zeitreihe mit ausgeben
 
   if (dsa2_object$parameters$log == TRUE){
     model <- "multiplicative"
