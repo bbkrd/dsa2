@@ -39,10 +39,10 @@ Imports:
     xts,
     zoo,
     dsa,
+    rJava,
     stats,
-    rjd3bbkhighfreqforecast,
     rjd3bbksplines,
-    rjd3highfreq,
+    rjd3highfreq (>= 1.0.0),
     rjd3stl
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

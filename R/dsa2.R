@@ -71,37 +71,43 @@ dsa <- function(series,
     
     # Take logs
     # NOTE(Daniel): Should be handled in Java
-    if (log) {
-      series <- log(series) 
-    }
+    #if (log) {
+    #  series <- log(series) 
+    #}
     
     # Run fractional airline estimation
-    fracAirline <- rjd3bbkhighfreqforecast::fractionalAirlineEstimation(
+    fracAirline <- rjd3highfreq::fractionalAirlineEstimation(
       y = series, 
       periods = c(7, 365.25), 
       x = xreg, 
       nfcasts = h,
       outliers = outliers,
+      log=log,
       ...)
     
     # Undo logs
     # NOTE(DO): Should be handled in Java
-    if (log) {
-      series  <- exp(series) 
-      fracAirline$model$linearized <- exp(fracAirline$model$linearized)
-    } 
+    # the original series is as JD+ UI backtransformed
+    if (fracAirline$model$log) {
+      series  <- exp(series)}
+    
+    #  fracAirline$model$linearized <- fracAirline$model$linearized # wofür wird das benötigt
+     
     
     # Extract calendar adjusted series and calendar component 
     # TODO(Daniel): Find out if calendar component should be centered?
     xLinear <- fracAirline$model$linearized
     calComp <- fracAirline$model$component_userdef_reg_variables
-    if (is.null(calComp)) {
-      calComp <- xLinear*0 # NOTE(DO): '+ ifelse(log, 1, 0)' has to be readded, once the exp/log is handled correctly in the fractional airline
-    }
+   
+    # if (is.null(calComp)) { #CH glaube nicht dass das eine gute Idee ist.
+    #  calComp <- xLinear*0 # NOTE(DO): '+ ifelse(log, 1, 0)' has to be readded, once the exp/log is handled correctly in the fractional airline
+    # }
     
-    if (log) calComp <- exp(calComp) # NOTE(DO): Should be handled in Java
+}
     
-  } else {
+    
+  else{ 
+#    Hier muss noch die Logs von y rein, wenn, bzw woher weiß ich wie da mit logs umgegangen wird
     fracAirline <- pre_processing$preProcessing
     xLinear <- fracAirline$model$linearized  
     calComp <- pre_processing$components$calComp
@@ -111,7 +117,7 @@ dsa <- function(series,
   xLinear <- xts::xts(xLinear, order.by = dates)
   calComp <- xts::xts(calComp, order.by = dates)
   
-  # Preliminary seasonal components
+  # Preliminary seasonal components # with does nothing
   seasComp7   <- 0 * calComp + ifelse(log, 1, 0)
   seasComp31  <- 0 * calComp + ifelse(log, 1, 0)
   seasComp365 <- 0 * calComp + ifelse(log, 1, 0)
@@ -150,13 +156,13 @@ dsa <- function(series,
       }
     }
     
-    xLinx <- ts(rjd3bbksplines::interpolate31(zLinz, 
+    xLinx <- ts(interpolate31(zLinz, 
                            interpolator = interpolator),
                 frequency = 31)
                 
     s31Result <- adjust(method = s31, series = xLinx) 
     
-    seasComp31 <- xts::xts(rjd3bbksplines::reduce31(zLinz, s31Result$seasComp), 
+    seasComp31 <- xts::xts(reduce31(zLinz, s31Result$seasComp), 
                            zoo::index(seasComp31))
     
     # S365 ---------------------------------------------------------------------
@@ -181,14 +187,14 @@ dsa <- function(series,
                                 by = "days", 
                                 length.out = length(fracAirline$model$y))) 
   
-  if (log) original <- exp(original) # Should be handled before in fracAirline/Java
+  #if (log) original <- exp(original) # Should be handled before in fracAirline/Java
   
   seas_adj <- compute_seasadj(original, 
                                 seasComp7 = seasComp7, 
                                 seasComp31 = seasComp31, 
                                 seasComp365 = seasComp365, 
                                 calComp = calComp,
-                                log = log)
+                                log = fracAirline$model$log)
   
   
   series <- xts::merge.xts(original = original, seas_adj = seas_adj)
