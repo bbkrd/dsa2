@@ -344,6 +344,34 @@ output: html_document
       Adjustment method day-of-the-week: `r dsa2_object$parameters$s7`
       Adjustment method day-of-the-month: `r model_s31`
       Adjustment method day-of-the-year: `r dsa2_object$parameters$s365`
+\n
+**Summary**
+\n
+      `r sumResults[1]`
+      `r sumResults[2]`
+      `r sumResults[3]`
+      `r sumResults[4]`
+      `r sumResults[5]`
+      
+      `r if (is.null(dsa2_object$parameters$xreg)) {
+      
+          sumResults[6]
+          
+          if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
+          
+            sumResults[7]
+            sumResults[8]
+            
+            } else {
+            
+              for (i in 1:length(dsa2_object$preProcessing$model$variables)) {
+                
+                listOutlier <- as.data.frame(rbind(listOutlier,sumResults[8+i]))
+                
+              }
+              knitr::kable(listOutlier, caption = 'Outliers')
+            }
+      } `
       ",
       
       file = "output.Rmd")
