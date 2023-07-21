@@ -10,8 +10,8 @@
 #' @param outliers should outliers be identified using regarima models
 #' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
 #' @param h number of days to forecast
-#' @param interpolator either "default", "CUBIC_SPLINE" or "NONE" (the last two inherited from rjd3bbksplines::interpolate31). See details
-#' @param pre_processing Optionally include pre-processing results computed earlier
+#' @param interpolator either "default", "CUBIC_SPLINE" or "NONE". See details
+#' @param pre_processing Optionally include pre-processing results computed earlier using dsa2 result (see examples) 
 #' @param ... additional parameters from fractionalAirlineEstimation
 #' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
 #' For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
@@ -88,8 +88,8 @@ dsa <- function(series,
     # Undo logs
     # NOTE(DO): Should be handled in Java
     # the original series is as JD+ UI backtransformed
-    if (fracAirline$model$log) {
-      series  <- exp(series)}
+    #if (fracAirline$model$log) {
+    #  series  <- exp(series)}
     
     #  fracAirline$model$linearized <- fracAirline$model$linearized # wofür wird das benötigt
      
@@ -98,7 +98,9 @@ dsa <- function(series,
     # TODO(Daniel): Find out if calendar component should be centered?
     xLinear <- fracAirline$model$linearized
     calComp <- fracAirline$model$component_userdef_reg_variables
-   
+    if (fracAirline$model$log) {
+      calComp  <- log(calComp)}
+
     # if (is.null(calComp)) { #CH glaube nicht dass das eine gute Idee ist.
     #  calComp <- xLinear*0 # NOTE(DO): '+ ifelse(log, 1, 0)' has to be readded, once the exp/log is handled correctly in the fractional airline
     # }
@@ -109,7 +111,7 @@ dsa <- function(series,
   else{ 
 #    Hier muss noch die Logs von y rein, wenn, bzw woher weiß ich wie da mit logs umgegangen wird
     fracAirline <- pre_processing$preProcessing
-    xLinear <- fracAirline$model$linearized  
+    xLinear <- pre_processing$preProcessing$model$linearized  
     calComp <- pre_processing$components$calComp
   }
   
@@ -199,7 +201,8 @@ dsa <- function(series,
   
   series <- xts::merge.xts(original = original, seas_adj = seas_adj)
   colnames(series) <- c("original", "seas_adj")
-  
+  print(length(calComp))
+  print(length(original))
   components <- xts::merge.xts(calComp = xts::xts(calComp, 
                                                   zoo::index(original)), 
                                seasComp7 = xts::xts(seasComp7, 
