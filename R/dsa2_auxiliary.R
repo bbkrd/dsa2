@@ -156,23 +156,40 @@ summary.dsa2 <- function(dsa2_object) {
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
 
+
 print.dsa2 <- function(dsa2_object) {
-  cat("Pre-processing")
-  cat("\n") ## New line
-  cat("Fractional Airline Coefficients:")
-  cat(round(dsa2_object$preProcessing$estimation$parameters,3))
-  cat("\n") ## New line
-  cat("\n") ## New line
-  cat("Calendar Regressors") 
-  cat("\n") ## New line
-  print(.outCalendar(dsa2_object))
-  cat("\n") ## New line
-  cat("Outliers")
-  cat("\n") ## New line
-  print(.outOutlier(dsa2_object))
-  cat("\n")
-  # cat("Seasonality Test")
+  frac <- toString(round(dsa2_object$preProcessing$estimation$parameters,3))
+  if (is.null(dsa2_object$parameters$xreg)) {
+    calends <- .outCalendar(dsa2_object)
+  } else {
+    calends <- rbind(c("\tregressor", "coefficient", "t_Value") ,
+                     calends)
+    calends$sep <- "\n"
+    calends <- paste(t(calends), collapse = "\t")
+  }
+  
+  if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
+    outlier <- .outOutlier(dsa2_object)
+  } else
+  { outlier <- .outOutlier(dsa2_object)
+    outlier$dates <- as.character(outlier$dates)
+    outlier <- rbind(c("\toutliertype", "dates", "coefficient", "t_value"), 
+                   outlier)
+    outlier$sep <- "\n"
+    outlier <- paste(t(outlier), collapse = "\t")
+  }
+  
+  out <- paste0("Pre-processing\n
+Fractional Airline Coefficients: ", 
+                frac,"\n
+Calendar Regressors:\n\n",
+                calends,"\n
+Outliers:\n\n",
+                outlier)
+  cat(out)
+  invisible(out)
 }
+
 
 .outOutlier <- function(dsa2_object){
   if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
@@ -321,13 +338,15 @@ output <- function(dsa2_object) {
     model_s31 <- dsa2_object$parameters$s31
   }
   
+  out <- summary.dsa2(dsa2_object)
+  
   cat("---
 title: \"Title\"
 date: \'`r Sys.Date()`\'
 output: html_document
 ---
 **Time series information**
-\n
+\nL
       Name:
       Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`
       Number of values: `r length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h`
@@ -347,31 +366,7 @@ output: html_document
 \n
 **Summary**
 \n
-      `r sumResults[1]`
-      `r sumResults[2]`
-      `r sumResults[3]`
-      `r sumResults[4]`
-      `r sumResults[5]`
-      
-      `r if (is.null(dsa2_object$parameters$xreg)) {
-      
-          sumResults[6]
-          
-          if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
-          
-            sumResults[7]
-            sumResults[8]
-            
-            } else {
-            
-              for (i in 1:length(dsa2_object$preProcessing$model$variables)) {
-                
-                listOutlier <- as.data.frame(rbind(listOutlier,sumResults[8+i]))
-                
-              }
-              knitr::kable(listOutlier, caption = 'Outliers')
-            }
-      } `
+      `r out`
       ",
       
       file = "output.Rmd")
