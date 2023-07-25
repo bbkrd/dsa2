@@ -363,6 +363,7 @@ adjust <- function(method, series, log = NULL) {UseMethod("adjust")} # This is h
 #' Default method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log multiplicative models used
 #' @author Daniel Ollech
 #' @export
 
@@ -518,6 +519,7 @@ adjust.character <- function(method, series, log = NULL) {
 #' NULL method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log multiplicative models used
 #' @author Daniel Ollech
 #' @export
 

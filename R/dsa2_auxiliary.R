@@ -247,7 +247,7 @@ Outliers:\n\n",
       t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
     }
     dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, round(dsa2_object$preProcessing$model$b, 3), round(dsa2_object$preProcessing$model$t,3))
+    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b, 3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
     df <- t(df)
     lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
     names(lookup) <- c("id")
@@ -281,7 +281,7 @@ Outliers:\n\n",
       t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
     }
     dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, round(dsa2_object$preProcessing$model$b,3), round(dsa2_object$preProcessing$model$t,3))
+    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b,3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
     df <- t(df)
     lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
     names(lookup) <- c("id")
@@ -354,18 +354,22 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 }
 
 
-#' Output for dsa2
+#' HTML output for dsa2
 #' 
-#' Output for dsa2
+#' HTML output for dsa2
 #' @param dsa2_object output object
-#' @details Generates a .Rdm file that is rendered into an html document saved in the working directory.
+#' @param path path for HTML output
+#' @details Generates a .Rmd file that is rendered into an html document saved in the working directory.
 #' @author Lea Hengen, Sindy Brakemeier
 #' @export
 
-output <- function(dsa2_object) {
+output <- function(dsa2_object, path = NULL) {
+  if(is.null(path)) {
+    path <- getwd()
+  }
   
-  # TODO(LH): Name der Zeitreihe mit ausgeben
-
+  filename <- paste0(path, "/", dsa2_object$parameters$name, ".Rmd")
+  
   if (dsa2_object$parameters$log == TRUE) {
     model <- "multiplicative"
   } else {
@@ -404,11 +408,10 @@ date: \'`r Sys.Date()`\'
 output: html_document
 ---
 **Time series information**
-\nL
-      Name: `r dsa2_object$parameters$name`
-      Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`
-      Number of values: `r length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h`
 \n
+      Name: `r dsa2_object$parameters$name`       
+      Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`     
+      Number of values: `r length(zoo::index(dsa2_object$series)) - dsa2_object$parameters$h` 
 **Parameters**
 \n
       Number of iterations: `r dsa2_object$parameters$n_iterations`
@@ -424,19 +427,23 @@ output: html_document
 \n
 **Summary**
 \n
-      `r out`
+```{r, echo=FALSE}
+summary.dsa2(dsa2_object)
+``` 
+\n
       
 ```{r, echo=FALSE}
-interactive_time <- dygraphs::dygraph(dsa2_object$series, main = 'Result for seasonal adjustment of daily time series') 
+interactive_time <- dygraphs::dygraph(dsa2_object$series, 
+                                      main = 'Result for seasonal adjustment of daily time series') 
 interactive_time <- dygraphs::dyRangeSelector(interactive_time)
-interactive_time <- dygraphs::dyOptions(interactive_time,colors = .dsa2color('darkblue','red'))
+interactive_time <- dygraphs::dyOptions(interactive_time, 
+                                        colors = .dsa2color('darkblue','red'))
 interactive_time
 ```      
       ",
       
-      file = "output.Rmd")
-  rmarkdown::render("output.Rmd")
-  file.remove("output.Rmd") #entfernt die Rmd-Datei wieder
-
+      file = filename) 
+  rmarkdown::render(filename)
+  file.remove(filename) #Removes the Rmd-File
 }
 

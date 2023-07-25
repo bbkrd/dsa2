@@ -10,6 +10,8 @@
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{multiplicative models used}
 }
 \description{
 NULL method for adjusting a seasonal time series

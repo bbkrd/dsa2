@@ -2,18 +2,20 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{output}
 \alias{output}
-\title{Output for dsa2}
+\title{HTML output for dsa2}
 \usage{
-output(dsa2_object)
+output(dsa2_object, path = NULL)
 }
 \arguments{
 \item{dsa2_object}{output object}
+
+\item{path}{path for HTML output}
 }
 \description{
-Output for dsa2
+HTML output for dsa2
 }
 \details{
-Generates a .Rdm file that is rendered into an html document saved in the working directory.
+Generates a .Rmd file that is rendered into an html document saved in the working directory.
 }
 \author{
 Lea Hengen, Sindy Brakemeier
