@@ -405,7 +405,7 @@ output: html_document
 ---
 **Time series information**
 \nL
-      Name:
+      Name: `r dsa2_object$parameters$name`
       Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`
       Number of values: `r length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h`
 \n
@@ -425,9 +425,18 @@ output: html_document
 **Summary**
 \n
       `r out`
+      
+```{r, echo=FALSE}
+interactive_time <- dygraphs::dygraph(dsa2_object$series, main = 'Result for seasonal adjustment of daily time series') 
+interactive_time <- dygraphs::dyRangeSelector(interactive_time)
+interactive_time <- dygraphs::dyOptions(interactive_time,colors = .dsa2color('darkblue','red'))
+interactive_time
+```      
       ",
       
       file = "output.Rmd")
   rmarkdown::render("output.Rmd")
+  file.remove("output.Rmd") #entfernt die Rmd-Datei wieder
+
 }
 
