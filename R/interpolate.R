@@ -1,6 +1,11 @@
+#' Interpolator
+#' 
 #' Interpolates values for non-existent dates e.g. 29.02.2000
+#' @param series time series
 #' @param interpolator Either "CUBIC_SPLINE" or "NONE"
+#' @author Thomas Witthohn
 #' @export
+
 interpolate31 <- function(series, interpolator = "CUBIC_SPLINE") {
   first <- xts::first(series)
   year <- xts::.indexyear(first) + 1900
@@ -22,8 +27,15 @@ interpolate31 <- function(series, interpolator = "CUBIC_SPLINE") {
   return(jrslt)
 }
 
+
+#' Invert interpolation
+#' 
 #' Removes interpolated values for non-existent dates e.g. 29.02.2000
+#' @param originalSeries reference series
+#' @param interpolatedVector series including interpolated values
+#' @author Thomas Witthohn
 #' @export
+
 reduce31 <- function(originalSeries, interpolatedVector) {
   first <- xts::first(originalSeries)
   year <- xts::.indexyear(first) + 1900

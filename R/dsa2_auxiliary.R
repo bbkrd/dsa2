@@ -1,7 +1,26 @@
+#' Delete February 29
+#' 
+#' Delete the observation on February 29 from a time series
+#' @param x time series
+#' @author Daniel Ollech
+
+
 delete_29 <- function(x) {
   x[format(zoo::index(x), "%m-%d") == "02-29"] <- NA
   x <- x[!is.na(x)]
 }
+
+
+#' Internal function to invert taking logs and differences of a time series
+#' 
+#' For a series that has been logged and/or differenced, this function reverses these transformations.
+#' @param x time series
+#' @param y reference time series for inverting differencing
+#' @param Diff number of differences to be taken
+#' @param log should time series be logarithmised
+#' @param Lag which Lag of differencing needs to be inverted
+#' @details Function is used in dsa to handle the users choice of logs and levels.
+#' @author Daniel Ollech
 
 
 Descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
@@ -40,6 +59,16 @@ Descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied fro
 }
 
 
+#' Internal function to take logs and differences of  a time series
+#' 
+#' Logarithmise and / or difference a time series 
+#' @param x time series
+#' @param Diff number of differences to be taken
+#' @param log Should time series be logarithmised
+#' @details Function is used in dsa to handle the users choice of logs and levels.
+#' @author Daniel Ollech
+
+
 Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
   if (log) 
     x = log(x)
@@ -49,9 +78,16 @@ Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 }
 
 
-# Color palette
-# https://mycolor.space/
-.dsa2color <- function(color, ...){
+#' Defining dsa2 colors
+#' 
+#' This function defines the colors to be used troughout the dsa2 package
+#' @param color name of color
+#' @param ... additional colors
+#' @author Daniel Ollech
+#' @examples dsa2:::.dsa2color("darkblue")
+
+
+.dsa2color <- function(color, ...) {
  if (missing(...)) {
    bc <- color
  } 
@@ -88,7 +124,7 @@ Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' Plot generic for dsa2
 #' 
 #' Creates a plot of original and seasonally adjusted series.
-#' @param dsa_object dsa2 output object
+#' @param x dsa2 output object
 #' @param include_forecasts display forecast data
 #' @param main title of the plot
 #' @param ... additional parameters from plot() function
@@ -96,24 +132,24 @@ Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' @author Sindy Brakemeier, Daniel Ollech
 #' @export
 
-plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, ...) {
+plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, ...) {
   opar <- graphics::par(no.readonly = TRUE)
   graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
   
   if (include_forecasts) {
     minus_h <- 0
   } else {
-    minus_h <- dsa2_object$parameters$h
+    minus_h <- x$parameters$h
   }
-  dsa2_object$series <- head(dsa2_object$series, 
-                  nrow(dsa2_object$series) - minus_h)
+  x$series <- utils::head(x$series, 
+                  nrow(x$series) - minus_h)
   
-  dates <- zoo::index(dsa2_object$series)
-  series1 <- as.numeric(dsa2_object$series[,1])
-  series2 <- as.numeric(dsa2_object$series[,2])
+  dates <- zoo::index(x$series)
+  series1 <- as.numeric(x$series[,1])
+  series2 <- as.numeric(x$series[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
   graphics::par(xpd = FALSE, cex.axis = 0.75)
-  graphics::abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
+  graphics::abline(v = graphics::axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   graphics::axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
@@ -122,7 +158,7 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
   graphics::par(col.axis = "transparent")
   graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
   graphics::axis(2, col.ticks = .dsa2color("grey"))
-  box(col = .dsa2color("grey"))
+  graphics::box(col = .dsa2color("grey"))
   .add_legend("bottom", legend = c("Original", "Adjusted"), lty = c(1,1),
               col = .dsa2color("darkblue", "red"),
               horiz = TRUE, bty = 'n', cex = 0.8)
@@ -134,46 +170,53 @@ plot.dsa2 <- function(dsa2_object, main = "Result for seasonal adjustment of dai
               mar = c(0, 0, 0, 0), new = TRUE)
   on.exit(graphics::par(opar))
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
-  legend(...)
+  graphics::legend(...)
 }
 
 
 #' Summary generic for dsa2
 #' 
 #' Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
-#' @param dsa_object dsa2 output object
+#' @param object dsa2 output object
+#' @param ... further arguments to print
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
-summary.dsa2 <- function(dsa2_object) {
-  print(dsa2_object)
+summary.dsa2 <- function(object, ...) {
+  print(object)
 }
 
 
 #' Print generic for dsa2
 #' 
 #' Print generic for dsa2, lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
-#' @param dsa_object dsa2 output object
+#' @param x dsa2 output object
+#' @param ... further arguments to print
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
 
 
-print.dsa2 <- function(dsa2_object) {
-  frac <- toString(round(dsa2_object$preProcessing$estimation$parameters,3))
-  if (is.null(dsa2_object$parameters$xreg)) {
-    calends <- .outCalendar(dsa2_object)
+print.dsa2 <- function(x, ...) {
+  handle <- list(...) # Just used to ensure consistency with generic print
+  frac <- toString(round(x$preProcessing$estimation$parameters,3))
+  if (is.null(x$parameters$xreg)) {
+    calends <- .outCalendar(x)
   } else {
-    calends <- rbind(c("\tregressor", "coefficient", "t_Value") ,
+    calends <- .outCalendar(x)
+    the_name <- ifelse(max(nchar(colnames(x$parameters$xreg))) < 8, # ensures that the regression results are printed nicely
+                       "\tregs",
+                       "\tregressors")
+    calends <- rbind(c(the_name, "coef", "t-value") ,
                      calends)
     calends$sep <- "\n"
     calends <- paste(t(calends), collapse = "\t")
   }
   
-  if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
-    outlier <- .outOutlier(dsa2_object)
+  if (all(x$preProcessing$model$component_outliers == 0)) {
+    outlier <- .outOutlier(x)
   } else
-  { outlier <- .outOutlier(dsa2_object)
+  { outlier <- .outOutlier(x)
     outlier$dates <- as.character(outlier$dates)
-    outlier <- rbind(c("\toutliertype", "dates", "coefficient", "t_value"), 
+    outlier <- rbind(c("\ttype", "dates", "\tcoef", "t-value"), 
                    outlier)
     outlier$sep <- "\n"
     outlier <- paste(t(outlier), collapse = "\t")
@@ -190,8 +233,13 @@ Outliers:\n\n",
   invisible(out)
 }
 
+#' Internal function for outliers
+#' 
+#' Internal function to polish the output for outliers
+#' @param dsa2_object dsa2 output object
+#' @author Sindy Brakemeier, Lea Hengen
 
-.outOutlier <- function(dsa2_object){
+.outOutlier <- function(dsa2_object) {
   if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
     return("No outliers found")
   } else {
@@ -219,7 +267,13 @@ Outliers:\n\n",
   }
 }
 
-.outCalendar <- function(dsa2_object){
+#' Internal function for calendars
+#' 
+#' Internal function to polish the output for calendars
+#' @param dsa2_object dsa2 output object
+#' @author Sindy Brakemeier, Lea Hengen
+
+.outCalendar <- function(dsa2_object) {
   if (is.null(dsa2_object$parameters$xreg)) {
     return("No calendar adjustment conducted")
   } else {
@@ -249,11 +303,12 @@ Outliers:\n\n",
 #' Create a plot of the original and adjusted series from two different adjustments
 #' @param dsa2_object1 first dsa2 output object
 #' @param dsa2_object2 second dsa2 output object
-#' @example set.seed(2358)
+#' @param include_forecasts should forecasts be depicted?
+#' @examples set.seed(2358)
 #' all <- tssim::sim_daily(N = 5)
 #' series <- all$original
-#' result <- dsa2(series, outliers = NULL)
-#' result2 <- dsa2(series,s7 = "x11", pre_processing = result)
+#' result <- dsa(series, outliers = NULL)
+#' result2 <- dsa(series,s7 = "x11", pre_processing = result)
 #' compare_plot(result, result2)
 #' @author Daniel Ollech
 #' @export
@@ -265,10 +320,13 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   } else {
     minus_h <- dsa2_object1$parameters$h
   }
-  result1 <- head(dsa2_object1$series, 
+  result1 <- utils::head(dsa2_object1$series, 
                   nrow(dsa2_object1$series) - minus_h)
-  result2 <- head(dsa2_object2$series, 
+  result2 <- utils::head(dsa2_object2$series, 
                   nrow(dsa2_object2$series) - minus_h)
+  
+  name1 <- deparse(substitute(dsa2_object1))
+  name2 <- deparse(substitute(dsa2_object2))
   
   opar <- graphics::par(no.readonly  =  TRUE)
   graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
@@ -278,7 +336,7 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   series3 <- as.numeric(result2[,2])
   plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n")
   graphics::par(xpd = FALSE, cex.axis = 0.75)
-  graphics::abline(v = axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
+  graphics::abline(v = graphics::axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   graphics::axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
@@ -286,53 +344,53 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   graphics::lines(dates, series2, col = .dsa2color("red"))
   graphics::lines(dates, series3, col = .dsa2color("green"))
   graphics::par(col.axis = "transparent")
-  graphics::axis(1, col.ticks = .dsa2color("grey"), axis.Date(1,dates))
+  graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
   graphics::axis(2, col.ticks = .dsa2color("grey"))
-  box(col = .dsa2color("grey"))
-  .add_legend("bottom", legend = c("Original", "Adjusted Series 1", "Adjusted Series 2"), lty = c(1,1),
-              col = .dsa2color("darkblue", "red", "orange"),
+  graphics::box(col = .dsa2color("grey"))
+  .add_legend("bottom", legend = c("Original", paste0("Adjusted Series (", name1, ")"), paste0("Adjusted Series (", name2, ")")), lty = c(1,1),
+              col = .dsa2color("darkblue", "red", "green"),
               horiz = TRUE, bty = 'n', cex = 0.8)
   on.exit(graphics::par(opar))
 }
 
 
-#' Output generic for dsa2
+#' Output for dsa2
 #' 
-#' Output generic for dsa2
-#' @param dsa2 output object
+#' Output for dsa2
+#' @param dsa2_object output object
 #' @details Generates a .Rdm file that is rendered into an html document saved in the working directory.
-#' @author x
+#' @author Lea Hengen, Sindy Brakemeier
 #' @export
 
 output <- function(dsa2_object) {
   
   # TODO(LH): Name der Zeitreihe mit ausgeben
 
-  if (dsa2_object$parameters$log == TRUE){
+  if (dsa2_object$parameters$log == TRUE) {
     model <- "multiplicative"
   } else {
     model <- "additive"
   }
   
-  if (is.null(dsa2_object$parameters$xreg)){
+  if (is.null(dsa2_object$parameters$xreg)) {
     regressors <- "not in use"
   } else{
     regressors <- colnames(dsa2_object$parameters$xreg)
   }
   
-  if (is.null(dsa2_object$parameters$outliers)){
+  if (is.null(dsa2_object$parameters$outliers)) {
     outliers <- "not in use"
   } else{
     outliers <- dsa2_object$parameters$outliers
   }
   
-  if (is.null(dsa2_object$parameters$pre_processing)){
+  if (is.null(dsa2_object$parameters$pre_processing)) {
     pre_processing_ex <- "not in use"
   } else {
     pre_processing_ex <- "in use"
   }
   
-  if (is.null(dsa2_object$parameters$s31)){
+  if (is.null(dsa2_object$parameters$s31)) {
     model_s31 <- "none"
   } else{
     model_s31 <- dsa2_object$parameters$s31

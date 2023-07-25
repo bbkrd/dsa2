@@ -4,12 +4,14 @@
 \alias{adjust}
 \title{Generic for adjusting a seasonal time series}
 \usage{
-adjust(method, series)
+adjust(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{should logs be used}
 }
 \description{
 Generic for adjusting a seasonal time series

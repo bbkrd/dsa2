@@ -83,7 +83,13 @@
 #' \item{no2_sa}{Seasonally and calendar adjusted version using dsa of no2}
 #' }
 #' @source Own calculations, Deutsche Bundesbank, Bundesnetzagentur, EEA
-#' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics (forthcoming).
+#' @references Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics 13 (2), 235-264.
 #' @author Daniel Ollech
 "daily_data"
+
+#' Centered version of xts of all German regressors used for daily time series
+#' 
+#' This is the centered version of the holidays regressors. See ?dsa2::holidays for details
+#' @author Daniel Ollech
+"holidaysCentered"
 

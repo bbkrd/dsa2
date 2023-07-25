@@ -4,12 +4,14 @@
 \alias{adjust.x11_method}
 \title{X-11 method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{x11_method}(method, series)
+\method{adjust}{x11_method}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{should logs be used}
 }
 \description{
 X-11 method for adjusting a seasonal time series

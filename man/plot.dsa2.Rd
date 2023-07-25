@@ -4,11 +4,28 @@
 \alias{plot.dsa2}
 \title{Plot generic for dsa2}
 \usage{
-\method{plot}{dsa2}(dsa2_object)
+\method{plot}{dsa2}(
+  x,
+  main = "Result for seasonal adjustment of daily time series",
+  include_forecasts = FALSE,
+  ...
+)
+}
+\arguments{
+\item{x}{dsa2 output object}
+
+\item{main}{title of the plot}
+
+\item{include_forecasts}{display forecast data}
+
+\item{...}{additional parameters from plot() function}
 }
 \description{
-Plot generic for dsa2
+Creates a plot of original and seasonally adjusted series.
+}
+\details{
+The function uses the base plot package.
 }
 \author{
-x
+Sindy Brakemeier, Daniel Ollech
 }

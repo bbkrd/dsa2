@@ -4,11 +4,16 @@
 \alias{print.dsa2}
 \title{Print generic for dsa2}
 \usage{
-\method{print}{dsa2}(dsa2_object)
+\method{print}{dsa2}(x, ...)
+}
+\arguments{
+\item{x}{dsa2 output object}
+
+\item{...}{further arguments to print}
 }
 \description{
-Print generic for dsa2
+Print generic for dsa2, lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
 }
 \author{
-x
+Sindy Brakemeier, Lea Hengen
 }

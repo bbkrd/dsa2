@@ -4,12 +4,14 @@
 \alias{adjust.character}
 \title{Character method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{character}(method, series)
+\method{adjust}{character}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{should logs be used}
 }
 \description{
 Character method for adjusting a seasonal time series

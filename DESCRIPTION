@@ -1,6 +1,6 @@
 Package: dsa2
 Title: Seasonal adjustment of daily time series
-Version: 0.1.1
+Version: 0.1.5
 Authors@R: 
     c(person(given = "Daniel",
              family = "Ollech",
@@ -38,11 +38,15 @@ LazyData: true
 Imports: 
     xts,
     zoo,
-    dsa,
     rJava,
     stats,
-    rjd3bbksplines,
     rjd3highfreq (>= 1.0.0),
-    rjd3stl
+    rjd3stl,
+    rjd3x11plus,
+    rmarkdown
+Suggests:
+    tssim
+Depends: 
+    R (>= 2.10)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

@@ -4,12 +4,14 @@
 \alias{adjust.seats_method}
 \title{Seats method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{seats_method}(method, series)
+\method{adjust}{seats_method}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{should logs be used}
 }
 \description{
 Seats method for adjusting a seasonal time series

@@ -4,15 +4,16 @@
 \alias{summary.dsa2}
 \title{Summary generic for dsa2}
 \usage{
-\method{summary}{dsa2}()
+\method{summary}{dsa2}(object, ...)
+}
+\arguments{
+\item{object}{dsa2 output object}
 
-\method{summary}{dsa2}()
+\item{...}{further arguments to print}
 }
 \description{
-Summary generic for dsa2
-
-Summary generic for dsa2
+Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
 }
 \author{
-x
+Sindy Brakemeier, Lea Hengen
 }

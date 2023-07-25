@@ -4,7 +4,7 @@
 \alias{adjust.default}
 \title{Default method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{default}(method, series)
+\method{adjust}{default}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}

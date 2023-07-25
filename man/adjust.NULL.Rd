@@ -4,7 +4,7 @@
 \alias{adjust.NULL}
 \title{NULL method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{`NULL`}(method, series)
+\method{adjust}{`NULL`}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}

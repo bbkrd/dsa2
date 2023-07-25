@@ -6,7 +6,7 @@
 \usage{
 seats_method(
   period = NA,
-  log = TRUE,
+  log = FALSE,
   sn = FALSE,
   stde = FALSE,
   nbcasts = 0,
@@ -16,7 +16,7 @@ seats_method(
 \arguments{
 \item{period}{period}
 
-\item{log}{log}
+\item{log}{log, ignored in dsa2}
 
 \item{sn}{sn}
 
@@ -28,6 +28,11 @@ seats_method(
 }
 \description{
 Handler for seats
+}
+\details{
+This functions is basically a translator between the dsa2 routines
+and rjd3highfreq::fractionalAirlineDecomposition, but its goal is to invoke the Seats procedure.
+It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 }
 \author{
 Daniel Ollech

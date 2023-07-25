@@ -5,7 +5,7 @@
 \title{Compute calendar and seasonally adjusted time series}
 \usage{
 compute_seasadj(
-  xLinear,
+  series,
   seasComp7,
   seasComp31,
   seasComp365,
@@ -14,6 +14,8 @@ compute_seasadj(
 )
 }
 \arguments{
+\item{series}{basic series}
+
 \item{seasComp7}{day-of-the-week component}
 
 \item{seasComp31}{day-of-the-month component}
@@ -22,7 +24,7 @@ compute_seasadj(
 
 \item{calComp}{calendar component}
 
-\item{xLinx}{basic series}
+\item{log}{do we use a multiplicative model}
 }
 \description{
 Compute calendar and seasonally adjusted time series

@@ -15,8 +15,13 @@
 #' @param ... additional parameters from fractionalAirlineEstimation
 #' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
 #' For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
+#' Is is not possible to use different decomposition schemes for the single dsa2 steps. This means you cannot use a multiplicative model for the day-of-the-week and an additive model for the day-of-the-year. Therefore, the global specification og log = TRUE or log = FALSE is used for all steps.
+#' 
+#' 
 #' @author Daniel Ollech, Christiane Hofer, Martin Stefan, Thomas Witthohn
-#' @examples 
+#' @examples
+#' Sys.setenv("JAVA_HOME"="C:/Workspace/Java/JDK/jdk-17.0.3+7") ## Currently start with this
+#' .libPaths("C:/Workspace/R/JD_lib") ## Currently start with this
 #' ## Create time series 
 #' set.seed(2358)
 #' all <- tssim::sim_daily(N=5)
@@ -54,9 +59,21 @@ dsa <- function(series,
                  ...) {
   
   parameters <- as.list(environment(), all = TRUE)
+  parameters$name <-  deparse(substitute(series)) # Get name of object inputted as series
   
   # Preliminary checks -----------------------------------------------------
   .preliminary_checks(series, outliers)
+  
+  if (any( (inherits(s7, "character") && s7 == "seats") |  # Note(DO): If-clause needs to be deleted once Seats can deal with multiplicative models
+           inherits(s7, "seats_method") |  
+           (inherits(s31, "character") && s31 == "seats") | 
+           inherits(s31, "seats_method") |  
+           (inherits(s365, "character") && s365 == "seats") | 
+           inherits(s365, "seats_method")) & 
+      log) {
+    log <- FALSE
+    message("The log parameter has been set to FALSE. Thus, an additive model is employed for *all* steps of DSA2. \nThis is because Seats currently cannot handle multiplicative models.")
+  } 
   
   # Vector of dates (needed for xts conversion) -------------------------------
   dates   <- seq.Date(from = as.Date(stats::start(series)),
@@ -68,13 +85,7 @@ dsa <- function(series,
   
   # User has not provided pre-processing results
   if (is.null(pre_processing)) {
-    
-    # Take logs
-    # NOTE(Daniel): Should be handled in Java
-    #if (log) {
-    #  series <- log(series) 
-    #}
-    
+
     # Run fractional airline estimation
     fracAirline <- rjd3highfreq::fractionalAirlineEstimation(
       y = series, 
@@ -82,33 +93,15 @@ dsa <- function(series,
       x = xreg, 
       nfcasts = h,
       outliers = outliers,
-      log=log,
+      log = log,
       ...)
-    
-    # Undo logs
-    # NOTE(DO): Should be handled in Java
-    # the original series is as JD+ UI backtransformed
-    #if (fracAirline$model$log) {
-    #  series  <- exp(series)}
-    
-    #  fracAirline$model$linearized <- fracAirline$model$linearized # wofür wird das benötigt
-     
     
     # Extract calendar adjusted series and calendar component 
     # TODO(Daniel): Find out if calendar component should be centered?
     xLinear <- fracAirline$model$linearized
-    calComp <- fracAirline$model$component_userdef_reg_variables
-    if (fracAirline$model$log) {
-      calComp  <- log(calComp)}
-
-    # if (is.null(calComp)) { #CH glaube nicht dass das eine gute Idee ist.
-    #  calComp <- xLinear*0 # NOTE(DO): '+ ifelse(log, 1, 0)' has to be readded, once the exp/log is handled correctly in the fractional airline
-    # }
-    
-}
-    
-    
-  else{ 
+    calComp <- xts::xts(fracAirline$model$component_userdef_reg_variables,
+                                 order.by = dates)
+} else { 
 #    Hier muss noch die Logs von y rein, wenn, bzw woher weiß ich wie da mit logs umgegangen wird
     fracAirline <- pre_processing$preProcessing
     xLinear <- pre_processing$preProcessing$model$linearized  
@@ -117,8 +110,7 @@ dsa <- function(series,
   
   # Convert to xts-format
   xLinear <- xts::xts(xLinear, order.by = dates)
-  calComp <- xts::xts(calComp, order.by = dates)
-  
+
   # Preliminary seasonal components # with does nothing
   seasComp7   <- 0 * calComp + ifelse(log, 1, 0)
   seasComp31  <- 0 * calComp + ifelse(log, 1, 0)
@@ -131,34 +123,34 @@ dsa <- function(series,
   for (j in seq(n_iterations)) {
     
     # S7 -----------------------------------------------------------------------
-    xLinx <- compute_seasadj(xLinear, 
-                               seasComp7 = NULL, 
-                               seasComp31 = seasComp31, 
-                               seasComp365 = seasComp365, 
-                               log = log)
-    xLinx <- ts(xLinx, frequency = 7)
+    xLinx <- compute_seasadj(series = xLinear, 
+                             seasComp7 = NULL, 
+                             seasComp31 = seasComp31, 
+                             seasComp365 = seasComp365, 
+                             log = log)
+    xLinx <- stats::ts(xLinx, frequency = 7)
 
-    s7Result <- adjust(method = s7, series = xLinx) 
+    s7Result <- adjust(method = s7, series = xLinx, log = log) 
     seasComp7 <- xts::xts(s7Result$seasComp, 
                           zoo::index(seasComp7))
     
     # S31 ----------------------------------------------------------------------
     
-    zLinz <- compute_seasadj(xLinear, 
+    zLinz <- compute_seasadj(series = xLinear, 
                              seasComp7 = seasComp7, 
                              seasComp31 = NULL, 
                              seasComp365 = seasComp365, 
                              log = log)
     
     if (interpolator == "default") {
-      if (class(s31) == "stl_method" | (class(s31) == "character" && s31 == "stl")) {
+      if (inherits(s31, "stl_method") | (inherits(s31, "character") && s31 == "stl")) {
         interpolator <- "NONE"
       } else {
         interpolator <- "CUBIC_SPLINE" 
       }
     }
     
-    xLinx <- ts(interpolate31(zLinz, 
+    xLinx <- stats::ts(interpolate31(zLinz, 
                            interpolator = interpolator),
                 frequency = 31)
                 
@@ -169,40 +161,38 @@ dsa <- function(series,
     
     # S365 ---------------------------------------------------------------------
     
-    xLinx <- compute_seasadj(xLinear, 
-                               seasComp7 = seasComp7, 
-                               seasComp31 = seasComp31, 
-                               seasComp365 = NULL, 
-                               log = log)
+    xLinx <- compute_seasadj(series = xLinear, 
+                             seasComp7 = seasComp7, 
+                             seasComp31 = seasComp31, 
+                             seasComp365 = NULL, 
+                             log = log)
     
     zLinz <- delete_29(xLinx)
-    yLiny <- ts(as.numeric(zLinz), frequency = 365)
-    s365Result <- adjust(method = s365, series = yLiny)
+    yLiny <- stats::ts(as.numeric(zLinz), frequency = 365)
+    s365Result <- adjust(method = s365, series = yLiny, log = log)
     seasComp365 <- xts::xts(s365Result$seasComp, zoo::index(zLinz))
-    seasComp365 <- zoo::na.locf(xts::merge.xts(seasComp365, xLinear)[,1]) # Filling up the seasonal component with a value for 29.Feb. Should be handled in Java ## na.locf makes that value on 29.2 = value on 28.2
+    seasComp365 <- zoo::na.locf(xts::merge.xts(seasComp365, xLinear)[,1]) # Filling up the seasonal component with a value for 29. Feb. Should be handled in Java ## na.locf makes that value on 29.2 = value on 28.2
   }
   
   
   # Create output --------------------------------------------------------------
-  original <- xts::xts(fracAirline$model$y, 
+  # original <- xts::xts(c(fracAirline$model$y, utils::tail(Descaler(as.numeric(xLinear), log=log), h)), # DO: Übergangslösung, y inkl. Forecasts muss in Java angepasst werden
+  original <- xts::xts(fracAirline$model$y,
                        seq.Date(from = as.Date(stats::start(series)), 
                                 by = "days", 
                                 length.out = length(fracAirline$model$y))) 
   
-  #if (log) original <- exp(original) # Should be handled before in fracAirline/Java
-  
   seas_adj <- compute_seasadj(original, 
-                                seasComp7 = seasComp7, 
-                                seasComp31 = seasComp31, 
-                                seasComp365 = seasComp365, 
-                                calComp = calComp,
-                                log = fracAirline$model$log)
+                              seasComp7 = seasComp7, 
+                              seasComp31 = seasComp31, 
+                              seasComp365 = seasComp365, 
+                              calComp = calComp,
+                              log = log)
   
   
   series <- xts::merge.xts(original = original, seas_adj = seas_adj)
   colnames(series) <- c("original", "seas_adj")
-  print(length(calComp))
-  print(length(original))
+
   components <- xts::merge.xts(calComp = xts::xts(calComp, 
                                                   zoo::index(original)), 
                                seasComp7 = xts::xts(seasComp7, 
@@ -215,7 +205,6 @@ dsa <- function(series,
                             "seasComp7", 
                             "seasComp31",
                             "seasComp365")
-  
   
   out <- list(series = series, 
               components = components, 
@@ -232,7 +221,7 @@ dsa <- function(series,
 #' Handler for stl
 #' @param period period
 #' @param swindow swindow
-#' @param log log
+#' @param log log, ignored in dsa2
 #' @param twindow twindow
 #' @param ninnerloop ninnerloop
 #' @param nouterloop nouterloop
@@ -241,6 +230,7 @@ dsa <- function(series,
 #' @param weight.function weight.function
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and rjd3stl::stl, but its goal is to invoke the stl procedure.
+#' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 #' @author Daniel Ollech
 #' @export
 
@@ -275,25 +265,29 @@ stl_method  <- function(period = NA,
 #' 
 #' Handler for x-11
 #' @param period period
-#' @param log log
+#' @param log log, ignored in dsa2
 #' @param sma sma
-#' @param trend.horizon t
-#' @param trend.kernel t
-#' @param trend.asymmetric t
+#' @param trend.horizon band.width of trend filters
+#' @param trend.degree polynomial order of the local trend model
+#' @param trend.kernel kernel weights in objective function
+#' @param trend.asymmetric truncation type to obtain asymmetric from symmetric filter
 #' @param sigma sigma
+#' @details This functions is basically a translator between the dsa2 routines 
+#' and rjd3x11plus::x11plus, but its goal is to invoke the X-11 procedure.
+#' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 #' @author Daniel Ollech
 #' @export
 
-x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3highfreq::x11
-                       log = TRUE, # NOTE(DO): Umbenennung von mul in rjd3highfreq::x11
+x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x11plus
+                       log = TRUE, # NOTE(DO): Renaming  mul in rjd3x11plus::x11plus for harmonization purposes
                        sma = c("S3X9", "S3X1", "S3X3", "S3X5", "S3X15")[1], 
-                       trend.horizon = 6, # NOTE(DO): Brauchen wir?
-                       trend.degree = 2, # NOTE(DO): Brauchen wir?
+                       trend.horizon = 6,  
+                       trend.degree = 2,  
                        trend.kernel = c("Henderson"),
                        trend.asymmetric = c("CutAndNormalize"),
-                       sigma = c(1.5,2.5)) # NOTE(DO): Umbenennung von extreme.lsig, extreme.usig
+                       sigma = c(1.5,2.5)) # NOTE(DO): Renaming extreme.lsig, extreme.usig for harmonization purposes
 {
-  if (class(sma) == "numeric") {
+  if (inherits(sma, "numeric")) {
     sma <- paste0("S3X", sma)
   }
   
@@ -318,16 +312,19 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3highfreq::x
 #' 
 #' Handler for seats
 #' @param period period
-#' @param log log
+#' @param log log, ignored in dsa2
 #' @param sn sn
 #' @param stde stde
 #' @param nbcasts nbcasts
 #' @param nfcasts nfcasts
+#' @details This functions is basically a translator between the dsa2 routines 
+#' and rjd3highfreq::fractionalAirlineDecomposition, but its goal is to invoke the Seats procedure.
+#' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 #' @author Daniel Ollech
 #' @export
 
-seats_method <- function(period = period,  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition, we might want to use rjd3bbkhighfreqforecast::multiAirlineDecomposition instead
-                         log = FALSE, # NOTE(DO): Currently not implemented in rjd3bbkhighfreqforecast::fractionalAirlineDecomposition
+seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition
+                         log = FALSE, # NOTE(DO): Currently not implemented 
                          sn = FALSE,
                          stde = FALSE,
                          nbcasts = 0,
@@ -340,8 +337,8 @@ seats_method <- function(period = period,  # NOTE(DO): Assumes use of rjd3highfr
                      nbcasts = nbcasts, 
                      nfcasts = nfcasts)
   
-  stop("Seats is currently not fully implemented, but we are working to implement it.")
-  
+  if (log) {stop("Seats is currently not fully implemented. Therefore, please do not use a multiplicative model, i.e. set log = FALSE.")}
+
   class(parameters) <- c("seats_method")
   
   return(parameters) 
@@ -353,12 +350,13 @@ seats_method <- function(period = period,  # NOTE(DO): Assumes use of rjd3highfr
 #' Generic for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log should logs be used
 #' @author Daniel Ollech
 #' @export
 
 ### NOTE(DO): Maybe the following line(s) have to be loaded at package
 ###           start-up once this thingy becomes a dsa2 package
-adjust <- function(method, series) {UseMethod("adjust")} # This is how we define generics in S3
+adjust <- function(method, series, log = NULL) {UseMethod("adjust")} # This is how we define generics in S3
 
 #' Default method for adjusting a seasonal time series
 #' 
@@ -368,7 +366,7 @@ adjust <- function(method, series) {UseMethod("adjust")} # This is how we define
 #' @author Daniel Ollech
 #' @export
 
-adjust.default <- function(method, series) {
+adjust.default <- function(method, series, log = NULL) {
   message("The method should either be one of 'x11', 'stl' or 'seats' or a call to stl_method(), x11_method() or seats_method()")
 }
 
@@ -377,13 +375,16 @@ adjust.default <- function(method, series) {
 #' STL method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log should logs be used
 #' @author Daniel Ollech
 #' @export
 
-adjust.stl_method <- function(method, series) { 
+adjust.stl_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
+  
+  if (!is.null(log)) {method$multiplicative <- log}
   
   adjustment <- do.call(rjd3stl::stl, append(list(series),
                                              method))
@@ -395,35 +396,83 @@ adjust.stl_method <- function(method, series) {
 #' X-11 method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log should logs be used
 #' @author Daniel Ollech
 #' @export
 
-adjust.x11_method <- function(method, series) { 
+adjust.x11_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
   
-  adjustment <- do.call(rjd3highfreq::x11, append(list(series),
-                                                       method))
+  if (!is.null(log)) {method$mul <- log}
+  
+  adjustment <- do.call(rjd3x11plus::x11plus, append(list(series),
+                                                     .correct_filter_length(method, # remove correct_filter_length once handled in Java. Then instead of correct_filter_length(..), we here just need to put in "method"
+                                                                           series)))
   return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s))
 }
 
+#' Check the chosen X-11 filter
+#' 
+#' If X-11 is used on the day-of-the-year effect, the number of observations included in the time series needs to be high enough for certain filters to be used. This function checks it.
+#' @param method method to be employed
+#' @param series time series to be adjusted
+#' @author Daniel Ollech
+
+.correct_filter_length <- function(method, series) { # Can be removed, once handled in Java
+  all_filters <- c(15,9,5,3,1)
+  oldfilter <- method$seas.s1
+  filter <- as.numeric(gsub("S3X", 
+                            "", 
+                            oldfilter)
+                       )
+  position <- grep(paste0("^", filter, "$"), all_filters)
+  
+  length_series <- length(series)/365
+  if (method$period >= 365) {
+  if (length_series < 3) {
+    stop("Series needs to have at least 3 years of observations to use X-11")
+  } else {
+    while (length_series < filter + 2) {
+      position <- position + 1
+      if (position > 5) {
+        stop("Something is wrong. Choose a longer series or an appropriate seasonal filter")
+      }
+      filter <- all_filters[position]
+    }
+    
+    method$seas.s0 <- paste0("S3X", filter)
+    method$seas.s1 <- paste0("S3X", filter)
+    if (oldfilter != method$seas.s1) {
+    message(paste("The seasonal filter for X-11 (in the estimation of day-of-the-year) has been changed to", method$seas.s1))}
+  }
+  }
+  
+  return(method) 
+}
+
+
+
 #' Seats method for adjusting a seasonal time series
 #' 
 #' Seats method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log should logs be used
 #' @author Daniel Ollech
 #' @export
 
-adjust.seats_method <- function(method, series) { 
+adjust.seats_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
   
+  #if (!is.null(log)) {method$multiplicative <- log} # Note(DO): Needs to be activated once Seats can deal with multiplicative models
+  
   adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
-                                                       method))
-  return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4])) 
+                                                                              method))
+  return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
 }
 
 #' Character method for adjusting a seasonal time series
@@ -431,22 +480,25 @@ adjust.seats_method <- function(method, series) {
 #' Character method for adjusting a seasonal time series
 #' @param method method to be employed
 #' @param series time series to be adjusted
+#' @param log should logs be used
 #' @author Daniel Ollech
 #' @export
 
-adjust.character <- function(method, series) { 
-  if (method == "stl") {
+adjust.character <- function(method, series, log = NULL) { 
+    if (method == "stl") {
     adjustment <- do.call(rjd3stl::stl, append(list(series),
                                                stl_method(
-                                                 period = stats::frequency(series)
+                                                 period = stats::frequency(series),
+                                                 log = ifelse(is.null(log), TRUE, log)
                                                  )))
     return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4])) 
   }
   
   if (method == "x11") {
-    adjustment <- do.call(rjd3highfreq::x11, append(list(series),
-                                                         x11_method(
-                                                           period = stats::frequency(series)
+    adjustment <- do.call(rjd3x11plus::x11plus, append(list(series),
+                                                       x11_method(
+                                                           period = stats::frequency(series),
+                                                           log = ifelse(is.null(log), TRUE, log)
                                                          )))
     return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
   }
@@ -454,7 +506,8 @@ adjust.character <- function(method, series) {
   if (method == "seats") {
     adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
                                                            seats_method(
-                                                             period = stats::frequency(series)
+                                                             period = stats::frequency(series),
+                                                             log = ifelse(is.null(log), FALSE, log) # NOTE(DO): Needs to be changed, once seats can handle multiplicative models
                                                            )))
     return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
   }
@@ -468,7 +521,7 @@ adjust.character <- function(method, series) {
 #' @author Daniel Ollech
 #' @export
 
-adjust.NULL <- function(method, series) {
+adjust.NULL <- function(method, series, log = NULL) {
   return(list(adjustment = NULL, seasComp = series*NA)) 
 }
 
@@ -477,15 +530,16 @@ adjust.NULL <- function(method, series) {
 #' Compute calendar and seasonally adjusted time series
 #' 
 #' Compute calendar and seasonally adjusted time series
-#' @param xLinx basic series
+#' @param series basic series
 #' @param seasComp7 day-of-the-week component
 #' @param seasComp31 day-of-the-month component
 #' @param seasComp365 day-of-the-year component
 #' @param calComp calendar component
+#' @param log do we use a multiplicative model
 #' @author Daniel Ollech
 #' @export
 
-compute_seasadj <- function(xLinear, 
+compute_seasadj <- function(series, 
                             seasComp7, 
                             seasComp31, 
                             seasComp365, 
@@ -494,20 +548,20 @@ compute_seasadj <- function(xLinear,
   
   # Replace NULL or NA components
   if (is.null(seasComp7) | all(is.na(seasComp7))) {
-    seasComp7 <- xLinear * 0 + ifelse(log, 1, 0)
+    seasComp7 <- series * 0 + ifelse(log, 1, 0)
   }
   if (is.null(seasComp31) | all(is.na(seasComp31))) {
-    seasComp31 <- xLinear * 0 + ifelse(log, 1, 0)
+    seasComp31 <- series * 0 + ifelse(log, 1, 0)
   }
   if (is.null(seasComp365) | all(is.na(seasComp365))) {
-    seasComp365 <- xLinear * 0 + ifelse(log, 1, 0)
+    seasComp365 <- series * 0 + ifelse(log, 1, 0)
   }
-  if (is.null(calComp) | all(is.na(seasComp365))) {
-    calComp <- xLinear * 0 + ifelse(log, 1, 0)
+  if (is.null(calComp) | all(is.na(calComp))) {
+    calComp <- series * 0 + ifelse(log, 1, 0)
   }
   
   # Compute adjusted figures
-  xout <- Descaler(Scaler(xLinear, log = log) - 
+  xout <- Descaler(Scaler(series, log = log) - 
                    Scaler(calComp, log = log) - 
                    Scaler(seasComp7, log = log) - 
                    Scaler(seasComp31, log = log) - 

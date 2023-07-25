@@ -18,20 +18,27 @@ x11_method(
 \arguments{
 \item{period}{period}
 
-\item{log}{log}
+\item{log}{log, ignored in dsa2}
 
 \item{sma}{sma}
 
-\item{trend.horizon}{t}
+\item{trend.horizon}{band.width of trend filters}
 
-\item{trend.kernel}{t}
+\item{trend.degree}{polynomial order of the local trend model}
 
-\item{trend.asymmetric}{t}
+\item{trend.kernel}{kernel weights in objective function}
+
+\item{trend.asymmetric}{truncation type to obtain asymmetric from symmetric filter}
 
 \item{sigma}{sigma}
 }
 \description{
 Handler for x-11
+}
+\details{
+This functions is basically a translator between the dsa2 routines
+and rjd3x11plus::x11plus, but its goal is to invoke the X-11 procedure.
+It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 }
 \author{
 Daniel Ollech

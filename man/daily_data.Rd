@@ -25,7 +25,7 @@ daily_data
 Three time series that have been analysed by Ollech (2021) and their seasonally and calendar adjusted variants.
 }
 \references{
-Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics (forthcoming).
+Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics 13 (2), 235-264.
 }
 \author{
 Daniel Ollech

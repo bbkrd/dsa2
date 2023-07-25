@@ -11,7 +11,7 @@ dsa(
   s7 = c("x11", "stl", "seats")[2],
   s31 = NULL,
   s365 = c("x11", "stl", "seats")[2],
-  outliers = c("AO", "LS", "TC"),
+  outliers = c("AO", "LS", "WO"),
   n_iterations = 1,
   h = 365,
   interpolator = "default",
@@ -38,9 +38,9 @@ dsa(
 
 \item{h}{number of days to forecast}
 
-\item{interpolator}{either "default", "CUBIC_SPLINE" or "NONE" (the last two inherited from rjd3bbksplines::interpolate31). See details}
+\item{interpolator}{either "default", "CUBIC_SPLINE" or "NONE". See details}
 
-\item{pre_processing}{Optionally include pre-processing results computed earlier}
+\item{pre_processing}{Optionally include pre-processing results computed earlier using dsa2 result (see examples)}
 
 \item{...}{additional parameters from fractionalAirlineEstimation}
 }
@@ -50,8 +50,11 @@ Seasonal adjustment of daily time series
 \details{
 DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
 For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
+Is is not possible to use different decomposition schemes for the single dsa2 steps. This means you cannot use a multiplicative model for the day-of-the-week and an additive model for the day-of-the-year. Therefore, the global specification og log = TRUE or log = FALSE is used for all steps.
 }
 \examples{
+Sys.setenv("JAVA_HOME"="C:/Workspace/Java/JDK/jdk-17.0.3+7") ## Currently start with this
+.libPaths("C:/Workspace/R/JD_lib") ## Currently start with this
 ## Create time series 
 set.seed(2358)
 all <- tssim::sim_daily(N=5)
@@ -62,10 +65,10 @@ result <- dsa(series)
 plot(result)
 
 ## Set STL parameters to be used
-result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9))
+result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9), pre_processing = result)
 
 ## Use STL and X11 in combination
-result3 <- dsa(series, s7 = "stl", s365 = "x11")
+result3 <- dsa(series, s7 = "x11", s365 = "stl", pre_processing = result) 
 
 ## Compare results
 compare_plot(result2, result3)
@@ -78,5 +81,5 @@ Ollech, Daniel (2021). Seasonal Adjustment of Daily Time Series.
 Journal of Time Series Econometrics 13 (2), 235-264.
 }
 \author{
-Daniel Ollech, Martin Stefan
+Daniel Ollech, Christiane Hofer, Martin Stefan, Thomas Witthohn
 }

@@ -10,9 +10,19 @@ compare_plot(dsa2_object1, dsa2_object2, include_forecasts = FALSE)
 \item{dsa2_object1}{first dsa2 output object}
 
 \item{dsa2_object2}{second dsa2 output object}
+
+\item{include_forecasts}{should forecasts be depicted?}
 }
 \description{
 Create a plot of the original and adjusted series from two different adjustments
+}
+\examples{
+set.seed(2358)
+all <- tssim::sim_daily(N = 5)
+series <- all$original
+result <- dsa(series, outliers = NULL)
+result2 <- dsa(series,s7 = "x11", pre_processing = result)
+compare_plot(result, result2)
 }
 \author{
 Daniel Ollech

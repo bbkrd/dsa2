@@ -4,12 +4,14 @@
 \alias{adjust.stl_method}
 \title{STL method for adjusting a seasonal time series}
 \usage{
-\method{adjust}{stl_method}(method, series)
+\method{adjust}{stl_method}(method, series, log = NULL)
 }
 \arguments{
 \item{method}{method to be employed}
 
 \item{series}{time series to be adjusted}
+
+\item{log}{should logs be used}
 }
 \description{
 STL method for adjusting a seasonal time series
