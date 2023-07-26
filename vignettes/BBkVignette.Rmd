@@ -1,0 +1,115 @@
+---
+title: "BBkVignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{BBkVignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r start}
+Sys.setenv("JAVA_HOME" = "C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
+.libPaths("C:\\Workspace\\R\\JD_lib")
+```
+
+
+```{r setup}
+library(dsa2)
+```
+
+
+```{r createSeries}
+all <- tssim::sim_daily(N = 6, 
+                        week_sd = 10,
+                        year_sd = 10,
+                        extra_smooth = TRUE,
+                        calendar = list(which = "EasterMonday", 
+                                        effect_size = 40, 
+                                        from = -1, 
+                                        to = 0))
+series <- all$original
+
+
+regs <- holidaysCentered[ ,c("EasterMonday", 
+                            "EasterSunday")][seq.Date(from = start(series), 
+                                                      length.out = length(series) + 365, 
+                                                      by = "days")]
+```
+
+
+
+## Default adjustment
+
+Currently, by default, STL is used for the seasonal adjustments
+```{r Default, fig.width=7.5, fig.height=4.5}
+result0 <- dsa(series)
+result0
+plot(result0)
+# output(result) # Create HTML output
+```
+
+## Adjustment with missing values
+```{r AdjustmentMissing, fig.width=7.5, fig.height=4.5}
+seriesx <- series
+seriesx[c(1, 499, 1010, 1748)] <- NA
+
+resultx <- dsa(seriesx)
+resultx
+plot(resultx)
+```
+
+
+## Adjustment with regressors
+
+```{r DefaultRegs, fig.width=7.5, fig.height=4.5}
+result <- dsa(series,
+              xreg = regs)
+result
+plot(result)
+```
+
+## Adjustment with X-11
+
+Setting any of s7, s31 or s365 to "x11" uses the default adjustment of x11. Alternatively, x11_method() can be used, to specify details of the adjustment.
+The function compare_plot() allows you to compare results from two different adjustment graphically.
+Finally, if you only want to change the seasonal adjustment part and leave the pre-adjustment unchanged, you can plug-in the previous result to pre_adjustment, to speed up the computation.
+
+```{r, AdjustmentX11, fig.width=7.5, fig.height=4.5}
+result2 <-  dsa(series, 
+                s7 = "x11", 
+                s31 = "x11", 
+                s365 = x11_method(sma = "S3x1", 
+                                  sigma = c(2, 3)),
+                xreg = regs,
+                pre_processing = result)
+
+
+compare_plot(result, result2)
+```
+
+
+## Adjustment with Seats
+The adjustment called Seats is in fact just a Extended Airline based decomposition. Also, currently, multiplicative decompositions are not implemented.
+```{r SeatsAdjustment, fig.width=7.5, fig.height=4.5}
+result3 <- dsa(series, 
+               s7 = seats_method(),
+               s365 = seats_method(), 
+               log = FALSE,
+               xreg = regs)
+
+compare_plot(result, result3)
+```
+
+
+
+
+
+
+

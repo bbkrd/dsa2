@@ -102,14 +102,14 @@ dsa <- function(series,
     calComp <- xts::xts(fracAirline$model$component_userdef_reg_variables,
                                  order.by = dates)
 } else { 
-#    Hier muss noch die Logs von y rein, wenn, bzw woher weiß ich wie da mit logs umgegangen wird
     fracAirline <- pre_processing$preProcessing
     xLinear <- pre_processing$preProcessing$model$linearized  
     calComp <- pre_processing$components$calComp
   }
   
   # Convert to xts-format
-  xLinear <- xts::xts(xLinear, order.by = dates)
+  xLinear <- Descaler(xts::xts(xLinear, order.by = dates),
+                      log = log)
 
   # Preliminary seasonal components # with does nothing
   seasComp7   <- 0 * calComp + ifelse(log, 1, 0)
