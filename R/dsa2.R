@@ -387,7 +387,7 @@ adjust.stl_method <- function(method, series, log = NULL) {
   
   if (!is.null(log)) {method$multiplicative <- log}
   
-  adjustment <- do.call(rjd3stl::stl, append(list(series),
+  adjustment <- do.call(rjd3stl::stlplus, append(list(series),
                                              method))
   return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4]))
 }
@@ -487,7 +487,7 @@ adjust.seats_method <- function(method, series, log = NULL) {
 
 adjust.character <- function(method, series, log = NULL) { 
     if (method == "stl") {
-    adjustment <- do.call(rjd3stl::stl, append(list(series),
+    adjustment <- do.call(rjd3stl::stlplus, append(list(series),
                                                stl_method(
                                                  period = stats::frequency(series),
                                                  log = ifelse(is.null(log), TRUE, log)
@@ -496,19 +496,15 @@ adjust.character <- function(method, series, log = NULL) {
   }
   
   if (method == "x11") {
-    adjustment <- do.call(rjd3x11plus::x11plus, append(list(series),
-                                                       x11_method(
-                                                           period = stats::frequency(series),
-                                                           log = ifelse(is.null(log), TRUE, log)
-                                                         )))
-    return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
+
+    return(adjust(method = x11_method(),series = series,log = log)) 
   }
   
   if (method == "seats") {
     adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
                                                            seats_method(
                                                              period = stats::frequency(series),
-                                                             log = ifelse(is.null(log), FALSE, log) # NOTE(DO): Needs to be changed, once seats can handle multiplicative models
+                                                            log = ifelse(is.null(log), FALSE, log) # NOTE(DO): Needs to be changed, once seats can handle multiplicative models
                                                            )))
     return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
   }
