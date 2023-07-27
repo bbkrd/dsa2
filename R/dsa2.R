@@ -176,7 +176,6 @@ dsa <- function(series,
   
   
   # Create output --------------------------------------------------------------
-  # original <- xts::xts(c(fracAirline$model$y, utils::tail(Descaler(as.numeric(xLinear), log=log), h)), # DO: Übergangslösung, y inkl. Forecasts muss in Java angepasst werden
   original <- xts::xts(fracAirline$model$y,
                        seq.Date(from = as.Date(stats::start(series)), 
                                 by = "days", 
