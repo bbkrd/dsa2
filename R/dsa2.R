@@ -108,7 +108,7 @@ dsa <- function(series,
   }
   
   # Convert to xts-format
-  xLinear <- Descaler(xts::xts(xLinear, order.by = dates),
+  xLinear <- descaler(xts::xts(xLinear, order.by = dates),
                       log = log)
 
   # Preliminary seasonal components # with does nothing
@@ -386,7 +386,7 @@ adjust.stl_method <- function(method, series, log = NULL) {
   
   if (!is.null(log)) {method$multiplicative <- log}
   
-  adjustment <- do.call(rjd3stl::stl, append(list(series),
+  adjustment <- do.call(rjd3stl::stlplus, append(list(series),
                                              method))
   return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4]))
 }
@@ -421,32 +421,37 @@ adjust.x11_method <- function(method, series, log = NULL) {
 #' @author Daniel Ollech
 
 .correct_filter_length <- function(method, series) { # Can be removed, once handled in Java
-  all_filters <- c(15,9,5,3,1)
+  all_filters <- c(15, 9, 5, 3, 1)
   oldfilter <- method$seas.s1
-  filter <- as.numeric(gsub("S3X", 
-                            "", 
-                            oldfilter)
-                       )
+  filter <- as.numeric(gsub("S3X",
+                            "",
+                            oldfilter))
   position <- grep(paste0("^", filter, "$"), all_filters)
   
-  length_series <- length(series)/365
+  length_series <- length(series) / 365
   if (method$period >= 365) {
-  if (length_series < 3) {
-    stop("Series needs to have at least 3 years of observations to use X-11")
-  } else {
-    while (length_series < filter + 2) {
-      position <- position + 1
-      if (position > 5) {
-        stop("Something is wrong. Choose a longer series or an appropriate seasonal filter")
+    if (length_series < 3) {
+      stop("Series needs to have at least 3 years of observations to use X-11")
+    } else {
+      while (length_series < filter + 2) {
+        position <- position + 1
+        if (position > 5) {
+          stop("Something is wrong. Choose a longer series or an appropriate seasonal filter")
+        }
+        filter <- all_filters[position]
       }
-      filter <- all_filters[position]
+      
+      method$seas.s0 <- paste0("S3X", filter)
+      method$seas.s1 <- paste0("S3X", filter)
+      if (oldfilter != method$seas.s1) {
+        message(
+          paste(
+            "The seasonal filter for X-11 (in the estimation of day-of-the-year) has been changed to",
+            method$seas.s1
+          )
+        )
+      }
     }
-    
-    method$seas.s0 <- paste0("S3X", filter)
-    method$seas.s1 <- paste0("S3X", filter)
-    if (oldfilter != method$seas.s1) {
-    message(paste("The seasonal filter for X-11 (in the estimation of day-of-the-year) has been changed to", method$seas.s1))}
-  }
   }
   
   return(method) 
@@ -484,33 +489,21 @@ adjust.seats_method <- function(method, series, log = NULL) {
 #' @author Daniel Ollech
 #' @export
 
-adjust.character <- function(method, series, log = NULL) { 
-    if (method == "stl") {
-    adjustment <- do.call(rjd3stl::stl, append(list(series),
-                                               stl_method(
-                                                 period = stats::frequency(series),
-                                                 log = ifelse(is.null(log), TRUE, log)
-                                                 )))
-    return(list(adjustment = adjustment, seasComp = adjustment$decomposition[,4])) 
+adjust.character <- function(method, series, log = NULL) {
+  if (method == "stl") {
+    method <- stl_method()
+  } else if (method == "x11") {
+    method <- x11_method()
+  } else if (method == "seats") {
+    method <- seats_method()
+  } else{
+    stop("Unknown method!")
   }
-  
-  if (method == "x11") {
-    adjustment <- do.call(rjd3x11plus::x11plus, append(list(series),
-                                                       x11_method(
-                                                           period = stats::frequency(series),
-                                                           log = ifelse(is.null(log), TRUE, log)
-                                                         )))
-    return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
-  }
-  
-  if (method == "seats") {
-    adjustment <- do.call(rjd3highfreq::fractionalAirlineDecomposition, append(list(series),
-                                                           seats_method(
-                                                             period = stats::frequency(series),
-                                                             log = ifelse(is.null(log), FALSE, log) # NOTE(DO): Needs to be changed, once seats can handle multiplicative models
-                                                           )))
-    return(list(adjustment = adjustment, seasComp = adjustment$decomposition$s)) 
-  }
+  return(adjust(
+    method = method,
+    series = series,
+    log = log
+  )) 
 }
 
 #' NULL method for adjusting a seasonal time series
@@ -562,11 +555,11 @@ compute_seasadj <- function(series,
   }
   
   # Compute adjusted figures
-  xout <- Descaler(Scaler(series, log = log) - 
-                   Scaler(calComp, log = log) - 
-                   Scaler(seasComp7, log = log) - 
-                   Scaler(seasComp31, log = log) - 
-                   Scaler(seasComp365, log = log), log = log) 
+  xout <- descaler(scaler(series, log = log) - 
+                   scaler(calComp, log = log) - 
+                   scaler(seasComp7, log = log) - 
+                   scaler(seasComp31, log = log) - 
+                   scaler(seasComp365, log = log), log = log) 
 
   # Return
   return(xout)

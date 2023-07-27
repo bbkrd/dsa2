@@ -23,7 +23,7 @@ delete_29 <- function(x) {
 #' @author Daniel Ollech
 
 
-Descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
+descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
   .diffinv_xts <- function(x, y, lag = 1, differences = 1, 
                            stepsize = "days", ...) {
     if (all(class(y) != "xts")) {
@@ -69,7 +69,7 @@ Descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied fro
 #' @author Daniel Ollech
 
 
-Scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
+scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
   if (log) 
     x = log(x)
   if (Diff > 0) 
