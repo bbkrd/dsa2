@@ -14,9 +14,10 @@ knitr::opts_chunk$set(
 )
 ```
 
+You can get Java 17 here: R:\Zentrale\Projekte\FB-S\Daten\DA\JDemetra\Anwendungen\VC\Java\JDK
+Move and unpack the zip file to the right path: C:\\Workspace\\Java\\JDK\\ 
 ```{r start}
 Sys.setenv("JAVA_HOME" = "C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
-.libPaths("C:\\Workspace\\R\\JD_lib")
 ```
 
 

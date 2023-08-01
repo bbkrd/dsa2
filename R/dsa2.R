@@ -353,8 +353,6 @@ seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::
 #' @author Daniel Ollech
 #' @export
 
-### NOTE(DO): Maybe the following line(s) have to be loaded at package
-###           start-up once this thingy becomes a dsa2 package
 adjust <- function(method, series, log = NULL) {UseMethod("adjust")} # This is how we define generics in S3
 
 #' Default method for adjusting a seasonal time series

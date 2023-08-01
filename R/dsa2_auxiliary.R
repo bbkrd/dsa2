@@ -447,3 +447,181 @@ interactive_time
   file.remove(filename) #Removes the Rmd-File
 }
 
+
+#' Generic for ACF
+#' 
+#' Generic for ACF
+#' @param ... parameters 
+#' @author Daniel Ollech
+#' @export
+
+acf <- function(dsa2_object,  ...) {UseMethod("acf")} # This is how we define generics in S3
+
+#' Generic for PACF
+#' 
+#' Generic for PACF
+#' @param ... parameters 
+#' @author Daniel Ollech
+#' @export
+
+pacf <- function(dsa2_object,  ...) {UseMethod("pacf")} # This is how we define generics in S3
+
+#' Generic for spectrum
+#' 
+#' Generic for spectrum
+#' @param ... parameters 
+#' @author Daniel Ollech
+#' @export
+
+spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we define generics in S3
+
+#' Plot the ACF based on dsa2 object
+#'
+#' Plot the ACF for a seasonally adjusted time series extracted from a dsa2 object 
+#' @param dsa2_object object as calculated by dsa2()
+#' @param ... further arguments for barplot()
+#' @details Wrapper around the stats::acf() function
+#' @author Daniel Ollech
+#' @examples x <- daily_sim(3)$original
+#' result <- dsa(x)
+#' acf(result)
+#' @export
+
+acf.dsa2 <- function(dsa2_object, ...) {
+  # Calculations before
+  residuals <- dsa2_object$preProcessing$model$residuals
+  residuals <- residuals[!is.na(residuals)]
+  acf_result <- stats::acf(residuals, lag.max = 366 * 2, plot = FALSE)
+  acf_res <- acf_result$acf[c(1:7 + 1, 30:31 + 1, 365 + 1, 730 + 1)]
+  names(acf_res) <-
+    as.character(acf_result$lag[c(1:7 + 1, 30:31 + 1, 365 + 1, 730 + 1)])
+  ci <- stats::qnorm((1 + 0.95) / 2) / sqrt(length(residuals))
+  
+  # Plotting
+  graphics::barplot(
+    acf_res,
+    ylim = c(-1, 1),
+    main = "ACF for selected lags",
+    xlab = "lags",
+    ylab = "ACF",
+    col = .dsa2color("darkgreen"),
+    space = 6,
+    border = NA,
+    ...
+  )
+  graphics::abline(h = ci,
+                   lty = 3,
+                   col = .dsa2color("blue"))
+  graphics::abline(h = -ci,
+                   lty = 3,
+                   col = .dsa2color("blue"))
+  graphics::abline(v = 52.5, col = .dsa2color("darkgrey"))
+  graphics::abline(v = 65, col = .dsa2color("darkgrey"))
+}
+
+#' Plot the PACF based on dsa2 object
+#'
+#' Plot the PACF for a seasonally adjusted time series extracted from a dsa2 object 
+#' @param dsa2_object object as calculated by dsa2()
+#' @param ... further arguments for barplot()
+#' @details Wrapper around the stats::pacf() function
+#' @author Daniel Ollech
+#' @examples x <- daily_sim(3)$original
+#' result <- dsa(x)
+#' pacf(result)
+#' @export
+
+pacf.dsa2 <- function(dsa2_object, ...) {
+  # Calculations before
+  residuals <- dsa2_object$preProcessing$model$residuals
+  residuals <- residuals[!is.na(residuals)]
+  acf_result <- stats::pacf(residuals, lag.max = 366 * 2, plot = FALSE)
+  acf_res <- acf_result$acf[c(1:7, 30:31, 365, 730)]
+  names(acf_res) <-
+    as.character(acf_result$lag[c(1:7, 30:31, 365, 730)])
+  ci <- stats::qnorm((1 + 0.95) / 2) / sqrt(length(residuals))
+  
+  # Plotting
+  graphics::barplot(
+    acf_res,
+    ylim = c(-1, 1),
+    main = "PACF for selected lags",
+    xlab = "lags",
+    ylab = "PACF",
+    col = .dsa2color("violet"),
+    space = 6,
+    border = NA,
+    ...
+  )
+  graphics::abline(h = ci,
+                   lty = 3,
+                   col = .dsa2color("blue"))
+  graphics::abline(h = -ci,
+                   lty = 3,
+                   col = .dsa2color("blue"))
+  graphics::abline(v = 52.5, col = .dsa2color("darkgrey"))
+  graphics::abline(v = 65, col = .dsa2color("darkgrey"))
+}
+
+
+#' Plot the periodogram of a daily time series
+#'
+#' Plot the periodogram of a daily time series
+#' @param x xts or ts, daily timeseries
+#' @param xlog should x-axis be log transformed
+#' @param size linesize
+#' @param color color of line
+#' @param .dsa2color("pink") color of vertical lines
+#' @details Plot uses ggplot2 and can be changed accordingly. The spectrum is build around the spec.pgram() function
+#' @author Daniel Ollech
+#' @examples x <- daily_sim(3)$original
+#' res <- dsa(x)
+#' spectrum(res)
+#' @export
+
+spectrum.dsa2 <- function(dsa2_object, xlog=FALSE) {
+  # Calculations before
+  original_diff <- diff(dsa2_object$series$original)
+  original_diff <- ts(original_diff[!is.na(original_diff)], frequency = 365.2524)
+  df <- data.frame(freq = stats::spec.pgram(original_diff, plot = F)$freq, spectrum = (stats::spec.pgram(original_diff, plot = F)$spec))
+  
+  seasadj_diff <- diff(dsa2_object$series$seas_adj)
+  seasadj_diff <- ts(seasadj_diff[!is.na(seasadj_diff)], frequency = 365.2524)
+  df2 <- data.frame(freq = stats::spec.pgram(seasadj_diff, plot = F)$freq, spectrum = (stats::spec.pgram(seasadj_diff, plot = F)$spec))
+  
+  
+  opar <- graphics::par(no.readonly = TRUE)
+  graphics::par(fig = c(0, 1, 0, 1), 
+                oma = c(1, 1, 1, 1),
+                mar = c(1.75, 2.75, 1.5, 0.5),
+                mgp = c(1.75, 0.5, 0),
+                cex.axis = 0.75)
+  graphics::par(mfrow = c(2,1))
+  .single_plot_spectrum(df, ylab = "Original", title = "Spectrum")
+  graphics::par(mar = c(2.75, 2.75, 0.5, 0.5))
+  .single_plot_spectrum(df2, ylab = "Seasonally Adjusted", title = "")
+  
+  
+  on.exit(graphics::par(opar))
+}
+
+
+.single_plot_spectrum <- function(df, ylab = "Spectrum", title = "Spectrum") {
+  graphics::plot(
+    df,
+    type = "l",
+    log = "y",
+    ylab = ylab,
+    xlab = "Number of cycles",
+    main = title
+  )
+  graphics::abline(v = 12, col = .dsa2color("orange"), lty = 3)
+  graphics::abline(v = 24, col = .dsa2color("orange"), lty = 3)
+  graphics::abline(v = 365.2524/7, col = .dsa2color("red"), lty = 4)
+  graphics::abline(v = 365.2524/7*2, col = .dsa2color("red"), lty = 4)
+  graphics::abline(v = 365.2524/7*3, col = .dsa2color("red"), lty = 4)
+  graphics::lines(df)
+}
+
+plot_spectrum(dsa2_object)
+
