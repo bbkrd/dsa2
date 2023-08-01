@@ -211,7 +211,7 @@ print.dsa2 <- function(x, ...) {
     calends <- paste(t(calends), collapse = "\t")
   }
   
-  if (all(x$preProcessing$model$component_outliers == 0)) {
+  if (sum(x$preProcessing$model$component_outliers) == length(x$preProcessing$model$component_outliers)) {
     outlier <- .outOutlier(x)
   } else
   { outlier <- .outOutlier(x)
@@ -240,7 +240,7 @@ Outliers:\n\n",
 #' @author Sindy Brakemeier, Lea Hengen
 
 .outOutlier <- function(dsa2_object) {
-  if (all(dsa2_object$preProcessing$model$component_outliers == 0)) {
+  if (sum(dsa2_object$preProcessing$model$component_outliers) == length(dsa2_object$preProcessing$model$component_outliers)) {
     return("No outliers found")
   } else {
     for (i in length(dsa2_object$preProcessing$model$variables)) {
@@ -394,16 +394,28 @@ output <- function(dsa2_object, path = NULL) {
     pre_processing_ex <- "in use"
   }
   
-  if (is.null(dsa2_object$parameters$s31)) {
-    model_s31 <- "none"
-  } else{
-    model_s31 <- dsa2_object$parameters$s31
+  if (class(dsa2_object$parameters$s31) == "NULL") {
+    method_s31 <- "none"
+  } else {
+    method_s31 <- class(dsa2_object$parameters$s31)
+  }
+  
+  if (class(dsa2_object$parameters$s7) == "character") {
+    method_s7 <- dsa2_object$parameters$s7
+  } else {
+    method_s7 <- class(dsa2_object$parameters$s7)
+  }
+  
+  if (class(dsa2_object$parameters$s365) == "character") {
+    method_s365 <- dsa2_object$parameters$s365
+  } else {
+    method_s365 <- class(dsa2_object$parameters$s365)
   }
   
   out <- summary.dsa2(dsa2_object)
   
   cat("---
-title: \"Title\"
+title: \"DSA Output\"
 date: \'`r Sys.Date()`\'
 output: html_document
 ---
@@ -421,9 +433,9 @@ output: html_document
       Outlier types: `r outliers`
       External pre-processing: `r pre_processing_ex`
       Interpolation method: `r dsa2_object$parameters$interpolator`
-      Adjustment method day-of-the-week: `r dsa2_object$parameters$s7`
-      Adjustment method day-of-the-month: `r model_s31`
-      Adjustment method day-of-the-year: `r dsa2_object$parameters$s365`
+      Adjustment method day-of-the-week: `r method_s7`
+      Adjustment method day-of-the-month: `r method_s31`
+      Adjustment method day-of-the-year: `r method_s365`
 \n
 **Summary**
 \n
