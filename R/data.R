@@ -26,7 +26,7 @@
 #' \item{DstSpring}{Daylight Saving Time, Spring=1}
 #' \item{EasterMonday}{Easter Monday}
 #' \item{EasterMondayAft1Day}{Captures the first day after Easter Monday}
-#' \item{EasterPeriod}{Captures all days from Holy Thursday to Easter Monday}
+#' \item{EasterPeriod}{Captures all days from Holy Thursday to Tuesday after Easter Monday}
 #' \item{EasterSunday}{Easter Sunday}
 #' \item{Epiphany}{Epiphany, Jan 6}
 #' \item{GermanUnity}{German Unity, Oct 3}
@@ -44,12 +44,12 @@
 #' \item{Nov1ZZZ}{Captures if Nov 1 is a certain weekday (Monday to Sunday)}
 #' \item{Nov1Bridge}{Captures the bridge days created by Nov 1, i.e. if surrounding days are either a Monday or Friday}
 #' \item{Oct3ZZZ}{Captures if German Unity, Oct 3, is a certain weekday (Monday to Sunday)}
-#' \item{Oct3Bridge}{Captures the bridge days created by Nov 1, i.e. if surrounding days are either a Monday or Friday}
+#' \item{Oct3Bridge}{Captures the bridge days created by Oct 3, i.e. if surrounding days are either a Monday or Friday}
 #' \item{Oct31ZZZ}{Captures if Reformation Day, Oct 31, is a certain weekday (Monday to Sunday)}
 #' \item{Oct31Bridge}{Captures the bridge days created by Reformation Day, i.e. if surrounding days are either a Monday or Friday}
-#' \item{Pentecost}{Pentecost Monday}
-#' \item{PentecostAft1Day}{Captures the first day after Pentecost Monday}
-#' \item{PentecostBef1Day}{Captures the last day before Pentecost Monday}
+#' \item{Pentecost}{Pentecost Sunday}
+#' \item{PentecostAft1Day}{Captures the first day after Pentecost Sunday}
+#' \item{PentecostBef1Day}{Captures the last day before Pentecost Sunday}
 #' \item{PentecostMonday}{Alias for Pentecost Monday}
 #' \item{PentecostPeriod}{Period spanning three days from Pentecost Sunday to Tuesday after Pentecost Monday}
 #' \item{PostNewEveSat1w}{Captures Saturdays in the period from Dec 31 to Jan 6}
@@ -62,6 +62,7 @@
 #' \item{PreXmasSun3d}{Captures Sundays in the three days leading up to Christmas}
 #' \item{ReformationDay}{Reformation Day, Oct 31}
 #' \item{ReformationDay2017}{Reformation Day, Oct 31 2017 (National holiday that year)}
+#' \item{USLaborDay}{US Labor Day}
 #' \item{XmasPeriodZZZ}{Captures weekdays (Monday to Sunday) in the Christmas period from Dec 21 to Jan 5}
 #' }
 #' @source Own calculations

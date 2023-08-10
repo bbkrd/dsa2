@@ -228,14 +228,14 @@ dsa <- function(series,
 #' @param weight.threshold weight.threshold
 #' @param weight.function weight.function
 #' @details This functions is basically a translator between the dsa2 routines 
-#' and rjd3stl::stl, but its goal is to invoke the stl procedure.
+#' and rjd3stl::stlplus, but its goal is to invoke the stl procedure.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 #' @author Daniel Ollech
 #' @export
 
 stl_method  <- function(period = NA, 
                         swindow = 13, 
-                        log = TRUE, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stl
+                        log = TRUE, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stlplus
                         twindow = 0, 
                         ninnerloop = 1, 
                         nouterloop = 15, 
