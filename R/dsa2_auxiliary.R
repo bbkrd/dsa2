@@ -326,7 +326,9 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
                   nrow(dsa2_object2$series) - minus_h)
   
   name1 <- deparse(substitute(dsa2_object1))
+  name1 <- substring(name1,1,15)
   name2 <- deparse(substitute(dsa2_object2))
+  name2 <- substring(name1,1,15)
   
   opar <- graphics::par(no.readonly  =  TRUE)
   graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
@@ -341,14 +343,14 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
        main = "Comparison", col = .dsa2color("darkblue"), bty = "n")
-  graphics::lines(dates, series2, col = .dsa2color("red"))
-  graphics::lines(dates, series3, col = .dsa2color("green"))
+  graphics::lines(dates, series2, col = .dsa2color("lightgreen"))
+  graphics::lines(dates, series3, col = .dsa2color("violet"))
   graphics::par(col.axis = "transparent")
   graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
   graphics::axis(2, col.ticks = .dsa2color("grey"))
   graphics::box(col = .dsa2color("grey"))
   .add_legend("bottom", legend = c("Original", paste0("Adjusted Series (", name1, ")"), paste0("Adjusted Series (", name2, ")")), lty = c(1,1),
-              col = .dsa2color("darkblue", "red", "green"),
+              col = .dsa2color("darkblue", "lightgreen", "violet"),
               horiz = TRUE, bty = 'n', cex = 0.8)
   on.exit(graphics::par(opar))
 }
