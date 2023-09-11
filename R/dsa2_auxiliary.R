@@ -494,7 +494,7 @@ spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we
 #' @param ... further arguments for barplot()
 #' @details Wrapper around the stats::acf() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' acf(result)
 #' @export
@@ -538,7 +538,7 @@ acf.dsa2 <- function(dsa2_object, ...) {
 #' @param ... further arguments for barplot()
 #' @details Wrapper around the stats::pacf() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' pacf(result)
 #' @export
@@ -586,7 +586,7 @@ pacf.dsa2 <- function(dsa2_object, ...) {
 #' @param .dsa2color("pink") color of vertical lines
 #' @details Plot uses ggplot2 and can be changed accordingly. The spectrum is build around the spec.pgram() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' res <- dsa(x)
 #' spectrum(res)
 #' @export
@@ -635,5 +635,5 @@ spectrum.dsa2 <- function(dsa2_object, xlog=FALSE) {
   graphics::lines(df)
 }
 
-plot_spectrum(dsa2_object)
+#plot_spectrum(dsa2_object) #CH: keine Ahnung was die Zeile tun soll. 
 

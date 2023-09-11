@@ -40,7 +40,7 @@ Handler for stl
 }
 \details{
 This functions is basically a translator between the dsa2 routines
-and rjd3stl::stl, but its goal is to invoke the stl procedure.
+and rjd3stl::stlplus, but its goal is to invoke the stl procedure.
 It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
 }
 \author{
