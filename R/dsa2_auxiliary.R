@@ -328,7 +328,7 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   name1 <- deparse(substitute(dsa2_object1))
   name1 <- substring(name1,1,15)
   name2 <- deparse(substitute(dsa2_object2))
-  name2 <- substring(name1,1,15)
+  name2 <- substring(name2,1,15)
   
   opar <- graphics::par(no.readonly  =  TRUE)
   graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
