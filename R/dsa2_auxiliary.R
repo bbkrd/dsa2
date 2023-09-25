@@ -221,6 +221,8 @@ print.dsa2 <- function(x, ...) {
     outlier$sep <- "\n"
     outlier <- paste(t(outlier), collapse = "\t")
   }
+
+  
   
   out <- paste0("Pre-processing\n
 Fractional Airline Coefficients: ", 
@@ -233,6 +235,8 @@ Outliers:\n\n",
   invisible(out)
 }
 
+
+
 #' Internal function for outliers
 #' 
 #' Internal function to polish the output for outliers
@@ -240,33 +244,64 @@ Outliers:\n\n",
 #' @author Sindy Brakemeier, Lea Hengen
 
 .outOutlier <- function(dsa2_object) {
-  if (sum(dsa2_object$preProcessing$model$component_outliers) == length(dsa2_object$preProcessing$model$component_outliers)) {
-    return("No outliers found")
+  
+  # detect if any outliers present
+  if (dsa2_object$parameters$log) {
+    noOutliers <- all(dsa2_object$preProcessing$model$component_outliers == 1)
   } else {
-    for (i in length(dsa2_object$preProcessing$model$variables)) {
-      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-    }
-    dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b, 3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
-    df <- t(df)
-    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-    names(lookup) <- c("id")
-    df <- cbind(df, lookup)
-    names(df) <- c("o","coefficient","t_value","id")
-    out <- subset(df, !grepl("x-", df$o) )
-    dates <- zoo::index(dsa2_object$series)
-    dates <- data.frame(dates)
-    dates$id <- seq.int(nrow(dates))
-    base <- (merge(lookup, dates, by = "id" ))
-    df2 <- (merge(out, base, by = "id"))
-    result <- data.frame(substr(df2$o,1,2))
-    names(result) <- c("outliertype")
-    df2 <- cbind(df2, result)
-    df2 <- subset(df2, select = c("outliertype", "dates", "coefficient", "t_value"))  
-    return(df2)
+    noOutliers <- all(dsa2_object$preProcessing$model$component_outliers == 0)
   }
+  
+  # no outliers found
+  if (noOutliers) {
+    return("No outliers found")
+  }
+    
+  # auxiliary variables
+  dates <- zoo::index(dsa2_object$series)             # dates of time series
+  xreg  <- dsa2_object$parameters$xreg                # calendar matrix
+  vars  <- dsa2_object$preProcessing$model$variables  # outlier/calendar vars
+  coefs <- dsa2_object$preProcessing$model$b          # coefficients
+  covar <- dsa2_object$preProcessing$model$bcov       # covariance matrix
+  
+  # remove calendar variables
+  n <- ncol(xreg)
+  if (!is.null(n)) {
+    vars  <- vars[-c(1:n)]
+    coefs <- coefs[-c(1:n)]
+    covar <- covar[-c(1:n),-c(1:n)]
+  }
+  
+  # extract types and dates of outliers from 'vars'
+  outlierTypes <- substr(vars, 1, 2)
+  outlierDates <- dates[as.numeric(substr(vars, 4, nchar(vars)))]
+  
+  # compute standard errors and t-values
+  sterrs <- sqrt(diag(covar))
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Date"       = outlierDates,
+    "Type"       = outlierTypes,
+    "Coeffienct" = coefs,
+    "Std.Error"  = sterrs,
+    "t-Value"    = tvals
+  )
+  
+  # sort by dates
+  df <- df[order(outlierDates),]
+  
+  # return
+  return(df)
+  
 }
 
+
+
+
+  
+ 
 #' Internal function for calendars
 #' 
 #' Internal function to polish the output for calendars
@@ -274,27 +309,41 @@ Outliers:\n\n",
 #' @author Sindy Brakemeier, Lea Hengen
 
 .outCalendar <- function(dsa2_object) {
+  
+  # detect if any calendar matrix present
   if (is.null(dsa2_object$parameters$xreg)) {
     return("No calendar adjustment conducted")
-  } else {
-    for (i in length(dsa2_object$preProcessing$model$variables)) {
-      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-    }
-    dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b,3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
-    df <- t(df)
-    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-    names(lookup) <- c("id")
-    df <- cbind(df, lookup)
-    names(df) <- c("o","coefficient","t_value","id")
-    cal <- subset(df, grepl("x-", df$o) )
-    cal$o <- colnames(dsa2_object$parameters$xreg)
-    cal2 <- subset(cal, select = c("o", "coefficient", "t_value"))  
-    names(cal2) <- c("regressor", "coefficient", "t_value")
-    return(cal2)  
   }
-}
+  
+  # auxiliary variables
+  dates <- zoo::index(dsa2_object$series)             # dates of time series
+  xreg  <- dsa2_object$parameters$xreg                # calendar matrix
+  vars  <- dsa2_object$preProcessing$model$variables  # outlier/calendar vars
+  coefs <- dsa2_object$preProcessing$model$b          # coefficients
+  covar <- dsa2_object$preProcessing$model$bcov       # covariance matrix
+  
+  # remove outliers
+  n <- ncol(xreg)
+  vars  <- vars[1:n]
+  coefs <- coefs[1:n]
+  covar <- covar[1:n, 1:n]
+  
+  # compute standard errors and t-values
+  sterrs <- sqrt(diag(covar))
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Name"       = colnames(xreg),
+    "Coeffienct" = coefs,
+    "Std.Error"  = sterrs,
+    "t-Value"    = tvals
+  )
 
+  # return
+  return(df)
+  
+}
 
 
 
