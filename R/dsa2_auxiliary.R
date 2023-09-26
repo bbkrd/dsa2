@@ -197,43 +197,47 @@ summary.dsa2 <- function(object, ...) {
 
 print.dsa2 <- function(x, ...) {
   handle <- list(...) # Just used to ensure consistency with generic print
-  frac <- toString(round(x$preProcessing$estimation$parameters,3))
-  if (is.null(x$parameters$xreg)) {
-    calends <- .outCalendar(x)
-  } else {
-    calends <- .outCalendar(x)
-    the_name <- ifelse(max(nchar(colnames(x$parameters$xreg))) < 8, # ensures that the regression results are printed nicely
-                       "\tregs",
-                       "\tregressors")
-    calends <- rbind(c(the_name, "coef", "t-value") ,
-                     calends)
-    calends$sep <- "\n"
-    calends <- paste(t(calends), collapse = "\t")
+  
+  # auxiliary function to format the print objects
+  print_format <- function(y) {
+    y <- rbind(colnames(y), y)         # add column names as observations
+    y$sep <- "\n"                      # add line breaks
+    y <- apply(y, 2, format)           # apply format over each column
+    y <- paste(t(y), collapse = "\t")  # paste together
+    return(y)
   }
   
-  if (sum(x$preProcessing$model$component_outliers) == length(x$preProcessing$model$component_outliers)) {
-    outlier <- .outOutlier(x)
-  } else
-  { outlier <- .outOutlier(x)
-    outlier$dates <- as.character(outlier$dates)
-    outlier <- rbind(c("\ttype", "dates", "\tcoef", "t-value"), 
-                   outlier)
-    outlier$sep <- "\n"
-    outlier <- paste(t(outlier), collapse = "\t")
-  }
-
+  # call auxiliary functions to prepare string outputs
+  fracARIMA <- .outARIMA(x)
+  calendar  <- .outCalendar(x)
+  outliers  <- .outOutlier(x)
   
+  # format string outputs
+  fracARIMA <- print_format(fracARIMA)
+  outliers  <- ifelse(is.null(outliers), "No outliers found", print_format(outliers))
+  calendar  <- ifelse(is.null(calendar), "No calendar adjustment conducted", print_format(calendar))
   
-  out <- paste0("Pre-processing\n
-Fractional Airline Coefficients: ", 
-                frac,"\n
-Calendar Regressors:\n\n",
-                calends,"\n
-Outliers:\n\n",
-                outlier)
+  # paste together for output string  
+  out <- paste0("Pre-processing",
+                "\n\n",
+                "Fractional Airline Model:",
+                "\n\n\t",
+                fracARIMA,
+                "\n\n",
+                "Calendar Regressors:",
+                "\n\n\t",
+                calendar,
+                "\n\n",
+                "Outliers:",
+                "\n\n\t",
+                outliers)
+  
+  # print
   cat(out)
   invisible(out)
+  
 }
+
 
 
 
@@ -243,7 +247,7 @@ Outliers:\n\n",
 #' @param dsa2_object dsa2 output object
 #' @author Jakob Oberhammer, Martin Stefan
 
-.outARIMA <- function(dsa2_object, n = 3) {
+.outARIMA <- function(dsa2_object, digits = 3) {
   
   # auxiliary variables
   coefs <- dsa2_object$preProcessing$estimation$parameters
@@ -255,10 +259,10 @@ Outliers:\n\n",
   
   # create df
   df <- data.frame(
-    "Name"       = paste("Coef.", 1:3),
-    "Coeffienct" = format(round(coefs, n),  n_small = n),
-    "Std.Error"  = format(round(sterrs, n), n_small = n),
-    "t-Value"    = format(round(tvals, n),  n_small = n)
+    "Regressor"   = c("theta", "theta 7", "theta 365"),
+    "Coefficient" = format(round(coefs,  digits),  n_small = digits),
+    "Std.Error"   = format(round(sterrs, digits),  n_small = digits),
+    "t-Value"     = format(round(tvals,  digits),  n_small = digits)
   )
   
   # return
@@ -274,7 +278,7 @@ Outliers:\n\n",
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outOutlier <- function(dsa2_object, n = 3) {
+.outOutlier <- function(dsa2_object, digits = 3) {
   
   # detect if any outliers present
   if (dsa2_object$parameters$log) {
@@ -285,7 +289,7 @@ Outliers:\n\n",
   
   # no outliers found
   if (noOutliers) {
-    return("No outliers found")
+    return(NULL)
   }
     
   # auxiliary variables
@@ -313,11 +317,11 @@ Outliers:\n\n",
   
   # create df
   df <- data.frame(
-    "Date"       = outlierDates,
-    "Type"       = outlierTypes,
-    "Coeffienct" = format(round(coefs, n),  n_small = n),
-    "Std.Error"  = format(round(sterrs, n), n_small = n),
-    "t-Value"    = format(round(tvals, n),  n_small = n)
+    "Date"        = as.character(outlierDates),
+    "Type"        = outlierTypes,
+    "Coefficient" = format(round(coefs,  digits), n_small = digits),
+    "Std.Error"   = format(round(sterrs, digits), n_small = digits),
+    "t-Value"     = format(round(tvals,  digits), n_small = digits)
   )
   
   # sort by dates
@@ -339,11 +343,11 @@ Outliers:\n\n",
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outCalendar <- function(dsa2_object, n = 3) {
+.outCalendar <- function(dsa2_object, digits = 3) {
   
   # detect if any calendar matrix present
   if (is.null(dsa2_object$parameters$xreg)) {
-    return("No calendar adjustment conducted")
+    return(NULL)
   }
   
   # auxiliary variables
@@ -365,10 +369,10 @@ Outliers:\n\n",
   
   # create df
   df <- data.frame(
-    "Name"       = colnames(xreg),
-    "Coeffienct" = format(round(coefs, n),  n_small = n),
-    "Std.Error"  = format(round(sterrs, n), n_small = n),
-    "t-Value"    = format(round(tvals, n),  n_small = n)
+    "Regressor"  = colnames(xreg),
+    "Coefficient" = format(round(coefs,  digits), n_small = digits),
+    "Std.Error"  = format(round(sterrs, digits), n_small = digits),
+    "t-Value"    = format(round(tvals,  digits), n_small = digits)
   )
 
   # return
