@@ -237,13 +237,44 @@ Outliers:\n\n",
 
 
 
+#' Internal function for Fractional Airline model
+#' 
+#' Internal function to polish the output for the fractional airline model
+#' @param dsa2_object dsa2 output object
+#' @author Jakob Oberhammer, Martin Stefan
+
+.outARIMA <- function(dsa2_object, n = 3) {
+  
+  # auxiliary variables
+  coefs <- dsa2_object$preProcessing$estimation$parameters
+  covar <- dsa2_object$preProcessing$estimation$covariance
+  
+  # compute standard errors and t-values
+  sterrs <- sqrt(diag(covar))
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Name"       = paste("Coef.", 1:3),
+    "Coeffienct" = format(round(coefs, n),  n_small = n),
+    "Std.Error"  = format(round(sterrs, n), n_small = n),
+    "t-Value"    = format(round(tvals, n),  n_small = n)
+  )
+  
+  # return
+  return(df)
+  
+}
+
+
+
 #' Internal function for outliers
 #' 
 #' Internal function to polish the output for outliers
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outOutlier <- function(dsa2_object) {
+.outOutlier <- function(dsa2_object, n = 3) {
   
   # detect if any outliers present
   if (dsa2_object$parameters$log) {
@@ -284,9 +315,9 @@ Outliers:\n\n",
   df <- data.frame(
     "Date"       = outlierDates,
     "Type"       = outlierTypes,
-    "Coeffienct" = coefs,
-    "Std.Error"  = sterrs,
-    "t-Value"    = tvals
+    "Coeffienct" = format(round(coefs, n),  n_small = n),
+    "Std.Error"  = format(round(sterrs, n), n_small = n),
+    "t-Value"    = format(round(tvals, n),  n_small = n)
   )
   
   # sort by dates
@@ -308,7 +339,7 @@ Outliers:\n\n",
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outCalendar <- function(dsa2_object) {
+.outCalendar <- function(dsa2_object, n = 3) {
   
   # detect if any calendar matrix present
   if (is.null(dsa2_object$parameters$xreg)) {
@@ -335,9 +366,9 @@ Outliers:\n\n",
   # create df
   df <- data.frame(
     "Name"       = colnames(xreg),
-    "Coeffienct" = coefs,
-    "Std.Error"  = sterrs,
-    "t-Value"    = tvals
+    "Coeffienct" = format(round(coefs, n),  n_small = n),
+    "Std.Error"  = format(round(sterrs, n), n_small = n),
+    "t-Value"    = format(round(tvals, n),  n_small = n)
   )
 
   # return
