@@ -570,15 +570,8 @@ compute_seasadj <- function(series,
     stop("Series is NULL")
   }
   if (length(series) < 365*2 + 1) { 
-    if (length(series) < 15) {
-      stop("Series is too short to use dsa2 on it.")
-    } else {
-      warning("Series it too short to estimate a day-of-the-year effect, 
-              and probably is too short for a good forecast. 
-              We would like more than 2 years of observations.")
-    }
+    stop("Series is too short to use dsa2 on it.")
   }
-  
   if (any(outliers == "TC")) {
     warning("The outlier type TC is not implemented in the Fractional Airline Estimation function")
   }
