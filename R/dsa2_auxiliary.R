@@ -214,8 +214,14 @@ print.dsa2 <- function(x, ...) {
   
   # format string outputs
   fracARIMA <- print_format(fracARIMA)
-  outliers  <- ifelse(is.null(outliers), "No outliers found", print_format(outliers))
-  calendar  <- ifelse(is.null(calendar), "No calendar adjustment conducted", print_format(calendar))
+  
+  outliers  <- ifelse(is.null(outliers), 
+                      "No outliers found", 
+                      print_format(outliers))
+  
+  calendar  <- ifelse(is.null(calendar), 
+                      "No calendar adjustment conducted", 
+                      print_format(calendar))
   
   # paste together for output string  
   out <- paste0("Pre-processing",
@@ -369,10 +375,10 @@ print.dsa2 <- function(x, ...) {
   
   # create df
   df <- data.frame(
-    "Regressor"  = colnames(xreg),
+    "Regressor"   = colnames(xreg),
     "Coefficient" = format(round(coefs,  digits), n_small = digits),
-    "Std.Error"  = format(round(sterrs, digits), n_small = digits),
-    "t-Value"    = format(round(tvals,  digits), n_small = digits)
+    "Std.Error"   = format(round(sterrs, digits), n_small = digits),
+    "t-Value"     = format(round(tvals,  digits), n_small = digits)
   )
 
   # return
@@ -443,106 +449,33 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' HTML output for dsa2
 #' 
 #' HTML output for dsa2
-#' @param dsa2_object output object
-#' @param path path for HTML output
-#' @details Generates a .Rmd file that is rendered into an html document saved in the working directory.
+#' @param x output object
+#' @param fileName name for HTML output
+#' @param filePath path for HTML output
+#' @details Generates an .Rmd file that is rendered into an .html document saved in the working directory.
 #' @author Lea Hengen, Sindy Brakemeier
 #' @export
 
-output <- function(dsa2_object, path = NULL) {
-  if(is.null(path)) {
+output <- function(x, fileName = NULL, filePath = NULL) {
+  
+  # if no file name is specified, use series name
+  if (is.null(fileName)) {
+    path <- x$parameters$name
+  }
+  
+  # if no file path is specified, use current working directory 
+  if (is.null(filePath)) {
     path <- getwd()
   }
   
-  filename <- paste0(path, "/", dsa2_object$parameters$name, ".Rmd")
+  # render markdown file
+  rmarkdown::render(
+    input       = paste0(system.file(package = "dsa2"), "/rmd/output.Rmd"),
+    output_file = paste0(filePath, "/", fileName, ".html"),
+    params      = list(x = x, fileName = fileName),
+    encoding    = 'UTF-8'
+  )
   
-  if (dsa2_object$parameters$log == TRUE) {
-    model <- "multiplicative"
-  } else {
-    model <- "additive"
-  }
-  
-  if (is.null(dsa2_object$parameters$xreg)) {
-    regressors <- "not in use"
-  } else{
-    regressors <- colnames(dsa2_object$parameters$xreg)
-  }
-  
-  if (is.null(dsa2_object$parameters$outliers)) {
-    outliers <- "not in use"
-  } else{
-    outliers <- dsa2_object$parameters$outliers
-  }
-  
-  if (is.null(dsa2_object$parameters$pre_processing)) {
-    pre_processing_ex <- "not in use"
-  } else {
-    pre_processing_ex <- "in use"
-  }
-  
-  if (class(dsa2_object$parameters$s31) == "NULL") {
-    method_s31 <- "none"
-  } else {
-    method_s31 <- class(dsa2_object$parameters$s31)
-  }
-  
-  if (class(dsa2_object$parameters$s7) == "character") {
-    method_s7 <- dsa2_object$parameters$s7
-  } else {
-    method_s7 <- class(dsa2_object$parameters$s7)
-  }
-  
-  if (class(dsa2_object$parameters$s365) == "character") {
-    method_s365 <- dsa2_object$parameters$s365
-  } else {
-    method_s365 <- class(dsa2_object$parameters$s365)
-  }
-  
-  out <- summary.dsa2(dsa2_object)
-  
-  cat("---
-title: \"DSA Output\"
-date: \'`r Sys.Date()`\'
-output: html_document
----
-**Time series information**
-\n
-      Name: `r dsa2_object$parameters$name`       
-      Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`     
-      Number of values: `r length(zoo::index(dsa2_object$series)) - dsa2_object$parameters$h` 
-**Parameters**
-\n
-      Number of iterations: `r dsa2_object$parameters$n_iterations`
-      Model: `r model`
-      Length of forecast: `r dsa2_object$parameters$h` days
-      Calendar regressors: `r regressors`
-      Outlier types: `r outliers`
-      External pre-processing: `r pre_processing_ex`
-      Interpolation method: `r dsa2_object$parameters$interpolator`
-      Adjustment method day-of-the-week: `r method_s7`
-      Adjustment method day-of-the-month: `r method_s31`
-      Adjustment method day-of-the-year: `r method_s365`
-\n
-**Summary**
-\n
-```{r, echo=FALSE}
-summary.dsa2(dsa2_object)
-``` 
-\n
-      
-```{r, echo=FALSE}
-interactive_time <- dygraphs::dygraph(dsa2_object$series, 
-                                      main = 'Result for seasonal adjustment of daily time series') 
-interactive_time <- dygraphs::dyRangeSelector(interactive_time)
-interactive_time <- dygraphs::dyOptions(interactive_time, 
-                                        colors = .dsa2color('darkblue','red'))
-interactive_time
-```      
-      ",
-      
-      file = filename) 
-  rmarkdown::render(filename)
-  file.remove(filename) #Removes the Rmd-File
 }
 
 
