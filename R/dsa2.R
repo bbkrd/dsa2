@@ -433,9 +433,7 @@ adjust.x11_method <- function(method, series, log = NULL) {
     } else {
       while (length_series < filter + 2) {
         position <- position + 1
-        if (position > 5) {
-          stop("Something is wrong. Choose a longer series or an appropriate seasonal filter")
-        }
+        
         filter <- all_filters[position]
       }
       
