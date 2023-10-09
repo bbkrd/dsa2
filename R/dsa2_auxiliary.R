@@ -318,7 +318,11 @@ print.dsa2 <- function(x, ...) {
   outlierDates <- dates[as.numeric(substr(vars, 4, nchar(vars)))]
   
   # compute standard errors and t-values
-  sterrs <- sqrt(diag(covar))
+  if (length(coef) == 1) {
+    sterrs <- sqrt(covar)
+  } else {
+    sterrs <- sqrt(diag(covar))
+  }
   tvals  <- coefs / sterrs
   
   # create df
@@ -370,7 +374,11 @@ print.dsa2 <- function(x, ...) {
   covar <- covar[1:n, 1:n]
   
   # compute standard errors and t-values
-  sterrs <- sqrt(diag(covar))
+  if (length(coef) == 1) {
+    sterrs <- sqrt(covar)
+  } else {
+    sterrs <- sqrt(diag(covar))
+  }
   tvals  <- coefs / sterrs
   
   # create df
