@@ -85,8 +85,8 @@ df %>%
     V1 ~ px(250)
   ) %>%
   cols_align(
-  V2,
-  align = "right"
+    c(V1,V2),
+    align = "left"
   )
 ```
 
@@ -138,8 +138,8 @@ df %>%
     V1 ~ px(250)
   ) %>%
   cols_align(
-    V2,
-    align = "right"
+    c(V1,V2),
+    align = "left"
     ) 
 ```
 
