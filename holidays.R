@@ -1,4 +1,4 @@
-library(s45)
+library(saison)
 # Basisregressor
 dates <- seq(as.Date("1950-01-01"), as.Date("2100-12-31"), by = "days")
 Base  <- xts::xts(rep(0, length(dates)), order.by = dates)
@@ -16,13 +16,13 @@ GoodFriday <- EasterSunday <- EasterMonday <- Base
 GoodFriday[as.Date(timeDate::GoodFriday(1950:2100))] <- 1
 EasterSunday[as.Date(timeDate::EasterSunday(1950:2100))] <- 1
 EasterMonday[as.Date(timeDate::EasterMonday(1950:2100))] <- 1
-HolySaturday <- s45:::lag0(EasterSunday,-1)
-HolyThursday <- s45:::lag0(EasterSunday,-3)
-EasterMondayAft1Day <- s45:::lag0(EasterMonday, 1)
+HolySaturday <- saison:::lag0(EasterSunday,-1)
+HolyThursday <- saison:::lag0(EasterSunday,-3)
+EasterMondayAft1Day <- saison:::lag0(EasterMonday, 1)
 
 # Rosenmontag
-CarnivalMonday <- s45:::lag0(EasterSunday,-48)
-MardiGras <- s45:::lag0(EasterSunday,-47)
+CarnivalMonday <- saison:::lag0(EasterSunday,-48)
+MardiGras <- saison:::lag0(EasterSunday,-47)
 
 # Tag der Arbeit
 LabourDay <- Base
@@ -35,15 +35,15 @@ USLabourDay[as.Date(timeDate::USLaborDay(1950:2100))] <- 1
 # Christi Himmelfahrt
 Ascension <- Base
 Ascension[as.Date(timeDate::Ascension(1950:2100))] <- 1
-AscensionBef1Day <- s45:::lag0(Ascension,-1)
-AscensionAft1Day <- s45:::lag0(Ascension, 1)
+AscensionBef1Day <- saison:::lag0(Ascension,-1)
+AscensionAft1Day <- saison:::lag0(Ascension, 1)
 
 # Pfingsten (Sonntag und Montag)
 Pentecost <- PentecostMonday <- Base
 Pentecost[as.Date(timeDate::Pentecost(1950:2100))] <- 1
 PentecostMonday[as.Date(timeDate::PentecostMonday(1950:2100))] <- 1
-PentecostAft1Day <- s45:::lag0(PentecostMonday, 1)
-PentecostBef1Day <- s45:::lag0(Pentecost,-1)
+PentecostAft1Day <- saison:::lag0(PentecostMonday, 1)
+PentecostBef1Day <- saison:::lag0(Pentecost,-1)
 
 # Tag der Deutschen Einheit
 GermanUnity <- Base
@@ -72,8 +72,8 @@ Epiphany[as.Date(timeDate::Epiphany(1950:2100))] <- 1
 # Fronleichnam (BW, BY, HE, NW, RP, SL)
 CorpusChristi <- Base
 CorpusChristi[as.Date(timeDate::DECorpusChristi(1950:2100))] <- 1
-CorpusChristiAft1Day <- s45:::lag0(CorpusChristi)
-CorpusChristiBef1Day <- s45:::lag0(CorpusChristi,-1)
+CorpusChristiAft1Day <- saison:::lag0(CorpusChristi)
+CorpusChristiBef1Day <- saison:::lag0(CorpusChristi,-1)
 
 # Maria Himmelfahrt (BY, SL)
 AssumptionOfMary <- Base
@@ -270,7 +270,7 @@ May1Mon <-
     output = "xts"
   )
 May1Bridge <-
-  dsa:::.add(s45:::lag0(May1Tue,-1), s45:::lag0(May1Thu, 1))
+  dsa:::.add(saison:::lag0(May1Tue,-1), saison:::lag0(May1Thu, 1))
 
 Oct3Sun <-
   cross_seasonal(
@@ -329,7 +329,7 @@ Oct3Mon <-
     output = "xts"
   )
 Oct3Bridge <-
-  dsa:::.add(s45:::lag0(Oct3Tue,-1), s45:::lag0(Oct3Thu, 1))
+  dsa:::.add(saison:::lag0(Oct3Tue,-1), saison:::lag0(Oct3Thu, 1))
 
 Oct31Sun <-
   cross_seasonal(
@@ -388,7 +388,7 @@ Oct31Mon <-
     output = "xts"
   )
 Oct31Bridge <-
-  dsa:::.add(s45:::lag0(Oct31Tue,-1), s45:::lag0(Oct31Thu, 1))
+  dsa:::.add(saison:::lag0(Oct31Tue,-1), saison:::lag0(Oct31Thu, 1))
 
 Nov1Sun <-
   cross_seasonal(
@@ -447,7 +447,7 @@ Nov1Mon <-
     output = "xts"
   )
 Nov1Bridge <-
-  dsa:::.add(s45:::lag0(Nov1Tue,-1), s45:::lag0(Nov1Thu, 1))
+  dsa:::.add(saison:::lag0(Nov1Tue,-1), saison:::lag0(Nov1Thu, 1))
 
 
 
@@ -859,25 +859,25 @@ Jan6Mon <-
 
 
 PentecostPeriod <-
-  dsa:::.add(s45:::lag0(PentecostMonday,-1),
+  dsa:::.add(saison:::lag0(PentecostMonday,-1),
              PentecostMonday,
-             s45:::lag0(PentecostMonday, 1)) # A negative value will create a dummy before the holiday, a positive number after the holiday
+             saison:::lag0(PentecostMonday, 1)) # A negative value will create a dummy before the holiday, a positive number after the holiday
 
 
 EasterPeriod <-
   dsa:::.add(
-    s45:::lag0(EasterMonday,-4),
-    s45:::lag0(EasterMonday,-3),
-    s45:::lag0(EasterMonday,-2),
-    s45:::lag0(EasterMonday,-1),
+    saison:::lag0(EasterMonday,-4),
+    saison:::lag0(EasterMonday,-3),
+    saison:::lag0(EasterMonday,-2),
+    saison:::lag0(EasterMonday,-1),
     EasterMonday,
-    s45:::lag0(EasterMonday, 1)
+    saison:::lag0(EasterMonday, 1)
   )
 
 # Zeitumstellung
-DstSpring <- s45:::create_dst_regressor(Base, spring = 1, autumn = 0)
-DstAutumn <- s45:::create_dst_regressor(Base, spring = 0, autumn = 1)
-Dst <- s45:::create_dst_regressor(Base, spring = -1, autumn = 1)
+DstSpring <- saison:::create_dst_regressor(Base, spring = 1, autumn = 0)
+DstAutumn <- saison:::create_dst_regressor(Base, spring = 0, autumn = 1)
+Dst <- saison:::create_dst_regressor(Base, spring = -1, autumn = 1)
 
 
 
@@ -1019,10 +1019,10 @@ All <-
   )
 
 holidays <- All
-saveRDS(holidays, file = "data/holidays.rds")
-save(holidays, file = "data/holidays.rda")
+saveRDS(holidays, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidays.rds")
+save(holidays, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidays.rda")
 
 
-holidaysCentered <- s45::center_regressor(All)
-saveRDS(holidaysCentered, file = "data/holidaysCentered.rds")
-save(holidaysCentered, file = "data/holidaysCentered.rda")
+holidaysCentered <- saison::center_regressor(All)
+saveRDS(holidaysCentered, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidaysCentered.rds")
+save(holidaysCentered, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidaysCentered.rda")

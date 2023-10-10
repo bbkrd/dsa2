@@ -36,8 +36,8 @@
 #' \item{Jan1ZZZ}{Captures if Jan 1 is a certain weekday (Monday to Sunday)}
 #' \item{Jan6ZZZ}{Captures if Jan 1 is a certain weekday (Monday to Sunday)}
 #' \item{LabourDay}{Labour Day, May 1}
-#' \item{LabourBridge}{Captures the bridge days created by May 1, i.e. if surrounding days are either a Monday or Friday}
 #' \item{MardiGras}{Mardi Gras}
+#' \item{May1Bridge}{Captures the bridge days created by May 1, i.e. if surrounding days are either a Monday or Friday}
 #' \item{May1ZZZ}{Captures if Labour Day, May 1, is a certain weekday (Monday to Sunday)}
 #' \item{NewYearsDay}{New Years Day, Jan 1}
 #' \item{NewYearsEve}{New Years Eve, Dec 31}
@@ -62,7 +62,7 @@
 #' \item{PreXmasSun3d}{Captures Sundays in the three days leading up to Christmas}
 #' \item{ReformationDay}{Reformation Day, Oct 31}
 #' \item{ReformationDay2017}{Reformation Day, Oct 31 2017 (National holiday that year)}
-#' \item{USLaborDay}{US Labor Day}
+#' \item{USLabourDay}{US Labour Day}
 #' \item{XmasPeriodZZZ}{Captures weekdays (Monday to Sunday) in the Christmas period from Dec 21 to Jan 5}
 #' }
 #' @source Own calculations
