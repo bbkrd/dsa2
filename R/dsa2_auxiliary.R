@@ -197,41 +197,86 @@ summary.dsa2 <- function(object, ...) {
 
 print.dsa2 <- function(x, ...) {
   handle <- list(...) # Just used to ensure consistency with generic print
-  frac <- toString(round(x$preProcessing$estimation$parameters,3))
-  if (is.null(x$parameters$xreg)) {
-    calends <- .outCalendar(x)
-  } else {
-    calends <- .outCalendar(x)
-    the_name <- ifelse(max(nchar(colnames(x$parameters$xreg))) < 8, # ensures that the regression results are printed nicely
-                       "\tregs",
-                       "\tregressors")
-    calends <- rbind(c(the_name, "coef", "t-value") ,
-                     calends)
-    calends$sep <- "\n"
-    calends <- paste(t(calends), collapse = "\t")
+  
+  # auxiliary function to format the print objects
+  print_format <- function(y) {
+    y <- rbind(colnames(y), y)         # add column names as observations
+    y$sep <- "\n"                      # add line breaks
+    y <- apply(y, 2, format)           # apply format over each column
+    y <- paste(t(y), collapse = "\t")  # paste together
+    return(y)
   }
   
-  if (sum(x$preProcessing$model$component_outliers) == length(x$preProcessing$model$component_outliers)) {
-    outlier <- .outOutlier(x)
-  } else
-  { outlier <- .outOutlier(x)
-    outlier$dates <- as.character(outlier$dates)
-    outlier <- rbind(c("\ttype", "dates", "\tcoef", "t-value"), 
-                   outlier)
-    outlier$sep <- "\n"
-    outlier <- paste(t(outlier), collapse = "\t")
-  }
+  # call auxiliary functions to prepare string outputs
+  fracARIMA <- .outARIMA(x)
+  calendar  <- .outCalendar(x)
+  outliers  <- .outOutlier(x)
   
-  out <- paste0("Pre-processing\n
-Fractional Airline Coefficients: ", 
-                frac,"\n
-Calendar Regressors:\n\n",
-                calends,"\n
-Outliers:\n\n",
-                outlier)
+  # format string outputs
+  fracARIMA <- print_format(fracARIMA)
+  
+  outliers  <- ifelse(is.null(outliers), 
+                      "No outliers found", 
+                      print_format(outliers))
+  
+  calendar  <- ifelse(is.null(calendar), 
+                      "No calendar adjustment conducted", 
+                      print_format(calendar))
+  
+  # paste together for output string  
+  out <- paste0("Pre-processing",
+                "\n\n",
+                "Fractional Airline Model:",
+                "\n\n\t",
+                fracARIMA,
+                "\n\n",
+                "Calendar Regressors:",
+                "\n\n\t",
+                calendar,
+                "\n\n",
+                "Outliers:",
+                "\n\n\t",
+                outliers)
+  
+  # print
   cat(out)
   invisible(out)
+  
 }
+
+
+
+
+#' Internal function for Fractional Airline model
+#' 
+#' Internal function to polish the output for the fractional airline model
+#' @param dsa2_object dsa2 output object
+#' @author Jakob Oberhammer, Martin Stefan
+
+.outARIMA <- function(dsa2_object, digits = 3) {
+  
+  # auxiliary variables
+  coefs <- dsa2_object$preProcessing$estimation$parameters
+  covar <- dsa2_object$preProcessing$estimation$covariance
+  
+  # compute standard errors and t-values
+  sterrs <- sqrt(diag(covar))
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Regressor"   = c("theta", "theta 7", "theta 365"),
+    "Coefficient" = format(round(coefs,  digits),  n_small = digits),
+    "Std.Error"   = format(round(sterrs, digits),  n_small = digits),
+    "t-Value"     = format(round(tvals,  digits),  n_small = digits)
+  )
+  
+  # return
+  return(df)
+  
+}
+
+
 
 #' Internal function for outliers
 #' 
@@ -239,62 +284,115 @@ Outliers:\n\n",
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outOutlier <- function(dsa2_object) {
-  if (sum(dsa2_object$preProcessing$model$component_outliers) == length(dsa2_object$preProcessing$model$component_outliers)) {
-    return("No outliers found")
+.outOutlier <- function(dsa2_object, digits = 3) {
+  
+  # detect if any outliers present
+  if (dsa2_object$parameters$log) {
+    noOutliers <- all(dsa2_object$preProcessing$model$component_outliers == 1)
   } else {
-    for (i in length(dsa2_object$preProcessing$model$variables)) {
-      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-    }
-    dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b, 3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
-    df <- t(df)
-    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-    names(lookup) <- c("id")
-    df <- cbind(df, lookup)
-    names(df) <- c("o","coefficient","t_value","id")
-    out <- subset(df, !grepl("x-", df$o) )
-    dates <- zoo::index(dsa2_object$series)
-    dates <- data.frame(dates)
-    dates$id <- seq.int(nrow(dates))
-    base <- (merge(lookup, dates, by = "id" ))
-    df2 <- (merge(out, base, by = "id"))
-    result <- data.frame(substr(df2$o,1,2))
-    names(result) <- c("outliertype")
-    df2 <- cbind(df2, result)
-    df2 <- subset(df2, select = c("outliertype", "dates", "coefficient", "t_value"))  
-    return(df2)
+    noOutliers <- all(dsa2_object$preProcessing$model$component_outliers == 0)
   }
+  
+  # no outliers found
+  if (noOutliers) {
+    return(NULL)
+  }
+    
+  # auxiliary variables
+  dates <- zoo::index(dsa2_object$series)             # dates of time series
+  xreg  <- dsa2_object$parameters$xreg                # calendar matrix
+  vars  <- dsa2_object$preProcessing$model$variables  # outlier/calendar vars
+  coefs <- dsa2_object$preProcessing$model$b          # coefficients
+  covar <- dsa2_object$preProcessing$model$bcov       # covariance matrix
+  
+  # remove calendar variables
+  n <- ncol(xreg)
+  if (!is.null(n)) {
+    vars  <- vars[-c(1:n)]
+    coefs <- coefs[-c(1:n)]
+    covar <- covar[-c(1:n),-c(1:n)]
+  }
+  
+  # extract types and dates of outliers from 'vars'
+  outlierTypes <- substr(vars, 1, 2)
+  outlierDates <- dates[as.numeric(substr(vars, 4, nchar(vars)))]
+  
+  # compute standard errors and t-values
+  if (length(coefs) == 1) {
+    sterrs <- sqrt(covar)
+  } else {
+    sterrs <- sqrt(diag(covar))
+  }
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Date"        = as.character(outlierDates),
+    "Type"        = outlierTypes,
+    "Coefficient" = format(round(coefs,  digits), n_small = digits),
+    "Std.Error"   = format(round(sterrs, digits), n_small = digits),
+    "t-Value"     = format(round(tvals,  digits), n_small = digits)
+  )
+  
+  # sort by dates
+  df <- df[order(outlierDates),]
+  
+  # return
+  return(df)
+  
 }
 
+
+
+
+  
+ 
 #' Internal function for calendars
 #' 
 #' Internal function to polish the output for calendars
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
 
-.outCalendar <- function(dsa2_object) {
+.outCalendar <- function(dsa2_object, digits = 3) {
+  
+  # detect if any calendar matrix present
   if (is.null(dsa2_object$parameters$xreg)) {
-    return("No calendar adjustment conducted")
-  } else {
-    for (i in length(dsa2_object$preProcessing$model$variables)) {
-      t_value <- dsa2_object$preProcessing$model$b / sqrt(dsa2_object$preProcessing$model$bcov[i,i])
-    }
-    dsa2_object$preProcessing$model$t <- t_value
-    df <- rbind(dsa2_object$preProcessing$model$variables, sprintf("%.3f",round(dsa2_object$preProcessing$model$b,3)), sprintf("%.3f",round(dsa2_object$preProcessing$model$t,3)))
-    df <- t(df)
-    lookup <- data.frame(substr(dsa2_object$preProcessing$model$variables,4,nchar(dsa2_object$preProcessing$model$variables)))
-    names(lookup) <- c("id")
-    df <- cbind(df, lookup)
-    names(df) <- c("o","coefficient","t_value","id")
-    cal <- subset(df, grepl("x-", df$o) )
-    cal$o <- colnames(dsa2_object$parameters$xreg)
-    cal2 <- subset(cal, select = c("o", "coefficient", "t_value"))  
-    names(cal2) <- c("regressor", "coefficient", "t_value")
-    return(cal2)  
+    return(NULL)
   }
-}
+  
+  # auxiliary variables
+  dates <- zoo::index(dsa2_object$series)             # dates of time series
+  xreg  <- dsa2_object$parameters$xreg                # calendar matrix
+  vars  <- dsa2_object$preProcessing$model$variables  # outlier/calendar vars
+  coefs <- dsa2_object$preProcessing$model$b          # coefficients
+  covar <- dsa2_object$preProcessing$model$bcov       # covariance matrix
+  
+  # remove outliers
+  n <- ncol(xreg)
+  vars  <- vars[1:n]
+  coefs <- coefs[1:n]
+  covar <- covar[1:n, 1:n]
+  
+  # compute standard errors and t-values
+  if (length(coefs) == 1) {
+    sterrs <- sqrt(covar)
+  } else {
+    sterrs <- sqrt(diag(covar))
+  }
+  tvals  <- coefs / sterrs
+  
+  # create df
+  df <- data.frame(
+    "Regressor"   = colnames(xreg),
+    "Coefficient" = format(round(coefs,  digits), n_small = digits),
+    "Std.Error"   = format(round(sterrs, digits), n_small = digits),
+    "t-Value"     = format(round(tvals,  digits), n_small = digits)
+  )
 
+  # return
+  return(df)
+  
+}
 
 
 
@@ -326,7 +424,9 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
                   nrow(dsa2_object2$series) - minus_h)
   
   name1 <- deparse(substitute(dsa2_object1))
+  name1 <- substring(name1,1,15)
   name2 <- deparse(substitute(dsa2_object2))
+  name2 <- substring(name2,1,15)
   
   opar <- graphics::par(no.readonly  =  TRUE)
   graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
@@ -341,14 +441,14 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
   graphics::par(new = TRUE)
   plot(dates, series1, type = "l", xlab = "", ylab = "", 
        main = "Comparison", col = .dsa2color("darkblue"), bty = "n")
-  graphics::lines(dates, series2, col = .dsa2color("red"))
-  graphics::lines(dates, series3, col = .dsa2color("green"))
+  graphics::lines(dates, series2, col = .dsa2color("lightgreen"))
+  graphics::lines(dates, series3, col = .dsa2color("violet"))
   graphics::par(col.axis = "transparent")
   graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
   graphics::axis(2, col.ticks = .dsa2color("grey"))
   graphics::box(col = .dsa2color("grey"))
   .add_legend("bottom", legend = c("Original", paste0("Adjusted Series (", name1, ")"), paste0("Adjusted Series (", name2, ")")), lty = c(1,1),
-              col = .dsa2color("darkblue", "red", "green"),
+              col = .dsa2color("darkblue", "lightgreen", "violet"),
               horiz = TRUE, bty = 'n', cex = 0.8)
   on.exit(graphics::par(opar))
 }
@@ -357,106 +457,33 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' HTML output for dsa2
 #' 
 #' HTML output for dsa2
-#' @param dsa2_object output object
-#' @param path path for HTML output
-#' @details Generates a .Rmd file that is rendered into an html document saved in the working directory.
+#' @param x output object
+#' @param fileName name for HTML output
+#' @param filePath path for HTML output
+#' @details Generates an .Rmd file that is rendered into an .html document saved in the working directory.
 #' @author Lea Hengen, Sindy Brakemeier
 #' @export
 
-output <- function(dsa2_object, path = NULL) {
-  if(is.null(path)) {
+output <- function(x, fileName = NULL, filePath = NULL) {
+  
+  # if no file name is specified, use series name
+  if (is.null(fileName)) {
+    path <- x$parameters$name
+  }
+  
+  # if no file path is specified, use current working directory 
+  if (is.null(filePath)) {
     path <- getwd()
   }
   
-  filename <- paste0(path, "/", dsa2_object$parameters$name, ".Rmd")
+  # render markdown file
+  rmarkdown::render(
+    input       = paste0(system.file(package = "dsa2"), "/rmd/output.Rmd"),
+    output_file = paste0(filePath, "/", fileName, ".html"),
+    params      = list(x = x, fileName = fileName),
+    encoding    = 'UTF-8'
+  )
   
-  if (dsa2_object$parameters$log == TRUE) {
-    model <- "multiplicative"
-  } else {
-    model <- "additive"
-  }
-  
-  if (is.null(dsa2_object$parameters$xreg)) {
-    regressors <- "not in use"
-  } else{
-    regressors <- colnames(dsa2_object$parameters$xreg)
-  }
-  
-  if (is.null(dsa2_object$parameters$outliers)) {
-    outliers <- "not in use"
-  } else{
-    outliers <- dsa2_object$parameters$outliers
-  }
-  
-  if (is.null(dsa2_object$parameters$pre_processing)) {
-    pre_processing_ex <- "not in use"
-  } else {
-    pre_processing_ex <- "in use"
-  }
-  
-  if (class(dsa2_object$parameters$s31) == "NULL") {
-    method_s31 <- "none"
-  } else {
-    method_s31 <- class(dsa2_object$parameters$s31)
-  }
-  
-  if (class(dsa2_object$parameters$s7) == "character") {
-    method_s7 <- dsa2_object$parameters$s7
-  } else {
-    method_s7 <- class(dsa2_object$parameters$s7)
-  }
-  
-  if (class(dsa2_object$parameters$s365) == "character") {
-    method_s365 <- dsa2_object$parameters$s365
-  } else {
-    method_s365 <- class(dsa2_object$parameters$s365)
-  }
-  
-  out <- summary.dsa2(dsa2_object)
-  
-  cat("---
-title: \"DSA Output\"
-date: \'`r Sys.Date()`\'
-output: html_document
----
-**Time series information**
-\n
-      Name: `r dsa2_object$parameters$name`       
-      Length: from `r zoo::index(dsa2_object$series)[1]` to `r zoo::index(dsa2_object$series)[length(zoo::index(dsa2_object$series))-dsa2_object$parameters$h]`     
-      Number of values: `r length(zoo::index(dsa2_object$series)) - dsa2_object$parameters$h` 
-**Parameters**
-\n
-      Number of iterations: `r dsa2_object$parameters$n_iterations`
-      Model: `r model`
-      Length of forecast: `r dsa2_object$parameters$h` days
-      Calendar regressors: `r regressors`
-      Outlier types: `r outliers`
-      External pre-processing: `r pre_processing_ex`
-      Interpolation method: `r dsa2_object$parameters$interpolator`
-      Adjustment method day-of-the-week: `r method_s7`
-      Adjustment method day-of-the-month: `r method_s31`
-      Adjustment method day-of-the-year: `r method_s365`
-\n
-**Summary**
-\n
-```{r, echo=FALSE}
-summary.dsa2(dsa2_object)
-``` 
-\n
-      
-```{r, echo=FALSE}
-interactive_time <- dygraphs::dygraph(dsa2_object$series, 
-                                      main = 'Result for seasonal adjustment of daily time series') 
-interactive_time <- dygraphs::dyRangeSelector(interactive_time)
-interactive_time <- dygraphs::dyOptions(interactive_time, 
-                                        colors = .dsa2color('darkblue','red'))
-interactive_time
-```      
-      ",
-      
-      file = filename) 
-  rmarkdown::render(filename)
-  file.remove(filename) #Removes the Rmd-File
 }
 
 
@@ -494,7 +521,7 @@ spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we
 #' @param ... further arguments for barplot()
 #' @details Wrapper around the stats::acf() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' acf(result)
 #' @export
@@ -538,7 +565,7 @@ acf.dsa2 <- function(dsa2_object, ...) {
 #' @param ... further arguments for barplot()
 #' @details Wrapper around the stats::pacf() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' pacf(result)
 #' @export
@@ -586,7 +613,7 @@ pacf.dsa2 <- function(dsa2_object, ...) {
 #' @param .dsa2color("pink") color of vertical lines
 #' @details Plot uses ggplot2 and can be changed accordingly. The spectrum is build around the spec.pgram() function
 #' @author Daniel Ollech
-#' @examples x <- daily_sim(3)$original
+#' @examples x <- tssim::sim_daily(3)$original
 #' res <- dsa(x)
 #' spectrum(res)
 #' @export
@@ -635,5 +662,5 @@ spectrum.dsa2 <- function(dsa2_object, xlog=FALSE) {
   graphics::lines(df)
 }
 
-plot_spectrum(dsa2_object)
+#plot_spectrum(dsa2_object) #CH: keine Ahnung was die Zeile tun soll. 
 

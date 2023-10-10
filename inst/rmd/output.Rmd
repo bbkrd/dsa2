@@ -1,0 +1,190 @@
+---
+title: "`r paste0('DSA2: ', x$parameters$name)`"
+pagetitle: "`r fileName`"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{css, echo = FALSE}
+h3 {
+  margin-top:    50px;
+  margin-bottom: 20px;
+  margin-left:   10px;
+}
+
+.gt_table {
+  margin-left:  10px !important;
+  margin-right: 0    !important;
+  width:        55%  !important;
+}
+```
+
+
+```{r setup, include = FALSE}
+# Disable default echo
+knitr::opts_chunk$set(echo = FALSE)
+
+# Load packages
+library(gt)
+library(dygraphs)
+
+# Define %>% command
+`%>%` <- magrittr::`%>%`
+```
+
+</br>
+
+
+```{r, fig.align = "left", fig.width = 10}
+# auxiliary variables
+dates      <- zoo::index(x$series)
+shadeEnd   <- dates[length(dates)]
+shadeStart <- dates[length(dates) - x$parameters$h]
+
+# graph
+dygraph(x$series) %>%
+  dyOptions(colors = c(.dsa2color("petrol"), .dsa2color("orange")))  %>%
+  dyAxis("x", drawGrid = FALSE) %>%
+  dyAxis("y", axisLabelWidth = 25) %>%
+  dySeries("original", label = "Original") %>%
+  dySeries("seas_adj", label = "Adjusted") %>%
+  dyShading(from = shadeStart, to = shadeEnd) %>%
+  dyLegend(labelsSeparateLines = TRUE,
+           width = 125,
+           show = "follow") %>%
+  dyRangeSelector(height = 70, 
+                  strokeColor = "", 
+                  fillColor = .dsa2color("petrol"))
+```
+
+
+### Time series properties
+```{r}
+# auxiliary variables
+name  <- x$parameters$name
+dates <- zoo::index(x$series)
+obs   <- length(dates) - x$parameters$h
+start <- as.character(dates[1])
+end   <- as.character(dates[obs])
+
+# create vector
+vec  <- c("Name:",          name,
+          "Start date:",    start,
+          "End date:",      end)
+
+# turn into a matrix, then into a dataframe
+mat <- matrix(vec, byrow = TRUE, ncol = 2)
+df  <- as.data.frame(mat)
+
+# create table for Rmd
+df %>% 
+  gt() %>% 
+  tab_options(column_labels.hidden = TRUE) %>%
+  cols_width(
+    V1 ~ px(250)
+  ) %>%
+  cols_align(
+    c(V1,V2),
+    align = "left"
+  )
+```
+
+### Estimation parameters
+
+```{r}
+# auxiliary variables
+p    <- x$parameters
+s7   <- p$s7
+s31  <- p$s31
+s365 <- p$s365
+niu  <- "Not in use"
+iterations      <- p$n_iterations
+modelType       <- ifelse(p$log, "Multiplicative", "Additive")
+fcastLength     <- p$h
+outlierTypes    <- ifelse(is.null(p$outliers), 
+                          niu, 
+                          paste(p$outliers, collapse = ", "))
+externalPre     <- ifelse(is.null(p$pre_processing), 
+                          niu, 
+                          p$pre_processing)
+interpolMethod  <- ifelse(is.null(p$interpolator), 
+                          niu, 
+                          p$interpolator)
+dowAdjustment   <- ifelse(is.null(s7),   "None", s7)
+domAdjustment   <- ifelse(is.null(s31),  "None", s31)
+doyAdjustment   <- ifelse(is.null(s365), "None", s365)
+
+# create vector
+vec  <- c("Number of iterations:",    iterations,
+          "Model type:",              modelType,
+          "Forecast length:",         fcastLength,
+          "Outlier types:",           outlierTypes,
+          "External pre-processing:", externalPre,
+          "Interpolation method:",    interpolMethod,
+          "Day-of-week adjustment:",  dowAdjustment,
+          "Day-of-month adjustment:", domAdjustment,
+          "Day-of-year adjustment:",  doyAdjustment)
+
+# turn into a matrix, then into a dataframe
+mat <- matrix(vec, byrow = TRUE, ncol = 2)
+df  <- as.data.frame(mat)
+
+# create table for Rmd
+df %>% 
+  gt() %>% 
+  tab_options(column_labels.hidden = TRUE) %>%
+  cols_width(
+    V1 ~ px(250)
+  ) %>%
+  cols_align(
+    c(V1,V2),
+    align = "left"
+    ) 
+```
+
+
+### Calendar effects
+
+```{r}
+calendar <- .outCalendar(x)
+if (is.null(calendar)) {
+  print("No calendar adjustment conducted")
+} else {
+  calendar %>% 
+  gt() %>% 
+  cols_width(
+    Regressor ~ px(170)
+  )
+}
+```
+
+
+
+### Outliers
+
+```{r}
+outliers <- .outOutlier(x)
+if (is.null(outliers)) {
+  print("No outliers found")
+} else {
+  outliers %>% 
+  gt() %>% 
+  cols_width(
+    Type ~ px(50),
+    Date ~ px(120)
+  ) %>%
+  cols_align(
+    Date,
+    align = "left"
+    ) %>%
+  cols_align(
+    Type,
+    align = "center"
+    )
+}
+```
+
+</br>
+</br>
+</br>
