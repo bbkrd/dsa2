@@ -53,7 +53,7 @@ Currently, by default, STL is used for the seasonal adjustments
 result0 <- dsa(series)
 result0
 plot(result0)
-# output(result) # Create HTML output
+# output(result0) # Create HTML output
 ```
 
 ## Adjustment with missing values

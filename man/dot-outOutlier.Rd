@@ -4,7 +4,7 @@
 \alias{.outOutlier}
 \title{Internal function for outliers}
 \usage{
-.outOutlier(dsa2_object)
+.outOutlier(dsa2_object, digits = 3)
 }
 \arguments{
 \item{dsa2_object}{dsa2 output object}

@@ -4,7 +4,7 @@
 \alias{.outCalendar}
 \title{Internal function for calendars}
 \usage{
-.outCalendar(dsa2_object)
+.outCalendar(dsa2_object, digits = 3)
 }
 \arguments{
 \item{dsa2_object}{dsa2 output object}

@@ -12,7 +12,7 @@
 )
 }
 \arguments{
-\item{x}{dsa2 output object}
+\item{x}{dsa2-output object}
 
 \item{main}{title of the plot}
 

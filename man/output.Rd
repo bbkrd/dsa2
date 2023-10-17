@@ -4,18 +4,20 @@
 \alias{output}
 \title{HTML output for dsa2}
 \usage{
-output(dsa2_object, path = NULL)
+output(x, fileName = NULL, filePath = NULL)
 }
 \arguments{
-\item{dsa2_object}{output object}
+\item{x}{output object}
 
-\item{path}{path for HTML output}
+\item{fileName}{name for HTML output}
+
+\item{filePath}{path for HTML output}
 }
 \description{
 HTML output for dsa2
 }
 \details{
-Generates a .Rmd file that is rendered into an html document saved in the working directory.
+Generates an .Rmd file that is rendered into an .html document saved in the working directory.
 }
 \author{
 Lea Hengen, Sindy Brakemeier

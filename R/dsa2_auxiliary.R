@@ -124,7 +124,7 @@ scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' Plot generic for dsa2
 #' 
 #' Creates a plot of original and seasonally adjusted series.
-#' @param x dsa2 output object
+#' @param x dsa2-output object
 #' @param include_forecasts display forecast data
 #' @param main title of the plot
 #' @param ... additional parameters from plot() function
@@ -513,6 +513,74 @@ pacf <- function(dsa2_object,  ...) {UseMethod("pacf")} # This is how we define 
 #' @export
 
 spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we define generics in S3
+
+#' ACF for ts object
+#' 
+#' See ?stats::acf for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+acf.ts <- function(x, ...) {
+  stats::acf(x, ...)
+}
+
+#' ACF for numeric object
+#' 
+#' See ?stats::acf for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+acf.numeric <- function(x, ...) {
+  stats::acf(x, ...)
+}
+
+#' PACF for ts object
+#' 
+#' See ?stats::pacf for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+pacf.ts <- function(x, ...) {
+  stats::pacf(x, ...)
+}
+
+#' PACF for numeric object
+#' 
+#' See ?stats::pacf for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+pacf.numeric <- function(x, ...) {
+  stats::pacf(x, ...)
+}
+
+
+#' Spectrum for ts object
+#' 
+#' See ?stats::acf for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+spectrum.ts <- function(x, ...) {
+  stats::spectrum(x, ...)
+}
+
+#' Spectrum for numeric object
+#' 
+#' See ?stats::spectrum  for details
+#' @param x input
+#' @param ... parameters 
+#' @export
+
+spectrum.numeric <- function(x, ...) {
+  stats::spectrum(x, ...)
+}
+
 
 #' Plot the ACF based on dsa2 object
 #'

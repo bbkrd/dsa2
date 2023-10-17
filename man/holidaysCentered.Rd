@@ -5,7 +5,7 @@
 \alias{holidaysCentered}
 \title{Centered version of xts of all German regressors used for daily time series}
 \format{
-An object of class \code{xts} (inherits from \code{zoo}) with 11323 rows and 132 columns.
+An object of class \code{xts} (inherits from \code{zoo}) with 55152 rows and 132 columns.
 }
 \usage{
 holidaysCentered

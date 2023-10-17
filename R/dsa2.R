@@ -130,7 +130,7 @@ dsa <- function(series,
                              log = log)
     xLinx <- stats::ts(xLinx, frequency = 7)
 
-    s7Result <- estimate_component(method = s7, series = xLinx, log = log) 
+    s7Result <- .estimate_component(method = s7, series = xLinx, log = log) 
     seasComp7 <- xts::xts(s7Result$seasComp, 
                           zoo::index(seasComp7))
     
@@ -154,7 +154,7 @@ dsa <- function(series,
                            interpolator = interpolator),
                 frequency = 31)
                 
-    s31Result <- estimate_component(method = s31, series = xLinx) 
+    s31Result <- .estimate_component(method = s31, series = xLinx) 
     
     seasComp31 <- xts::xts(reduce31(zLinz, s31Result$seasComp), 
                            zoo::index(seasComp31))
@@ -169,7 +169,7 @@ dsa <- function(series,
     
     zLinz <- delete_29(xLinx)
     yLiny <- stats::ts(as.numeric(zLinz), frequency = 365)
-    s365Result <- estimate_component(method = s365, series = yLiny, log = log)
+    s365Result <- .estimate_component(method = s365, series = yLiny, log = log)
     seasComp365 <- xts::xts(s365Result$seasComp, zoo::index(zLinz))
     seasComp365 <- zoo::na.locf(xts::merge.xts(seasComp365, xLinear)[,1]) # Filling up the seasonal component with a value for 29. Feb. Should be handled in Java ## na.locf makes that value on 29.2 = value on 28.2
   }
@@ -351,9 +351,8 @@ seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::
 #' @param series time series to be adjusted
 #' @param log should logs be used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component <- function(method, series, log = NULL) {UseMethod("estimate_component")} # This is how we define generics in S3
+.estimate_component <- function(method, series, log = NULL) {UseMethod(".estimate_component")} # This is how we define generics in S3
 
 #' Default method for estimating seasonal component
 #' 
@@ -362,9 +361,8 @@ estimate_component <- function(method, series, log = NULL) {UseMethod("estimate_
 #' @param series time series to be adjusted
 #' @param log multiplicative models used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.default <- function(method, series, log = NULL) {
+.estimate_component.default <- function(method, series, log = NULL) {
   message("The method should either be one of 'x11', 'stl' or 'seats' or a call to stl_method(), x11_method() or seats_method()")
 }
 
@@ -372,12 +370,11 @@ estimate_component.default <- function(method, series, log = NULL) {
 #' 
 #' STL method for estimating seasonal component
 #' @param method method to be employed
-#' @param series time series to be adjusted
+#' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.stl_method <- function(method, series, log = NULL) { 
+.estimate_component.stl_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
@@ -393,12 +390,11 @@ estimate_component.stl_method <- function(method, series, log = NULL) {
 #' 
 #' X-11 method for estimating seasonal component
 #' @param method method to be employed
-#' @param series time series to be adjusted
+#' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.x11_method <- function(method, series, log = NULL) { 
+.estimate_component.x11_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
@@ -415,7 +411,7 @@ estimate_component.x11_method <- function(method, series, log = NULL) {
 #' 
 #' If X-11 is used on the day-of-the-year effect, the number of observations included in the time series needs to be high enough for certain filters to be used. This function checks it.
 #' @param method method to be employed
-#' @param series time series to be adjusted
+#' @param series time series to be adjusted, class should be ts
 #' @author Daniel Ollech
 
 .correct_filter_length <- function(method, series) { # Can be removed, once handled in Java
@@ -459,12 +455,11 @@ estimate_component.x11_method <- function(method, series, log = NULL) {
 #' 
 #' Seats method for estimating seasonal component
 #' @param method method to be employed
-#' @param series time series to be adjusted
+#' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.seats_method <- function(method, series, log = NULL) { 
+.estimate_component.seats_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
   }
@@ -480,12 +475,11 @@ estimate_component.seats_method <- function(method, series, log = NULL) {
 #' 
 #' Character method for estimating seasonal component
 #' @param method method to be employed
-#' @param series time series to be adjusted
+#' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.character <- function(method, series, log = NULL) {
+.estimate_component.character <- function(method, series, log = NULL) {
   if (method == "stl") {
     method <- stl_method()
   } else if (method == "x11") {
@@ -495,7 +489,7 @@ estimate_component.character <- function(method, series, log = NULL) {
   } else{
     stop("Unknown method!")
   }
-  return(estimate_component(
+  return(.estimate_component(
     method = method,
     series = series,
     log = log
@@ -509,9 +503,8 @@ estimate_component.character <- function(method, series, log = NULL) {
 #' @param series time series to be adjusted
 #' @param log multiplicative models used
 #' @author Daniel Ollech
-#' @export
 
-estimate_component.NULL <- function(method, series, log = NULL) {
+.estimate_component.NULL <- function(method, series, log = NULL) {
   return(list(adjustment = NULL, seasComp = series*NA)) 
 }
 
