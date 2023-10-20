@@ -478,7 +478,8 @@ output <- function(x, fileName = NULL, filePath = NULL) {
   
   # render markdown file
   rmarkdown::render(
-    input       = paste0(system.file(package = "dsa2"), "/inst/rmd/output.Rmd"),
+    #input       = paste0(system.file(package = "dsa2"), "/inst/rmd/output.Rmd"),
+    input       = paste0(system.file(package = "dsa2"), "/rmd/output.Rmd"),
     output_file = paste0(filePath, "/", fileName, ".html"),
     params      = list(x = x, fileName = fileName),
     encoding    = 'UTF-8'

@@ -9,7 +9,7 @@
 \arguments{
 \item{method}{method to be employed}
 
-\item{series}{time series to be adjusted}
+\item{series}{time series to be adjusted, class should be ts}
 }
 \description{
 If X-11 is used on the day-of-the-year effect, the number of observations included in the time series needs to be high enough for certain filters to be used. This function checks it.

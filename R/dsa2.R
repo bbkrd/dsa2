@@ -215,7 +215,7 @@ dsa <- function(series,
   return(out)
 }
 
-#' Handler for stl
+#' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for stl
 #' @param period period
@@ -244,6 +244,43 @@ stl_method  <- function(period = NA,
                         weight.function = c('BIWEIGHT')
 ) 
 {
+  
+  # Pre-tests ---------------------------------------------------------------
+
+    if (!is.logical(log)) {
+      warning("log needs to be a boolean")
+    }
+  
+  if (!is.logical(nojump)) {
+    warning("nojump needs to be a boolean")
+  }
+  
+  if (!is.na(period)) {
+    if (!is.numeric(period) & !is.integer(period)) {
+      stop("period in stl_method() needs to be of class numeric or integer")
+    }
+    if (period < 2) {warning("period in stl_method() should be at least 2")}
+  }
+  
+  if ((!is.numeric(swindow) & !is.integer(swindow))) {
+    warning("swindow in stl_method() need to be of class numeric or integer")
+  }
+  
+  if ((!is.numeric(twindow) & !is.integer(twindow)) |
+      (!is.numeric(ninnerloop) & !is.integer(ninnerloop)) |
+      (!is.numeric(nouterloop) & !is.integer(nouterloop)) |
+      (!is.numeric(weight.threshold) & 
+       !is.integer(weight.threshold))) {
+    warning("twindow, ninnerloop, nouterloop and weight.threshold in 
+             stl_method() need to be of class numeric or integer")
+  }
+  
+  if (!is.character(weight.function)) {
+    warning("weight.function in stl_method() need to be of class character")
+  }
+  
+  # Translation of parameters -----------------------------------------------
+  
   parameters <- list(period = period,
                      swindow = swindow,
                      multiplicative = log,
@@ -260,7 +297,7 @@ stl_method  <- function(period = NA,
   return(parameters)  
 }
 
-#' Handler for x-11
+#' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for x-11
 #' @param period period
@@ -290,6 +327,36 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x1
     sma <- paste0("S3X", sma)
   }
   
+  # Pre-tests ---------------------------------------------------------------
+  if (!is.logical(log)) {
+    warning("log needs to be a boolean")
+  }
+  
+  if (!is.na(period)) {
+    if (!is.numeric(period) & !is.integer(period)) {
+      stop("period in x11_method() needs to be of class numeric or integer")
+    }
+    if (period < 2) {warning("period in x11_method() should be at least 2")}
+  }
+
+  if ((!is.numeric(trend.horizon) & !is.integer(trend.horizon)) |
+      (!is.numeric(trend.degree) & !is.integer(trend.degree))) {
+    warning("trend.horizon and trend.degree in x11_method() need to be of 
+            class numeric or integer")
+  }
+
+  if (!is.character(trend.kernel) |
+      !is.character(trend.asymmetric)) {
+    warning("trend.kernel and trend.asymmetric in x11_method() need to be of 
+            class character")
+  }
+  
+  if (length(sigma) != 2) {
+    warning("sigma needs to be of length 2, e.g. c(1.5, 2.5)")
+  }
+  
+  # Translation of parameters -----------------------------------------------
+  
   parameters <- list(period = period, 
                      mul = log, 
                      trend.horizon = trend.horizon, 
@@ -307,7 +374,7 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x1
   
 }
 
-#' Handler for seats
+#' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for seats
 #' @param period period
@@ -329,6 +396,29 @@ seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::
                          nbcasts = 0,
                          nfcasts = 0
 )  {
+  
+
+# Pre-tests ---------------------------------------------------------------
+if (!is.na(period)) {
+  if (class(period) != "numeric" & class(period) != "integer") {
+    stop("period in seats_method() needs to be of class numeric or integer")
+  }
+  if (period < 2) {warning("period in seats_method() should be at least 2")}
+}
+  
+if (!is.logical(sn) | !is.logical(stde)) {
+  warning("sn and stde in seats_method() should be either TRUE or FALSE")
+}
+  
+if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
+    (!is.numeric(nfcasts) & !is.integer(nfcasts))) {
+  warning("nbcasts and nfcasts in seats_method() need to be of class numeric or integer")
+}
+  
+
+
+# Translation of parameters -----------------------------------------------
+
   parameters <- list(period = period, 
                      # multiplicative = log, NOTE(DO): currently not implemented
                      sn = sn, 
