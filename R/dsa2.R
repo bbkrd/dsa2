@@ -205,9 +205,14 @@ dsa <- function(series,
                             "seasComp31",
                             "seasComp365")
   
+  adjustmentResults <- list(s7Result = s7Result, 
+                            s31Result = s31Result,
+                            s365Result = s365Result)
+  
   out <- list(series = series, 
               components = components, 
-              preProcessing = fracAirline, 
+              preProcessing = fracAirline,
+              adjustmentResults = adjustmentResults,
               parameters = parameters)
   
   class(out) <- "dsa2"
@@ -247,7 +252,7 @@ stl_method  <- function(period = NA,
   
   # Pre-tests ---------------------------------------------------------------
 
-    if (!is.logical(log)) {
+  if (!is.logical(log)) {
       warning("log needs to be a boolean")
     }
   

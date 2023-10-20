@@ -1,6 +1,6 @@
 Package: dsa2
 Title: Seasonal adjustment of daily time series
-Version: 0.1.13
+Version: 0.1.14
 Authors@R: 
     c(person(given = "Daniel",
              family = "Ollech",
@@ -43,7 +43,7 @@ Imports:
     rjd3highfreq (>= 1.0.0),
     rjd3stl,
     rjd3x11plus,
-    rmarkdown
+    rmarkdown,
     gt
 Suggests:
     knitr,
