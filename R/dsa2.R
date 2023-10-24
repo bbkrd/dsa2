@@ -240,7 +240,7 @@ dsa <- function(series,
 
 stl_method  <- function(period = NA, 
                         swindow = 13, 
-                        log = TRUE, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stlplus
+                        log = NULL, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stlplus
                         twindow = 0, 
                         ninnerloop = 1, 
                         nouterloop = 15, 
@@ -252,7 +252,7 @@ stl_method  <- function(period = NA,
   
   # Pre-tests ---------------------------------------------------------------
 
-  if (!is.logical(log)) {
+  if (!is.logical(log) & !is.null(log)) {
       warning("log needs to be a boolean")
     }
   
@@ -320,7 +320,7 @@ stl_method  <- function(period = NA,
 #' @export
 
 x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x11plus
-                       log = TRUE, # NOTE(DO): Renaming  mul in rjd3x11plus::x11plus for harmonization purposes
+                       log = NULL, # NOTE(DO): Renaming  mul in rjd3x11plus::x11plus for harmonization purposes
                        sma = c("S3X9", "S3X1", "S3X3", "S3X5", "S3X15")[1], 
                        trend.horizon = 6,  
                        trend.degree = 2,  
@@ -333,7 +333,7 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x1
   }
   
   # Pre-tests ---------------------------------------------------------------
-  if (!is.logical(log)) {
+  if (!is.logical(log) & !is.null(log)) {
     warning("log needs to be a boolean")
   }
   
@@ -395,7 +395,7 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x1
 #' @export
 
 seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::fractionalAirlineDecomposition
-                         log = FALSE, # NOTE(DO): Currently not implemented 
+                         log = NULL, # NOTE(DO): Currently not implemented 
                          sn = FALSE,
                          stde = FALSE,
                          nbcasts = 0,
@@ -420,7 +420,9 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
   warning("nbcasts and nfcasts in seats_method() need to be of class numeric or integer")
 }
   
-
+  if (!is.logical(log) & !is.null(log)) {
+    warning("log needs to be a boolean")
+  }
 
 # Translation of parameters -----------------------------------------------
 
@@ -431,7 +433,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
                      nbcasts = nbcasts, 
                      nfcasts = nfcasts)
   
-  if (log) {stop("Seats is currently not fully implemented. Therefore, please do not use a multiplicative model, i.e. set log = FALSE.")}
+  if (!is.null(log) && log) {stop("Seats is currently not fully implemented. Therefore, please do not use a multiplicative model, i.e. set log = FALSE.")}
 
   class(parameters) <- c("seats_method")
   
