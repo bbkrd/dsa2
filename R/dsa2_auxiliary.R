@@ -125,16 +125,22 @@ scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
 #' 
 #' Creates a plot of original and seasonally adjusted series.
 #' @param x dsa2-output object
-#' @param include_forecasts display forecast data
 #' @param main title of the plot
+#' @param include_forecasts display forecast data
+#' @param type line type
+#' @param xlab label of x-axis
+#' @param ylab label of y-axis, you may need to change the margins using mar
+#' @param cex.axis cex.axis see ?par
+#' @param bty bty see ?par
+#' @param mar margins of the plot
 #' @param ... additional parameters from plot() function
 #' @details The function uses the base plot package. 
 #' @author Sindy Brakemeier, Daniel Ollech
 #' @export
 
-plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, ...) {
+plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time series", include_forecasts = FALSE, type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", mar = c(4, 2, 2, 0.5), ...) {
   opar <- graphics::par(no.readonly = TRUE)
-  graphics::par(mar = c(4, 2, 2, 0.5), xpd = TRUE)
+  graphics::par(mar = mar, xpd = TRUE)
   
   if (include_forecasts) {
     minus_h <- 0
@@ -147,13 +153,13 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
   dates <- zoo::index(x$series)
   series1 <- as.numeric(x$series[,1])
   series2 <- as.numeric(x$series[,2])
-  plot(dates, series1,type = "l", xlab = "", ylab = "", cex.axis = 0.75, bty = "n", ...)
+  plot(dates, series1,type = type, xlab = xlab, ylab = ylab, cex.axis = cex.axis, bty = bty, ...)
   graphics::par(xpd = FALSE, cex.axis = 0.75)
   graphics::abline(v = graphics::axis.Date(1,dates), col = .dsa2color("grey"), lty = 1, xaxt = "n")
   graphics::axis(2, tck = 1, col = .dsa2color("grey"), lty = 1)
   graphics::par(new = TRUE)
-  plot(dates, series1, type = "l", xlab = "", ylab = "", 
-       main = main, col = .dsa2color("darkblue"), bty = "n")
+  plot(dates, series1, type = type, xlab = xlab, ylab = ylab, 
+       main = main, col = .dsa2color("darkblue"), bty = bty)
   graphics::lines(dates, series2, col = .dsa2color("red"))
   graphics::par(col.axis = "transparent")
   graphics::axis(1, col.ticks = .dsa2color("grey"), graphics::axis.Date(1,dates))
