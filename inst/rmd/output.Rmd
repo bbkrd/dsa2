@@ -23,14 +23,7 @@ h3 {
 
 ```{r setup, include = FALSE}
 # Disable default echo
-knitr::opts_chunk$set(echo = FALSE)
-
-# Load packages
-library(gt)
-library(dygraphs)
-
-# Define %>% command
-`%>%` <- magrittr::`%>%`
+knitr::opts_chunk$set(echo = FALSE, comment = NA)
 ```
 
 </br>
@@ -43,17 +36,18 @@ shadeEnd   <- dates[length(dates)]
 shadeStart <- dates[length(dates) - x$parameters$h]
 
 # graph
-dygraph(x$series) %>%
-  dyOptions(colors = c(.dsa2color("petrol"), .dsa2color("orange")))  %>%
-  dyAxis("x", drawGrid = FALSE) %>%
-  dyAxis("y", axisLabelWidth = 25) %>%
-  dySeries("original", label = "Original") %>%
-  dySeries("seas_adj", label = "Adjusted") %>%
-  dyShading(from = shadeStart, to = shadeEnd) %>%
-  dyLegend(labelsSeparateLines = TRUE,
-           width = 125,
-           show = "follow") %>%
-  dyRangeSelector(height = 70, 
+cols <- c(.dsa2color("petrol"), .dsa2color("orange"))
+dygraphs::dygraph(x$series) |>
+  dygraphs::dyOptions(colors = cols) |>
+  dygraphs::dyAxis("x", drawGrid = FALSE) |>
+  dygraphs::dyAxis("y", axisLabelWidth = 25) |>
+  dygraphs::dySeries("original", label = "Original") |>
+  dygraphs::dySeries("seas_adj", label = "Adjusted") |>
+  dygraphs::dyShading(from = shadeStart, to = shadeEnd) |>
+  dygraphs::dyLegend(labelsSeparateLines = TRUE,
+                     width = 125,
+                     show = "follow") |>
+  dygraphs::dyRangeSelector(height = 70, 
                   strokeColor = "", 
                   fillColor = .dsa2color("petrol"))
 ```
@@ -78,17 +72,18 @@ mat <- matrix(vec, byrow = TRUE, ncol = 2)
 df  <- as.data.frame(mat)
 
 # create table for Rmd
-df %>% 
-  gt() %>% 
-  tab_options(column_labels.hidden = TRUE) %>%
-  cols_width(
+df |> 
+  gt::gt() |> 
+  gt::tab_options(column_labels.hidden = TRUE) |>
+  gt::cols_width(
     V1 ~ px(250)
-  ) %>%
-  cols_align(
+  ) |>
+  gt::cols_align(
     c(V1,V2),
     align = "left"
   )
 ```
+
 
 ### Estimation parameters
 
@@ -131,29 +126,41 @@ mat <- matrix(vec, byrow = TRUE, ncol = 2)
 df  <- as.data.frame(mat)
 
 # create table for Rmd
-df %>% 
-  gt() %>% 
-  tab_options(column_labels.hidden = TRUE) %>%
-  cols_width(
+df |> 
+  gt::gt() |> 
+  gt::tab_options(column_labels.hidden = TRUE) |>
+  gt::cols_width(
     V1 ~ px(250)
-  ) %>%
-  cols_align(
+  ) |>
+  gt::cols_align(
     c(V1,V2),
     align = "left"
     ) 
 ```
 
 
+
+### ARIMA model
+
+```{r}
+.outARIMA(x, digits = 2) |> 
+  gt::gt() |> 
+  gt::cols_width(
+    Regressor ~ px(170)
+  )
+```
+
+
 ### Calendar effects
 
 ```{r}
-calendar <- .outCalendar(x)
+calendar <- .outCalendar(x, digits = 2)
 if (is.null(calendar)) {
   print("No calendar adjustment conducted")
 } else {
-  calendar %>% 
-  gt() %>% 
-  cols_width(
+  calendar |> 
+  gt::gt() |> 
+  gt::cols_width(
     Regressor ~ px(170)
   )
 }
@@ -164,21 +171,21 @@ if (is.null(calendar)) {
 ### Outliers
 
 ```{r}
-outliers <- .outOutlier(x)
+outliers <- .outOutlier(x, digits = 2)
 if (is.null(outliers)) {
   print("No outliers found")
 } else {
-  outliers %>% 
-  gt() %>% 
-  cols_width(
+  outliers |> 
+  gt::gt() |> 
+  gt::cols_width(
     Type ~ px(50),
     Date ~ px(120)
-  ) %>%
-  cols_align(
+  ) |>
+  gt::cols_align(
     Date,
     align = "left"
-    ) %>%
-  cols_align(
+    ) |>
+  gt::cols_align(
     Type,
     align = "center"
     )
