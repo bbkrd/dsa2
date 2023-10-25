@@ -223,15 +223,15 @@ dsa <- function(series,
 #' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for stl
-#' @param period period
-#' @param swindow swindow
+#' @param period frequency which shall be adjusted, numeric
+#' @param swindow number of observations included in the local regressions calculated to obtain the seasonal component
 #' @param log log, ignored in dsa2
-#' @param twindow twindow
-#' @param ninnerloop ninnerloop
-#' @param nouterloop nouterloop
-#' @param nojump nojump
-#' @param weight.threshold weight.threshold
-#' @param weight.function weight.function
+#' @param twindow number of observations included in local regressions for trend component
+#' @param ninnerloop number of inner loops of STL
+#' @param nouterloop number of outer loops of STL
+#' @param nojump impacts the precision of the estimation
+#' @param weight.threshold threshold for weights, see ? rjd3stl::stlplus for details
+#' @param weight.function wfunction for weights, see ? rjd3stl::stlplus for details
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and rjd3stl::stlplus, but its goal is to invoke the stl procedure.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
@@ -382,12 +382,12 @@ x11_method <- function(period = NA,   # NOTE(DO): Assumes use of rjd3x11plus::x1
 #' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for seats
-#' @param period period
+#' @param period frequency which shall be adjusted, numeric
 #' @param log log, ignored in dsa2
-#' @param sn sn
-#' @param stde stde
-#' @param nbcasts nbcasts
-#' @param nfcasts nfcasts
+#' @param sn shall the series be decomposed into two components (signal and noise)
+#' @param stde boolean, shall standard deviations of components be computed
+#' @param nbcasts number of forecasts
+#' @param nfcasts number of backcasts
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and rjd3highfreq::fractionalAirlineDecomposition, but its goal is to invoke the Seats procedure.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
