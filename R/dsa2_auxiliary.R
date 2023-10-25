@@ -184,11 +184,11 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
 #' 
 #' Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
 #' @param object dsa2 output object
-#' @param ... further arguments to print
+#' @param ... further arguments handed to print.dsa2
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
 summary.dsa2 <- function(object, ...) {
-  print(object)
+  print(object, ...)
 }
 
 
@@ -697,12 +697,8 @@ pacf.dsa2 <- function(dsa2_object, ...) {
 #' Plot the periodogram of a daily time series
 #'
 #' Plot the periodogram of a daily time series
-#' @param x xts or ts, daily timeseries
-#' @param xlog should x-axis be log transformed
-#' @param size linesize
-#' @param color color of line
-#' @param .dsa2color("pink") color of vertical lines
-#' @details Plot uses ggplot2 and can be changed accordingly. The spectrum is build around the spec.pgram() function
+#' @param dsa2_object dsa2-object
+#' @details The spectrum is build around the spec.pgram() function
 #' @author Daniel Ollech
 #' @examples x <- tssim::sim_daily(3)$original
 #' res <- dsa(x)
