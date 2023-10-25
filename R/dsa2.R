@@ -494,6 +494,10 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 .estimate_component.x11_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
     method$period <- stats::frequency(series)
+  } else {
+    if (method$period != stats::frequency(series)) {
+      warning(paste0("The period in the method used is set to ", method$period, ", but in this step of DSA2 we usually want to estimate a periodic component with period length ", stats::frequency(series)))
+    }
   }
   
   if (!is.null(log)) {method$mul <- log}
