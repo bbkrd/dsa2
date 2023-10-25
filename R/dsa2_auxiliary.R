@@ -189,7 +189,7 @@ summary.dsa2 <- function(object, ...) {
 #' Print generic for dsa2
 #' 
 #' Print generic for dsa2, lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
-#' @param x dsa2 output object
+#' @param x dsa2-output object
 #' @param ... further arguments to print
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
@@ -356,13 +356,28 @@ print.dsa2 <- function(x, ...) {
 .outCalendar <- function(dsa2_object, digits = 3) {
   
   # detect if any calendar matrix present
-  if (is.null(dsa2_object$parameters$xreg)) {
+  if (is.null(dsa2_object$parameters$xreg) & 
+      (all(dsa2_object$components$calComp==1) | 
+       all(dsa2_object$components$calComp==0))) {
     return(NULL)
   }
   
   # auxiliary variables
   dates <- zoo::index(dsa2_object$series)             # dates of time series
-  xreg  <- dsa2_object$parameters$xreg                # calendar matrix
+  if (is.null(dsa2_object$parameters$xreg)) {
+  xreg  <- dsa2_object$preProcessing$model$xreg[,-c(
+    grep("^AO.", dsa2_object$preProcessing$model$variables),
+    grep("^LS.", dsa2_object$preProcessing$model$variables),
+    grep("^WO.", dsa2_object$preProcessing$model$variables)
+  )]                # calendar matrix
+  colnames(xreg) <- dsa2_object$preProcessing$model$variables[-c(
+    grep("^AO.", dsa2_object$preProcessing$model$variables),
+    grep("^LS.", dsa2_object$preProcessing$model$variables),
+    grep("^WO.", dsa2_object$preProcessing$model$variables)
+  )]
+  } else {
+    xreg <- dsa2_object$parameters$xreg
+  } 
   vars  <- dsa2_object$preProcessing$model$variables  # outlier/calendar vars
   coefs <- dsa2_object$preProcessing$model$b          # coefficients
   covar <- dsa2_object$preProcessing$model$bcov       # covariance matrix
