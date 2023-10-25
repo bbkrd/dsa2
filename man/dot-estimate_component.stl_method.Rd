@@ -19,3 +19,4 @@ STL method for estimating seasonal component
 \author{
 Daniel Ollech
 }
+\keyword{internal}

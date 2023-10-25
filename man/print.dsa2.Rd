@@ -7,7 +7,7 @@
 \method{print}{dsa2}(x, ...)
 }
 \arguments{
-\item{x}{dsa2 output object}
+\item{x}{dsa2-output object}
 
 \item{...}{further arguments to print}
 }

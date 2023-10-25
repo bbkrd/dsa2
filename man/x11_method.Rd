@@ -2,11 +2,11 @@
 % Please edit documentation in R/dsa2.R
 \name{x11_method}
 \alias{x11_method}
-\title{Handler for x-11}
+\title{Translation between input to dsa() and rjd3-function}
 \usage{
 x11_method(
   period = NA,
-  log = TRUE,
+  log = NULL,
   sma = c("S3X9", "S3X1", "S3X3", "S3X5", "S3X15")[1],
   trend.horizon = 6,
   trend.degree = 2,
@@ -16,21 +16,21 @@ x11_method(
 )
 }
 \arguments{
-\item{period}{period}
+\item{period}{frequency which shall be adjusted, numeric}
 
 \item{log}{log, ignored in dsa2}
 
-\item{sma}{sma}
+\item{sma}{seasonal moving average used}
 
-\item{trend.horizon}{band.width of trend filters}
+\item{trend.horizon}{band.width of trend filters, see ?rjd3x11plus::x11plus for details}
 
-\item{trend.degree}{polynomial order of the local trend model}
+\item{trend.degree}{polynomial order of the local trend model, see ?rjd3x11plus::x11plus for details}
 
-\item{trend.kernel}{kernel weights in objective function}
+\item{trend.kernel}{kernel weights in objective function, see ?rjd3x11plus::x11plus for details}
 
-\item{trend.asymmetric}{truncation type to obtain asymmetric from symmetric filter}
+\item{trend.asymmetric}{truncation type to obtain asymmetric from symmetric filter, see ?rjd3x11plus::x11plus for details}
 
-\item{sigma}{sigma}
+\item{sigma}{lower and upper limit for the extreme value detection}
 }
 \description{
 Handler for x-11

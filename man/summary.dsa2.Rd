@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{dsa2 output object}
 
-\item{...}{further arguments to print}
+\item{...}{further arguments handed to print.dsa2}
 }
 \description{
 Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.

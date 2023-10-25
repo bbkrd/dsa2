@@ -7,21 +7,13 @@
 \method{spectrum}{dsa2}(dsa2_object, xlog = FALSE)
 }
 \arguments{
-\item{xlog}{should x-axis be log transformed}
-
-\item{x}{xts or ts, daily timeseries}
-
-\item{size}{linesize}
-
-\item{color}{color of line}
-
-\item{.dsa2color("pink")}{color of vertical lines}
+\item{dsa2_object}{dsa2-object}
 }
 \description{
 Plot the periodogram of a daily time series
 }
 \details{
-Plot uses ggplot2 and can be changed accordingly. The spectrum is build around the spec.pgram() function
+The spectrum is build around the spec.pgram() function
 }
 \examples{
 x <- tssim::sim_daily(3)$original

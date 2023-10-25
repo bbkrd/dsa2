@@ -2,12 +2,12 @@
 % Please edit documentation in R/dsa2.R
 \name{stl_method}
 \alias{stl_method}
-\title{Handler for stl}
+\title{Translation between input to dsa() and rjd3-function}
 \usage{
 stl_method(
   period = NA,
   swindow = 13,
-  log = TRUE,
+  log = NULL,
   twindow = 0,
   ninnerloop = 1,
   nouterloop = 15,
@@ -17,23 +17,23 @@ stl_method(
 )
 }
 \arguments{
-\item{period}{period}
+\item{period}{frequency which shall be adjusted, numeric}
 
-\item{swindow}{swindow}
+\item{swindow}{number of observations included in the local regressions calculated to obtain the seasonal component}
 
 \item{log}{log, ignored in dsa2}
 
-\item{twindow}{twindow}
+\item{twindow}{number of observations included in local regressions for trend component}
 
-\item{ninnerloop}{ninnerloop}
+\item{ninnerloop}{number of inner loops of STL}
 
-\item{nouterloop}{nouterloop}
+\item{nouterloop}{number of outer loops of STL}
 
-\item{nojump}{nojump}
+\item{nojump}{impacts the precision of the estimation}
 
-\item{weight.threshold}{weight.threshold}
+\item{weight.threshold}{threshold for weights, see ? rjd3stl::stlplus for details}
 
-\item{weight.function}{weight.function}
+\item{weight.function}{wfunction for weights, see ? rjd3stl::stlplus for details}
 }
 \description{
 Handler for stl

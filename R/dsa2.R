@@ -108,7 +108,7 @@ dsa <- function(series,
   }
   
   # Convert to xts-format
-  xLinear <- descaler(xts::xts(xLinear, order.by = dates),
+  xLinear <- .descaler(xts::xts(xLinear, order.by = dates),
                       log = log)
 
   # Preliminary seasonal components # with does nothing
@@ -443,7 +443,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 
 #' Generic for estimating seasonal component
 #' 
-#' Generic for estimating seasonal component
+#' Generic for estimating seasonal component. See ??.estimate_component for all variants
 #' @param method method to be employed
 #' @param series time series to be adjusted
 #' @param log should logs be used
@@ -458,6 +458,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted
 #' @param log multiplicative models used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.default <- function(method, series, log = NULL) {
   message("The method should either be one of 'x11', 'stl' or 'seats' or a call to stl_method(), x11_method() or seats_method()")
@@ -470,6 +471,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.stl_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
@@ -490,6 +492,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.x11_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
@@ -514,6 +517,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param method method to be employed
 #' @param series time series to be adjusted, class should be ts
 #' @author Daniel Ollech
+#' @keywords internal
 
 .correct_filter_length <- function(method, series) { # Can be removed, once handled in Java
   all_filters <- c(15, 9, 5, 3, 1)
@@ -559,6 +563,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.seats_method <- function(method, series, log = NULL) { 
   if (is.na(method$period)) {
@@ -579,6 +584,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted, class should be ts
 #' @param log should logs be used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.character <- function(method, series, log = NULL) {
   if (method == "stl") {
@@ -604,6 +610,7 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' @param series time series to be adjusted
 #' @param log multiplicative models used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component.NULL <- function(method, series, log = NULL) {
   return(list(adjustment = NULL, seasComp = series*NA)) 
@@ -645,11 +652,11 @@ compute_seasadj <- function(series,
   }
   
   # Compute adjusted figures
-  xout <- descaler(scaler(series, log = log) - 
-                   scaler(calComp, log = log) - 
-                   scaler(seasComp7, log = log) - 
-                   scaler(seasComp31, log = log) - 
-                   scaler(seasComp365, log = log), log = log) 
+  xout <- .descaler(.scaler(series, log = log) - 
+                   .scaler(calComp, log = log) - 
+                   .scaler(seasComp7, log = log) - 
+                   .scaler(seasComp31, log = log) - 
+                   .scaler(seasComp365, log = log), log = log) 
 
   # Return
   return(xout)

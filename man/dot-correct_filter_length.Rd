@@ -17,3 +17,4 @@ If X-11 is used on the day-of-the-year effect, the number of observations includ
 \author{
 Daniel Ollech
 }
+\keyword{internal}

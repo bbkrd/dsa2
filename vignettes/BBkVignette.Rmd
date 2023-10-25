@@ -84,8 +84,7 @@ Finally, if you only want to change the seasonal adjustment part and leave the p
 
 ```{r, AdjustmentX11, fig.width=7.5, fig.height=4.5}
 result2 <-  dsa(series, 
-                s7 = "x11", 
-                s31 = "x11", 
+                s7 = "x11",
                 s365 = x11_method(sma = "S3x1", 
                                   sigma = c(2, 3)),
                 xreg = regs,

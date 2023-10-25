@@ -21,9 +21,10 @@ delete_29 <- function(x) {
 #' @param Lag which Lag of differencing needs to be inverted
 #' @details Function is used in dsa to handle the users choice of logs and levels.
 #' @author Daniel Ollech
+#' @keywords internal
 
 
-descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
+.descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
   .diffinv_xts <- function(x, y, lag = 1, differences = 1, 
                            stepsize = "days", ...) {
     if (all(class(y) != "xts")) {
@@ -67,9 +68,10 @@ descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied fro
 #' @param log Should time series be logarithmised
 #' @details Function is used in dsa to handle the users choice of logs and levels.
 #' @author Daniel Ollech
+#' @keywords internal
 
 
-scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
+.scaler <- function(x, Diff = 0, log = FALSE) { # Copied from {dsa}
   if (log) 
     x = log(x)
   if (Diff > 0) 
@@ -187,6 +189,7 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
 #' @param ... further arguments handed to print.dsa2
 #' @author Sindy Brakemeier, Lea Hengen
 #' @export
+
 summary.dsa2 <- function(object, ...) {
   print(object, ...)
 }
@@ -257,7 +260,8 @@ print.dsa2 <- function(x, ...) {
 #' 
 #' Internal function to polish the output for the fractional airline model
 #' @param dsa2_object dsa2 output object
-#' @author Jakob Oberhammer, Martin Stefan
+#' @author Jakob Oberhammer, Martin Stefan, Sindy Brakemeier, Lea Hengen
+#' @keywords internal
 
 .outARIMA <- function(dsa2_object, digits = 3) {
   
@@ -289,6 +293,7 @@ print.dsa2 <- function(x, ...) {
 #' Internal function to polish the output for outliers
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
+#' @keywords internal
 
 .outOutlier <- function(dsa2_object, digits = 3) {
   
@@ -358,6 +363,7 @@ print.dsa2 <- function(x, ...) {
 #' Internal function to polish the output for calendars
 #' @param dsa2_object dsa2 output object
 #' @author Sindy Brakemeier, Lea Hengen
+#' @keywords internal
 
 .outCalendar <- function(dsa2_object, digits = 3) {
   
@@ -543,6 +549,7 @@ spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we
 #' @param x input
 #' @param ... parameters 
 #' @export
+#' @keywords internal
 
 acf.ts <- function(x, ...) {
   stats::acf(x, ...)
@@ -553,7 +560,7 @@ acf.ts <- function(x, ...) {
 #' See ?stats::acf for details
 #' @param x input
 #' @param ... parameters 
-#' @export
+#' @keywords internal
 
 acf.numeric <- function(x, ...) {
   stats::acf(x, ...)
@@ -564,7 +571,7 @@ acf.numeric <- function(x, ...) {
 #' See ?stats::pacf for details
 #' @param x input
 #' @param ... parameters 
-#' @export
+#' @keywords internal
 
 pacf.ts <- function(x, ...) {
   stats::pacf(x, ...)
@@ -575,7 +582,7 @@ pacf.ts <- function(x, ...) {
 #' See ?stats::pacf for details
 #' @param x input
 #' @param ... parameters 
-#' @export
+#' @keywords internal
 
 pacf.numeric <- function(x, ...) {
   stats::pacf(x, ...)
@@ -587,7 +594,7 @@ pacf.numeric <- function(x, ...) {
 #' See ?stats::acf for details
 #' @param x input
 #' @param ... parameters 
-#' @export
+#' @keywords internal
 
 spectrum.ts <- function(x, ...) {
   stats::spectrum(x, ...)
@@ -598,7 +605,7 @@ spectrum.ts <- function(x, ...) {
 #' See ?stats::spectrum  for details
 #' @param x input
 #' @param ... parameters 
-#' @export
+#' @keywords internal
 
 spectrum.numeric <- function(x, ...) {
   stats::spectrum(x, ...)

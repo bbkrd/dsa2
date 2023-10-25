@@ -20,5 +20,5 @@ HTML output for dsa2
 Generates an .Rmd file that is rendered into an .html document saved in the working directory.
 }
 \author{
-Lea Hengen, Sindy Brakemeier
+Lea Hengen, Sindy Brakemeier, Martin Stefan, Daniel Ollech
 }

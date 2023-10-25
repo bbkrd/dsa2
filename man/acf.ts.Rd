@@ -14,3 +14,4 @@
 \description{
 See ?stats::acf for details
 }
+\keyword{internal}

@@ -8,6 +8,12 @@
   x,
   main = "Result for seasonal adjustment of daily time series",
   include_forecasts = FALSE,
+  type = "l",
+  xlab = "",
+  ylab = "",
+  cex.axis = 0.75,
+  bty = "n",
+  mar = c(4, 2, 2, 0.5),
   ...
 )
 }
@@ -17,6 +23,18 @@
 \item{main}{title of the plot}
 
 \item{include_forecasts}{display forecast data}
+
+\item{type}{line type}
+
+\item{xlab}{label of x-axis}
+
+\item{ylab}{label of y-axis, you may need to change the margins using mar}
+
+\item{cex.axis}{cex.axis see ?par}
+
+\item{bty}{bty see ?par}
+
+\item{mar}{margins of the plot}
 
 \item{...}{additional parameters from plot() function}
 }

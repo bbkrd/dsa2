@@ -32,13 +32,13 @@ dsa(
 
 \item{s365}{method or specification used for adjustment of day-of-the-year}
 
-\item{outliers}{should outliers be identified using regarima models}
+\item{outliers}{which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched.}
 
-\item{n_iterations}{number of iterations of step 2 to 4 (i.e. s7, s31 and s365)}
+\item{n_iterations}{number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1.}
 
 \item{h}{number of days to forecast}
 
-\item{interpolator}{either "default", "CUBIC_SPLINE" or "NONE". See details}
+\item{interpolator}{either "default" ("NONE" if stl is used, "CUBIC_SPLINES" else), "CUBIC_SPLINE" or "NONE". See details}
 
 \item{pre_processing}{Optionally include pre-processing results computed earlier using dsa2 result (see examples)}
 
@@ -48,7 +48,7 @@ dsa(
 Seasonal adjustment of daily time series
 }
 \details{
-DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
+DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-month effect, and the day-of-the-year effect to get the seasonally adjusted series.
 For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
 Is is not possible to use different decomposition schemes for the single dsa2 steps. This means you cannot use a multiplicative model for the day-of-the-week and an additive model for the day-of-the-year. Therefore, the global specification og log = TRUE or log = FALSE is used for all steps.
 }

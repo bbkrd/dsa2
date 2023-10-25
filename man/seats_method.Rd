@@ -2,11 +2,11 @@
 % Please edit documentation in R/dsa2.R
 \name{seats_method}
 \alias{seats_method}
-\title{Handler for seats}
+\title{Translation between input to dsa() and rjd3-function}
 \usage{
 seats_method(
   period = NA,
-  log = FALSE,
+  log = NULL,
   sn = FALSE,
   stde = FALSE,
   nbcasts = 0,
@@ -14,17 +14,17 @@ seats_method(
 )
 }
 \arguments{
-\item{period}{period}
+\item{period}{frequency which shall be adjusted, numeric}
 
 \item{log}{log, ignored in dsa2}
 
-\item{sn}{sn}
+\item{sn}{shall the series be decomposed into two components (signal and noise)}
 
-\item{stde}{stde}
+\item{stde}{boolean, shall standard deviations of components be computed}
 
-\item{nbcasts}{nbcasts}
+\item{nbcasts}{number of forecasts}
 
-\item{nfcasts}{nfcasts}
+\item{nfcasts}{number of backcasts}
 }
 \description{
 Handler for seats
