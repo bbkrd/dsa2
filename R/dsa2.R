@@ -7,10 +7,10 @@
 #' @param s7 method or specification used for adjustment of day-of-the-week
 #' @param s31 method or specification used for adjustment of day-of-the-month
 #' @param s365 method or specification used for adjustment of day-of-the-year
-#' @param outliers should outliers be identified using regarima models
-#' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365)
+#' @param outliers which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched.
+#' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1.
 #' @param h number of days to forecast
-#' @param interpolator either "default", "CUBIC_SPLINE" or "NONE". See details
+#' @param interpolator either "default" ("NONE" if stl is used, "CUBIC_SPLINES" else), "CUBIC_SPLINE" or "NONE". See details
 #' @param pre_processing Optionally include pre-processing results computed earlier using dsa2 result (see examples) 
 #' @param ... additional parameters from fractionalAirlineEstimation
 #' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-year effect, and the day-of-the-year effect to get the seasonally adjusted series.
