@@ -305,14 +305,14 @@ stl_method  <- function(period = NA,
 #' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for x-11
-#' @param period period
+#' @param period frequency which shall be adjusted, numeric
 #' @param log log, ignored in dsa2
-#' @param sma sma
-#' @param trend.horizon band.width of trend filters
-#' @param trend.degree polynomial order of the local trend model
-#' @param trend.kernel kernel weights in objective function
-#' @param trend.asymmetric truncation type to obtain asymmetric from symmetric filter
-#' @param sigma sigma
+#' @param sma seasonal moving average used
+#' @param trend.horizon band.width of trend filters, see ?rjd3x11plus::x11plus for details
+#' @param trend.degree polynomial order of the local trend model, see ?rjd3x11plus::x11plus for details
+#' @param trend.kernel kernel weights in objective function, see ?rjd3x11plus::x11plus for details
+#' @param trend.asymmetric truncation type to obtain asymmetric from symmetric filter, see ?rjd3x11plus::x11plus for details
+#' @param sigma lower and upper limit for the extreme value detection
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and rjd3x11plus::x11plus, but its goal is to invoke the X-11 procedure.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
