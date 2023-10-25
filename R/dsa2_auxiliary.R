@@ -461,25 +461,26 @@ compare_plot <- function(dsa2_object1, dsa2_object2, include_forecasts = FALSE) 
 #' @param fileName name for HTML output
 #' @param filePath path for HTML output
 #' @details Generates an .Rmd file that is rendered into an .html document saved in the working directory.
-#' @author Lea Hengen, Sindy Brakemeier
+#' @author Lea Hengen, Sindy Brakemeier, Martin Stefan, Daniel Ollech
 #' @export
 
 output <- function(x, fileName = NULL, filePath = NULL) {
   
   # if no file name is specified, use series name
   if (is.null(fileName)) {
-    path <- x$parameters$name
+    fileName <- deparse(substitute(x))
   }
   
   # if no file path is specified, use current working directory 
   if (is.null(filePath)) {
-    path <- getwd()
+    filePath <- getwd()
   }
   
   # render markdown file
   rmarkdown::render(
     #input       = paste0(system.file(package = "dsa2"), "/inst/rmd/output.Rmd"),
     input       = paste0(system.file(package = "dsa2"), "/rmd/output.Rmd"),
+    output_format = "html_document",
     output_file = paste0(filePath, "/", fileName, ".html"),
     params      = list(x = x, fileName = fileName),
     encoding    = 'UTF-8'
