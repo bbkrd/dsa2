@@ -44,7 +44,8 @@ Imports:
     rjd3stl,
     rjd3x11plus,
     rmarkdown,
-    gt
+    gt,
+    dygraphs
 Suggests:
     knitr,
     tssim
