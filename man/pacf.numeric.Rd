@@ -14,3 +14,4 @@
 \description{
 See ?stats::pacf for details
 }
+\keyword{internal}

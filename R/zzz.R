@@ -6,8 +6,16 @@
 
 
 .onLoad <- function(libname, pkgname){
-  result <- rJava::.jpackage(pkgname, lib.loc = libname)
-  if (!result) stop("Loading java packages failed")
+  result <- tryCatch(rJava::.jpackage(pkgname, lib.loc = libname),
+                     error = function(e) e)
+  
+  if (inherits(result, "error")) {
+    stop("Loading java packages failed. You probably need to specify, where your
+         Java installation is stored using something like
+         Sys.setenv('JAVA_HOME' = 'C:/Workspace/Java/JDK/jdk-17.0.3+7')")
+  }
+  
+  # if (!result) stop("Loading java packages failed")
   
   jversion <- rJava::.jcall('java.lang.System','S','getProperty','java.version')
   if (jversion < "17") {

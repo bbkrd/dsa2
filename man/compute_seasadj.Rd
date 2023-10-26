@@ -6,28 +6,31 @@
 \usage{
 compute_seasadj(
   series,
-  seasComp7,
-  seasComp31,
-  seasComp365,
+  seasComp7 = NULL,
+  seasComp31 = NULL,
+  seasComp365 = NULL,
   calComp = NULL,
   log = TRUE
 )
 }
 \arguments{
-\item{series}{basic series}
+\item{series}{original, xts time series}
 
-\item{seasComp7}{day-of-the-week component}
+\item{seasComp7}{day-of-the-week component, xts time series}
 
-\item{seasComp31}{day-of-the-month component}
+\item{seasComp31}{day-of-the-month component, xts time series}
 
-\item{seasComp365}{day-of-the-year component}
+\item{seasComp365}{day-of-the-year component, xts time series}
 
-\item{calComp}{calendar component}
+\item{calComp}{calendar component, xts time series}
 
 \item{log}{do we use a multiplicative model}
 }
 \description{
 Compute calendar and seasonally adjusted time series
+}
+\details{
+All time series used should be of class xts or a numeric constant.
 }
 \author{
 Daniel Ollech

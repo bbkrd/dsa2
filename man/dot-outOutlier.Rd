@@ -15,3 +15,4 @@ Internal function to polish the output for outliers
 \author{
 Sindy Brakemeier, Lea Hengen
 }
+\keyword{internal}

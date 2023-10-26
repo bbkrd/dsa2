@@ -14,7 +14,7 @@
 \item{log}{multiplicative models used}
 }
 \description{
-Default method for estimating seasonal component
+Default method for estimating seasonal component.
 }
 \author{
 Daniel Ollech

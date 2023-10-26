@@ -4,10 +4,43 @@
 \alias{pacf.dsa2}
 \title{Plot the PACF based on dsa2 object}
 \usage{
-\method{pacf}{dsa2}(dsa2_object, ...)
+\method{pacf}{dsa2}(
+  x,
+  lags = c(1:7, 30:31, 365, 730),
+  ylim = c(-1, 1),
+  main = "PACF for selected lags",
+  xlab = "lags",
+  ylab = "PACF",
+  col = .dsa2color("darkgreen"),
+  col2 = .dsa2color("blue"),
+  col3 = .dsa2color("darkgrey"),
+  space = 6,
+  border = NA,
+  ...
+)
 }
 \arguments{
-\item{dsa2_object}{object as calculated by dsa2()}
+\item{x}{object as calculated by dsa2()}
+
+\item{lags}{which lags shall be shown}
+
+\item{ylim}{limits of y-axis}
+
+\item{main}{title of plot}
+
+\item{xlab}{x-axis label}
+
+\item{ylab}{y-axis label}
+
+\item{col}{color of lines}
+
+\item{col2}{color of horizontal lines for confidence interval}
+
+\item{col3}{color of vertical lines to separate lags of interest}
+
+\item{space}{space before each bar}
+
+\item{border}{color of border}
 
 \item{...}{further arguments for barplot()}
 }
@@ -15,7 +48,8 @@
 Plot the PACF for a seasonally adjusted time series extracted from a dsa2 object
 }
 \details{
-Wrapper around the stats::pacf() function
+Wrapper around the stats::pacf() function. See ?barplot for details
+on changing the look of the plot
 }
 \examples{
 x <- tssim::sim_daily(3)$original

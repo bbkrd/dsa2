@@ -615,89 +615,133 @@ spectrum.numeric <- function(x, ...) {
 #' Plot the ACF based on dsa2 object
 #'
 #' Plot the ACF for a seasonally adjusted time series extracted from a dsa2 object 
-#' @param dsa2_object object as calculated by dsa2()
+#' @param x object as calculated by dsa2()
+#' @param lags which lags shall be shown
+#' @param ylim limits of y-axis
+#' @param main title of plot
+#' @param xlab x-axis label
+#' @param ylab y-axis label
+#' @param col color of lines
+#' @param col2 color of horizontal lines for confidence interval
+#' @param col3 color of vertical lines to separate lags of interest
+#' @param space space before each bar
+#' @param border color of border
 #' @param ... further arguments for barplot()
-#' @details Wrapper around the stats::acf() function
+#' @details Wrapper around the stats::acf() function. See ?barplot for details
+#' on changing the look of the plot
 #' @author Daniel Ollech
 #' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' acf(result)
 #' @export
 
-acf.dsa2 <- function(dsa2_object, ...) {
+acf.dsa2 <- function(x, 
+                     lags = c(1:7 + 1, 30:31 + 1, 365 + 1, 730 + 1),
+                     ylim = c(-1, 1),
+                     main = "ACF for selected lags",
+                     xlab = "lags",
+                     ylab = "ACF",
+                     col = .dsa2color("darkgreen"),
+                     col2 = .dsa2color("blue"),
+                     col3 = .dsa2color("darkgrey"),
+                     space = 6,
+                     border = NA,
+                     ...) {
   # Calculations before
-  residuals <- dsa2_object$preProcessing$model$residuals
+  residuals <- x$preProcessing$model$residuals
   residuals <- residuals[!is.na(residuals)]
   acf_result <- stats::acf(residuals, lag.max = 366 * 2, plot = FALSE)
-  acf_res <- acf_result$acf[c(1:7 + 1, 30:31 + 1, 365 + 1, 730 + 1)]
+  acf_res <- acf_result$acf[lags]
   names(acf_res) <-
-    as.character(acf_result$lag[c(1:7 + 1, 30:31 + 1, 365 + 1, 730 + 1)])
+    as.character(acf_result$lag[lags])
   ci <- stats::qnorm((1 + 0.95) / 2) / sqrt(length(residuals))
   
   # Plotting
   graphics::barplot(
     acf_res,
-    ylim = c(-1, 1),
-    main = "ACF for selected lags",
-    xlab = "lags",
-    ylab = "ACF",
-    col = .dsa2color("darkgreen"),
-    space = 6,
-    border = NA,
+    ylim = ylim,
+    main = main,
+    xlab = xlab,
+    ylab = ylab,
+    col = col,
+    space = space,
+    border = border,
     ...
   )
   graphics::abline(h = ci,
                    lty = 3,
-                   col = .dsa2color("blue"))
+                   col = col2)
   graphics::abline(h = -ci,
                    lty = 3,
-                   col = .dsa2color("blue"))
-  graphics::abline(v = 52.5, col = .dsa2color("darkgrey"))
-  graphics::abline(v = 65, col = .dsa2color("darkgrey"))
+                   col = col2)
+  graphics::abline(v = 52.5, col = col3)
+  graphics::abline(v = 65, col = col3)
 }
 
 #' Plot the PACF based on dsa2 object
 #'
 #' Plot the PACF for a seasonally adjusted time series extracted from a dsa2 object 
-#' @param dsa2_object object as calculated by dsa2()
+#' @param x object as calculated by dsa2()
+#' @param lags which lags shall be shown 
+#' @param ylim limits of y-axis
+#' @param main title of plot
+#' @param xlab x-axis label
+#' @param ylab y-axis label
+#' @param col color of lines
+#' @param col2 color of horizontal lines for confidence interval
+#' @param col3 color of vertical lines to separate lags of interest
+#' @param space space before each bar
+#' @param border color of border
 #' @param ... further arguments for barplot()
-#' @details Wrapper around the stats::pacf() function
+#' @details Wrapper around the stats::pacf() function. See ?barplot for details
+#' on changing the look of the plot
 #' @author Daniel Ollech
 #' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' pacf(result)
 #' @export
 
-pacf.dsa2 <- function(dsa2_object, ...) {
+pacf.dsa2 <- function(x, 
+                     lags = c(1:7, 30:31, 365, 730),
+                     ylim = c(-1, 1),
+                     main = "PACF for selected lags",
+                     xlab = "lags",
+                     ylab = "PACF",
+                     col = .dsa2color("darkgreen"),
+                     col2 = .dsa2color("blue"),
+                     col3 = .dsa2color("darkgrey"),
+                     space = 6,
+                     border = NA,
+                     ...) {
   # Calculations before
-  residuals <- dsa2_object$preProcessing$model$residuals
+  residuals <- x$preProcessing$model$residuals
   residuals <- residuals[!is.na(residuals)]
-  acf_result <- stats::pacf(residuals, lag.max = 366 * 2, plot = FALSE)
-  acf_res <- acf_result$acf[c(1:7, 30:31, 365, 730)]
-  names(acf_res) <-
-    as.character(acf_result$lag[c(1:7, 30:31, 365, 730)])
+  pacf_result <- stats::pacf(residuals, lag.max = 366 * 2, plot = FALSE)
+  pacf_res <- pacf_result$acf[lags]
+  names(pacf_res) <-
+    as.character(pacf_result$lag[lags])
   ci <- stats::qnorm((1 + 0.95) / 2) / sqrt(length(residuals))
   
   # Plotting
   graphics::barplot(
-    acf_res,
-    ylim = c(-1, 1),
-    main = "PACF for selected lags",
-    xlab = "lags",
-    ylab = "PACF",
-    col = .dsa2color("violet"),
-    space = 6,
-    border = NA,
+    pacf_res,
+    ylim = ylim,
+    main = main,
+    xlab = xlab,
+    ylab = ylab,
+    col = col,
+    space = space,
+    border = border,
     ...
   )
   graphics::abline(h = ci,
                    lty = 3,
-                   col = .dsa2color("blue"))
+                   col = col2)
   graphics::abline(h = -ci,
                    lty = 3,
-                   col = .dsa2color("blue"))
-  graphics::abline(v = 52.5, col = .dsa2color("darkgrey"))
-  graphics::abline(v = 65, col = .dsa2color("darkgrey"))
+                   col = col2)
+  graphics::abline(v = 52.5, col = col3)
+  graphics::abline(v = 65, col = col3)
 }
 
 
@@ -705,6 +749,7 @@ pacf.dsa2 <- function(dsa2_object, ...) {
 #'
 #' Plot the periodogram of a daily time series
 #' @param dsa2_object dsa2-object
+#' @param ... further options to par()
 #' @details The spectrum is build around the spec.pgram() function
 #' @author Daniel Ollech
 #' @examples x <- tssim::sim_daily(3)$original
@@ -712,7 +757,7 @@ pacf.dsa2 <- function(dsa2_object, ...) {
 #' spectrum(res)
 #' @export
 
-spectrum.dsa2 <- function(dsa2_object, xlog=FALSE) {
+spectrum.dsa2 <- function(dsa2_object, ...) {
   # Calculations before
   original_diff <- diff(dsa2_object$series$original)
   original_diff <- ts(original_diff[!is.na(original_diff)], frequency = 365.2524)
@@ -728,7 +773,8 @@ spectrum.dsa2 <- function(dsa2_object, xlog=FALSE) {
                 oma = c(1, 1, 1, 1),
                 mar = c(1.75, 2.75, 1.5, 0.5),
                 mgp = c(1.75, 0.5, 0),
-                cex.axis = 0.75)
+                cex.axis = 0.75,
+                ...)
   graphics::par(mfrow = c(2,1))
   .single_plot_spectrum(df, ylab = "Original", title = "Spectrum")
   graphics::par(mar = c(2.75, 2.75, 0.5, 0.5))

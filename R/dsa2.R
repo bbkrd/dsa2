@@ -62,7 +62,7 @@ dsa <- function(series,
   parameters$name <-  deparse(substitute(series)) # Get name of object inputted as series
   
   # Preliminary checks -----------------------------------------------------
-  .preliminary_checks(series, outliers)
+  .preliminary_checks(series, outliers, xreg, h)
   
   if (any( (inherits(s7, "character") && s7 == "seats") |  # Note(DO): If-clause needs to be deleted once Seats can deal with multiplicative models
            inherits(s7, "seats_method") |  
@@ -136,7 +136,7 @@ dsa <- function(series,
     
     # S31 ----------------------------------------------------------------------
     
-    zLinz <- compute_seasadj(series = xLinear, 
+    zLinz <<- compute_seasadj(series = xLinear, 
                              seasComp7 = seasComp7, 
                              seasComp31 = NULL, 
                              seasComp365 = seasComp365, 
@@ -153,8 +153,10 @@ dsa <- function(series,
     xLinx <- stats::ts(interpolate31(zLinz, 
                            interpolator = interpolator),
                 frequency = 31)
+    
+    s31 <<- s31
                 
-    s31Result <- .estimate_component(method = s31, series = xLinx) 
+    s31Result <- .estimate_component(method = s31, series = xLinx, log = log) 
     
     seasComp31 <- xts::xts(reduce31(zLinz, s31Result$seasComp), 
                            zoo::index(seasComp31))
@@ -238,7 +240,7 @@ dsa <- function(series,
 #' @author Daniel Ollech
 #' @export
 
-stl_method  <- function(period = NA, 
+stl_method <- function(period = NA, 
                         swindow = 13, 
                         log = NULL, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stlplus
                         twindow = 0, 
@@ -443,17 +445,18 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 
 #' Generic for estimating seasonal component
 #' 
-#' Generic for estimating seasonal component. See ??.estimate_component for all variants
+#' Generic for estimating seasonal component
 #' @param method method to be employed
 #' @param series time series to be adjusted
 #' @param log should logs be used
 #' @author Daniel Ollech
+#' @keywords internal
 
 .estimate_component <- function(method, series, log = NULL) {UseMethod(".estimate_component")} # This is how we define generics in S3
 
 #' Default method for estimating seasonal component
 #' 
-#' Default method for estimating seasonal component
+#' Default method for estimating seasonal component. 
 #' @param method method to be employed
 #' @param series time series to be adjusted
 #' @param log multiplicative models used
@@ -621,19 +624,20 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
 #' Compute calendar and seasonally adjusted time series
 #' 
 #' Compute calendar and seasonally adjusted time series
-#' @param series basic series
-#' @param seasComp7 day-of-the-week component
-#' @param seasComp31 day-of-the-month component
-#' @param seasComp365 day-of-the-year component
-#' @param calComp calendar component
+#' @param series original, xts time series
+#' @param seasComp7 day-of-the-week component, xts time series
+#' @param seasComp31 day-of-the-month component, xts time series
+#' @param seasComp365 day-of-the-year component, xts time series
+#' @param calComp calendar component, xts time series
 #' @param log do we use a multiplicative model
+#' @details All time series used should be of class xts or a numeric constant. 
 #' @author Daniel Ollech
 #' @export
 
 compute_seasadj <- function(series, 
-                            seasComp7, 
-                            seasComp31, 
-                            seasComp365, 
+                            seasComp7 = NULL, 
+                            seasComp31 = NULL, 
+                            seasComp365 = NULL, 
                             calComp = NULL, 
                             log = TRUE) {
   
@@ -664,15 +668,40 @@ compute_seasadj <- function(series,
 }
 
 
-.preliminary_checks <- function(series, outliers) {
+.preliminary_checks <- function(series, outliers, xreg, h) {
+  ### Preliminary checks to check the input parameters in dsa2
   if (is.null(series)) { 
     stop("Series is NULL")
   }
+  
   if (length(series) < 365*2 + 1) { 
-    stop("Series is too short to use dsa2 on it.")
+    stop("Series is too short to use dsa2 on it")
   }
+  
+  if (!any(class(series)=="xts")) {
+    stop("Class of series should be xts")
+  }
+  
   if (any(outliers == "TC")) {
     warning("The outlier type TC is not implemented in the Fractional Airline Estimation function")
   }
+  
+  if (!is.null(xreg)) {
+    if (length(series) + h != nrow(xreg)) {
+      stop(
+        "The number of observations included in xreg needs to be equal to the length of the series plus the number of observations to forecast (given by h)"
+      )
+    }
+    
+    if (!is.null(dim(xreg))) {
+    if(any(apply(xreg[1:length(series),], 2, sd) == 0)) {
+      get_problem_regressor <- seq(ncol(xreg))[apply(xreg[1:length(series),], 2, sd) == 0]
+      stop(paste0("Some of the regressors included are constants with respect to the observations used in the fractional airline model, i.e all but the last ", h, " observations are a constant. The following columns need to be checked: ", paste0(get_problem_regressor, collapse=" ")))
+    }
+    }
+  }
+  
+  
+  
 }
 

@@ -4,10 +4,12 @@
 \alias{spectrum.dsa2}
 \title{Plot the periodogram of a daily time series}
 \usage{
-\method{spectrum}{dsa2}(dsa2_object, xlog = FALSE)
+\method{spectrum}{dsa2}(dsa2_object, ...)
 }
 \arguments{
 \item{dsa2_object}{dsa2-object}
+
+\item{...}{further options to par()}
 }
 \description{
 Plot the periodogram of a daily time series

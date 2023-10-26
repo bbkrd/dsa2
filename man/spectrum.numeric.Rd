@@ -14,3 +14,4 @@
 \description{
 See ?stats::spectrum  for details
 }
+\keyword{internal}

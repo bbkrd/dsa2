@@ -13,5 +13,6 @@
 Internal function to polish the output for the fractional airline model
 }
 \author{
-Jakob Oberhammer, Martin Stefan
+Jakob Oberhammer, Martin Stefan, Sindy Brakemeier, Lea Hengen
 }
+\keyword{internal}
