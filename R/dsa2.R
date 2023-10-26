@@ -136,7 +136,7 @@ dsa <- function(series,
     
     # S31 ----------------------------------------------------------------------
     
-    zLinz <<- compute_seasadj(series = xLinear, 
+    zLinz <- compute_seasadj(series = xLinear, 
                              seasComp7 = seasComp7, 
                              seasComp31 = NULL, 
                              seasComp365 = seasComp365, 
@@ -154,7 +154,7 @@ dsa <- function(series,
                            interpolator = interpolator),
                 frequency = 31)
     
-    s31 <<- s31
+    s31 <- s31
                 
     s31Result <- .estimate_component(method = s31, series = xLinx, log = log) 
     

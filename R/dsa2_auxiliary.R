@@ -525,15 +525,6 @@ output <- function(x, fileName = NULL, filePath = NULL) {
 
 acf <- function(dsa2_object,  ...) {UseMethod("acf")} # This is how we define generics in S3
 
-#' Generic for PACF
-#' 
-#' Generic for PACF
-#' @param ... parameters 
-#' @author Daniel Ollech
-#' @export
-
-pacf <- function(dsa2_object,  ...) {UseMethod("pacf")} # This is how we define generics in S3
-
 #' Generic for spectrum
 #' 
 #' Generic for spectrum
@@ -565,29 +556,6 @@ acf.ts <- function(x, ...) {
 acf.numeric <- function(x, ...) {
   stats::acf(x, ...)
 }
-
-#' PACF for ts object
-#' 
-#' See ?stats::pacf for details
-#' @param x input
-#' @param ... parameters 
-#' @keywords internal
-
-pacf.ts <- function(x, ...) {
-  stats::pacf(x, ...)
-}
-
-#' PACF for numeric object
-#' 
-#' See ?stats::pacf for details
-#' @param x input
-#' @param ... parameters 
-#' @keywords internal
-
-pacf.numeric <- function(x, ...) {
-  stats::pacf(x, ...)
-}
-
 
 #' Spectrum for ts object
 #' 
