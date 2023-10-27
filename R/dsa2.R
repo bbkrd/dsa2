@@ -52,6 +52,7 @@ dsa <- function(series,
                  s31 = NULL,
                  s365 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
                  outliers = c("AO", "LS", "WO"),
+                 critical_value = 6,
                  n_iterations = 1,
                  h = 365,
                  interpolator = "default",
@@ -93,6 +94,7 @@ dsa <- function(series,
       x = xreg, 
       nfcasts = h,
       outliers = outliers,
+      criticalValue = critical_value,
       log = log,
       ...)
     

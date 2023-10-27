@@ -1,5 +1,6 @@
 ---
 title: "BBkVignette"
+author: Daniel Ollech
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{BBkVignette}
@@ -14,19 +15,45 @@ knitr::opts_chunk$set(
 )
 ```
 
-You can get Java 17 here: R:\Zentrale\Projekte\FB-S\Daten\DA\JDemetra\Anwendungen\VC\Java\JDK
-Move and unpack the zip file to the right path: C:\\Workspace\\Java\\JDK\\ 
+## Quick intro DSA2
+The first version of dsa was developed by Ollech (2018, 2021). Based on the analysis of the daily currency in circulation, it was shown that daily time series can comprise calendar effects and several periodic effects. The latter can be handled by traditional seasonal adjustment methods, such as STL (see Cleveland et al, 1990, for details on this local regressions based method).
+
+While the first version of dsa used a non-seasonal ARIMA model with trigonometric components and additional calendar regressors to conduct the calendar and outlier adjustment, DSA2  uses the extended airline model developed by Jean Palate and included in the {rjd3highfreq} package. This allows the estimation of an Airline type ARIMA model with multiple periodic effects. Therefore, the order of the steps in dsa has been adapted as follows:
+
+1) Extended Airline model to estimate calendar and outlier effects
+2) Estimation of the day-of-the-week effect
+3) Estimation of the day-of-the-month effect
+4) Estimation of the day-of-the-year effect
+
+Steps 2 to 4 may be iterated several times to improve the estimation of the periodic effects. For the estimation of these effects, different methods can be used. Currently, X-11, STL and Seats (see below) are implemented.
+
+## Setup
+
+To get started, ensure that you have Java 17 oder higher. If not automatically detected, 
+you can set your Java home using the following command.
+ 
 ```{r start}
 Sys.setenv("JAVA_HOME" = "C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
 ```
 
+**In the Bundesbank, you can get Java 17 here:** 
 
+**R:/Zentrale/Projekte/FB-S/Daten/DA/JDemetra/Anwendungen/VC/Java/JDK**
+
+**Move and unpack the zip file to the right path: C:/Workspace/Java/JDK/**
+
+## Getting started with dsa2
+
+Once your Java settings are up to speed, you can start using the {dsa2} package
 ```{r setup}
 library(dsa2)
 ```
 
-
+## Creating some seasonal time series
 ```{r createSeries}
+## Creating series with calendar effects, and a day-of-the-week and day-of-the-year pattern
+
+set.seed(135)
 all <- tssim::sim_daily(N = 6, 
                         week_sd = 10,
                         year_sd = 10,
@@ -37,37 +64,41 @@ all <- tssim::sim_daily(N = 6,
                                         to = 0))
 series <- all$original
 
-
+## Creating holiday regressors
 regs <- holidaysCentered[ ,c("EasterMonday", 
                             "EasterSunday")][seq.Date(from = start(series), 
                                                       length.out = length(series) + 365, 
                                                       by = "days")]
+
+## Creating series with only day-of-the-month pattern
+allm <- tssim::sim_daily(N = 5, 
+                        week_sd = 0,
+                        year_sd = 0,
+                        month_sd = 10)
+
+series_withMonthlySeasonality <- allm$original
 ```
 
 
 
 ## Default adjustment
 
-Currently, by default, STL is used for the seasonal adjustments
+Currently, by default, STL is used for the seasonal adjustments and no automatic calendar adjustment is conducted
 ```{r Default, fig.width=7.5, fig.height=4.5}
 result0 <- dsa(series)
 result0
 plot(result0)
 # output(result0) # Create HTML output
 ```
+To create an HTML output you can use the following code
 
-## Adjustment with missing values
-```{r AdjustmentMissing, fig.width=7.5, fig.height=4.5}
-seriesx <- series
-seriesx[c(1, 499, 1010, 1748)] <- NA
-
-resultx <- dsa(seriesx)
-resultx
-plot(resultx)
+```{r output, fig.width=7.5, fig.height=4.5, eval = FALSE}
+output(result0) # Create HTML output
 ```
 
-
 ## Adjustment with regressors
+
+To conduct a calendar adjustment, you have to include your pre-defined regressors, as follows
 
 ```{r DefaultRegs, fig.width=7.5, fig.height=4.5}
 result <- dsa(series,
@@ -76,10 +107,29 @@ result
 plot(result)
 ```
 
+
+## Adjustment with missing values
+dsa() handles missing values automatically, they are filled up using the fractional airline model
+
+```{r AdjustmentMissing, fig.width=7.5, fig.height=4.5}
+seriesx <- series
+seriesx[c(1, 499, 1010, 1748)] <- NA
+
+resultx <- dsa(seriesx,
+              xreg = regs)
+resultx
+plot(resultx)
+```
+
+
+
+
 ## Adjustment with X-11
 
 Setting any of s7, s31 or s365 to "x11" uses the default adjustment of x11. Alternatively, x11_method() can be used, to specify details of the adjustment.
+
 The function compare_plot() allows you to compare results from two different adjustment graphically.
+
 Finally, if you only want to change the seasonal adjustment part and leave the pre-adjustment unchanged, you can plug-in the previous result to pre_adjustment, to speed up the computation.
 
 ```{r, AdjustmentX11, fig.width=7.5, fig.height=4.5}
@@ -97,6 +147,7 @@ compare_plot(result, result2)
 
 ## Adjustment with Seats
 The adjustment called Seats is in fact just a Extended Airline based decomposition. Also, currently, multiplicative decompositions are not implemented.
+
 ```{r SeatsAdjustment, fig.width=7.5, fig.height=4.5}
 result3 <- dsa(series, 
                s7 = seats_method(),
@@ -108,8 +159,35 @@ compare_plot(result, result3)
 ```
 
 
+## Day-of-the-month effects
+The currency in circulation series analysed by Ollech (2018) included noticeable day-of-the-month effects. Not too many other daily time series include such effects, which is why by default, dsa2 does not include the estimation of these effects.
+
+If you want to include it, you have to set the s31 parameter to a method of your choice
 
 
+```{r DayOfMonth, fig.width=7.5, fig.height=4.5}
+resultm <- dsa(series_withMonthlySeasonality, 
+               s7 = NULL,
+               s31 = seats_method(), 
+               s365 = NULL,
+               log = FALSE)
+
+resultm2 <- dsa(series_withMonthlySeasonality, 
+               s7 = NULL,
+               s31 = x11_method(), 
+               s365 = NULL,
+               log = FALSE,
+               pre_processing = resultm)
+
+compare_plot(resultm, resultm2)
+```
 
 
+## References
+Cleveland, R. B., W. S. Cleveland, J. E. McRae, and I. Terpenning. (1990). STL: A Seasonal-Trend Decomposition Procedure Based on Loess. Journal of Official Statistics, 6 (1), 3–73.
 
+Ollech, D. (2018). Seasonal adjustment of daily time series. Bundesbank Discussion Paper 41/2018.
+
+Ollech, D. (2021). Seasonal Adjustment of Daily Time Series. Journal of Time Series Econometrics, 13(2), 235-264.
+
+Ollech, D. (2023). Economic analysis using higher-frequency time series: challenges for seasonal adjustment. Empirical Economics, 64(3), 1375-1398.
