@@ -29,14 +29,14 @@ Steps 2 to 4 may be iterated several times to improve the estimation of the peri
 
 ## Setup
 
-To get started, ensure that you have Java 17 oder higher. If not automatically detected, 
+To get started, ensure that you have Java 17 or higher. If not automatically detected, 
 you can set your Java home using the following command.
  
 ```{r start}
 Sys.setenv("JAVA_HOME" = "C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
 ```
 
-**In the Bundesbank, you can get Java 17 here:** 
+**At the Bundesbank, you can get Java 17 here:** 
 
 **R:/Zentrale/Projekte/FB-S/Daten/DA/JDemetra/Anwendungen/VC/Java/JDK**
 
@@ -50,6 +50,7 @@ library(dsa2)
 ```
 
 ## Creating some seasonal time series
+For simplicity this example only includes the Easter holidays as holiday regressors, as they are the prime example of calendar effects. 
 ```{r createSeries}
 ## Creating series with calendar effects, and a day-of-the-week and day-of-the-year pattern
 
@@ -84,15 +85,18 @@ series_withMonthlySeasonality <- allm$original
 ## Default adjustment
 
 Currently, by default, STL is used for the seasonal adjustments and no automatic calendar adjustment is conducted
-```{r Default, fig.width=7.5, fig.height=4.5}
+```{r Default, fig.width=15, fig.height=4.5, fig.align = 'center'}
 result0 <- dsa(series)
 result0
 plot(result0)
-# output(result0) # Create HTML output
 ```
+
+
+## Create HTML output
+
 To create an HTML output you can use the following code
 
-```{r output, fig.width=7.5, fig.height=4.5, eval = FALSE}
+```{r output, fig.width=11, fig.height=4.5, eval = FALSE}
 output(result0) # Create HTML output
 ```
 
@@ -100,7 +104,7 @@ output(result0) # Create HTML output
 
 To conduct a calendar adjustment, you have to include your pre-defined regressors, as follows
 
-```{r DefaultRegs, fig.width=7.5, fig.height=4.5}
+```{r DefaultRegs, fig.width=15, fig.height=4.5, fig.align = 'center'}
 result <- dsa(series,
               xreg = regs)
 result
@@ -111,7 +115,7 @@ plot(result)
 ## Adjustment with missing values
 dsa() handles missing values automatically, they are filled up using the fractional airline model
 
-```{r AdjustmentMissing, fig.width=7.5, fig.height=4.5}
+```{r AdjustmentMissing, fig.width=15, fig.height=4.5, fig.align = 'center'}
 seriesx <- series
 seriesx[c(1, 499, 1010, 1748)] <- NA
 
@@ -126,13 +130,13 @@ plot(resultx)
 
 ## Adjustment with X-11
 
-Setting any of s7, s31 or s365 to "x11" uses the default adjustment of x11. Alternatively, x11_method() can be used, to specify details of the adjustment.
+The parameters s7, s31, and s365 control for the method or specification used for the adjustment of day-of-the-week, day-of-the-month, and day-of-the-year effects. Setting any of these parameters (s7, s31 or s365) to "x11" uses the default adjustment of x11. Alternatively, x11_method() can be used, to specify details of the adjustment.
 
 The function compare_plot() allows you to compare results from two different adjustment graphically.
 
-Finally, if you only want to change the seasonal adjustment part and leave the pre-adjustment unchanged, you can plug-in the previous result to pre_adjustment, to speed up the computation.
+If you only want to change the seasonal adjustment part and leave the pre-adjustment unchanged, you can plug-in the previous result to pre_adjustment, to speed up the computation.
 
-```{r, AdjustmentX11, fig.width=7.5, fig.height=4.5}
+```{r, AdjustmentX11, fig.width=15, fig.height=4.5, fig.align = 'center'}
 result2 <-  dsa(series, 
                 s7 = "x11",
                 s365 = x11_method(sma = "S3x1", 
@@ -146,9 +150,9 @@ compare_plot(result, result2)
 
 
 ## Adjustment with Seats
-The adjustment called Seats is in fact just a Extended Airline based decomposition. Also, currently, multiplicative decompositions are not implemented.
+The adjustment called Seats is in fact just an Extended Airline based decomposition. Note that currently, multiplicative decompositions are not implemented in dsa().
 
-```{r SeatsAdjustment, fig.width=7.5, fig.height=4.5}
+```{r SeatsAdjustment, fig.width=15, fig.height=4.5, fig.align = 'center'}
 result3 <- dsa(series, 
                s7 = seats_method(),
                s365 = seats_method(), 
@@ -165,7 +169,7 @@ The currency in circulation series analysed by Ollech (2018) included noticeable
 If you want to include it, you have to set the s31 parameter to a method of your choice
 
 
-```{r DayOfMonth, fig.width=7.5, fig.height=4.5}
+```{r DayOfMonth, fig.width=15, fig.height=4.5, fig.align = 'center'}
 resultm <- dsa(series_withMonthlySeasonality, 
                s7 = NULL,
                s31 = seats_method(), 
