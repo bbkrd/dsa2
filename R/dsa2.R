@@ -7,8 +7,9 @@
 #' @param s7 method or specification used for adjustment of day-of-the-week
 #' @param s31 method or specification used for adjustment of day-of-the-month
 #' @param s365 method or specification used for adjustment of day-of-the-year
-#' @param outliers which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched.
-#' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1.
+#' @param outliers which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched
+#' @param critical_value threshold to include outliers to be used in the automatic outlier estimation
+#' @param n_iterations number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1
 #' @param h number of days to forecast
 #' @param interpolator either "default" ("NONE" if stl is used, "CUBIC_SPLINES" else), "CUBIC_SPLINE" or "NONE". See details
 #' @param pre_processing Optionally include pre-processing results computed earlier using dsa2 result (see examples) 
@@ -52,6 +53,7 @@ dsa <- function(series,
                  s31 = NULL,
                  s365 = c("x11", "stl", "seats")[2], # NOTE(DO): Later x11 should be default
                  outliers = c("AO", "LS", "WO"),
+                 critical_value = 6,
                  n_iterations = 1,
                  h = 365,
                  interpolator = "default",
@@ -93,6 +95,7 @@ dsa <- function(series,
       x = xreg, 
       nfcasts = h,
       outliers = outliers,
+      criticalValue = critical_value,
       log = log,
       ...)
     
