@@ -22,4 +22,8 @@
     stop(paste("Your java version is ", jversion,
                ".  N or higher. Use Sys.setenv to set the path", sep = ""))
   }
+
+  classes <- system.file("java", package=pkgname, lib.loc=libname)
+  jars <- "splines-0.3.jar"
+  rJava::.jaddClassPath(paste(classes, jars, sep = .Platform$file.sep))
 }

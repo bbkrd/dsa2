@@ -7,6 +7,7 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
+library(xts)
 library(dsa2)
 
 test_check("dsa2")

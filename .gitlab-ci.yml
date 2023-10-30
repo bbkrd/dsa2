@@ -1,0 +1,47 @@
+stages:          
+  - build
+  - check
+  - test
+  - deploy
+
+default:
+  before_script:
+    - $env:JAVA_HOME = 'C:\Workspace\jdk.17.0.3_7'
+
+build-job:       
+  stage: build
+  script: 
+    - Rterm.exe -q -e 'devtools::build(binary = TRUE)'
+
+document:
+  stage: build
+  allow_failure: true
+  script:
+    - Rterm.exe -q -e "devtools::document(roclets = c('rd', 'collate', 'namespace', 'vignette'))"
+ 
+check:
+  stage: check
+  script:
+    - Rterm.exe -q -e "checkResults <- devtools::check(document = TRUE, vignettes = FALSE, error_on = 'never', args = '--no-tests')"
+      -e "if (!identical(checkResults[['errors']], character(0))) stop('Check with Errors')"
+      -e "if (!identical(checkResults[['warnings']], character(0))) stop('Check with Warnings')"
+
+unittests:
+  stage: test
+  script:
+    - Rterm.exe -q -e "if (any(as.data.frame(devtools::test())[['failed']] > 0)) stop('Some tests failed.')"
+
+install:
+  stage: deploy
+  script:
+    - Rterm.exe -q -e 'version <- paste(R.version$major, gsub(\"\\..+$\", \"\", R.version$minor), sep = \".\")'
+      -e "baseURL <- '$BASE_URL'"
+      -e 'binaryURL <- paste(baseURL,\"bin/windows/contrib/\",version,sep = \"\")'
+      -e 'source <- devtools::build(vignettes = FALSE)'
+      -e 'sourceURL <- paste(baseURL, \"src/contrib\", basename(source), sep = \"/\")'
+      -e "status <- curl::curl_upload(file = source,url = sourceURL, verbose = FALSE, username='$USER', password='$PWD')`$status_code"
+      -e 'if(status!=200){stop(paste(\"Failed upload of source package with code\", status))}'
+      -e 'binary <- devtools::build(binary = TRUE)'
+      -e 'binaryURL <- paste(baseURL, \"bin/windows/contrib\", version, basename(binary), sep = \"/\")'
+      -e "status <-  curl::curl_upload(file = binary,url = binaryURL, verbose = FALSE, username='$USER', password='$PWD')`$status_code"
+      -e 'if(status!=200){  stop(paste(\"Failed upload of binary package with code\", status))}'

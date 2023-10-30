@@ -48,7 +48,8 @@ Imports:
     dygraphs
 Suggests:
     knitr,
-    tssim
+    tssim,
+    testthat
 Depends: 
     R (>= 2.10)
 Roxygen: list(markdown = TRUE)

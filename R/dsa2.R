@@ -697,8 +697,8 @@ compute_seasadj <- function(series,
     }
     
     if (!is.null(dim(xreg))) {
-    if(any(apply(xreg[1:length(series),], 2, sd) == 0)) {
-      get_problem_regressor <- seq(ncol(xreg))[apply(xreg[1:length(series),], 2, sd) == 0]
+    if(any(apply(xreg[1:length(series),], 2, stats::sd) == 0)) {
+      get_problem_regressor <- seq(ncol(xreg))[apply(xreg[1:length(series),], 2, stats::sd) == 0]
       stop(paste0("Some of the regressors included are constants with respect to the observations used in the fractional airline model, i.e all but the last ", h, " observations are a constant. The following columns need to be checked: ", paste0(get_problem_regressor, collapse=" ")))
     }
     }

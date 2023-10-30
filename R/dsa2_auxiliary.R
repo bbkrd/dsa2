@@ -667,6 +667,7 @@ acf.dsa2 <- function(x,
 #' @examples x <- tssim::sim_daily(3)$original
 #' result <- dsa(x)
 #' pacf(result)
+#' @importFrom stats pacf
 #' @export
 
 pacf.dsa2 <- function(x, 
@@ -728,11 +729,11 @@ pacf.dsa2 <- function(x,
 spectrum.dsa2 <- function(dsa2_object, ...) {
   # Calculations before
   original_diff <- diff(dsa2_object$series$original)
-  original_diff <- ts(original_diff[!is.na(original_diff)], frequency = 365.2524)
+  original_diff <- stats::ts(original_diff[!is.na(original_diff)], frequency = 365.2524)
   df <- data.frame(freq = stats::spec.pgram(original_diff, plot = F)$freq, spectrum = (stats::spec.pgram(original_diff, plot = F)$spec))
   
   seasadj_diff <- diff(dsa2_object$series$seas_adj)
-  seasadj_diff <- ts(seasadj_diff[!is.na(seasadj_diff)], frequency = 365.2524)
+  seasadj_diff <- stats::ts(seasadj_diff[!is.na(seasadj_diff)], frequency = 365.2524)
   df2 <- data.frame(freq = stats::spec.pgram(seasadj_diff, plot = F)$freq, spectrum = (stats::spec.pgram(seasadj_diff, plot = F)$spec))
   
   
