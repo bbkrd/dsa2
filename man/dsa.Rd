@@ -12,6 +12,7 @@ dsa(
   s31 = NULL,
   s365 = c("x11", "stl", "seats")[2],
   outliers = c("AO", "LS", "WO"),
+  critical_value = 6,
   n_iterations = 1,
   h = 365,
   interpolator = "default",
@@ -32,9 +33,11 @@ dsa(
 
 \item{s365}{method or specification used for adjustment of day-of-the-year}
 
-\item{outliers}{which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched.}
+\item{outliers}{which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched}
 
-\item{n_iterations}{number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1.}
+\item{critical_value}{threshold to include outliers to be used in the automatic outlier estimation}
+
+\item{n_iterations}{number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1}
 
 \item{h}{number of days to forecast}
 
