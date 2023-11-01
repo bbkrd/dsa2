@@ -4,9 +4,11 @@
 \alias{acf}
 \title{Generic for ACF}
 \usage{
-acf(dsa2_object, ...)
+acf(x, ...)
 }
 \arguments{
+\item{x}{object for which ACF shall be plotted}
+
 \item{...}{parameters}
 }
 \description{

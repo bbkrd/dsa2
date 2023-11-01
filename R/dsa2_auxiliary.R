@@ -27,7 +27,7 @@ delete_29 <- function(x) {
 .descaler <- function(x, y = NA, Diff = 0,  log = FALSE, Lag = NA) { # Copied from {dsa}
   .diffinv_xts <- function(x, y, lag = 1, differences = 1, 
                            stepsize = "days", ...) {
-    if (all(class(y) != "xts")) {
+    if (!inherits(y, "xts")) {
       stop("The time series y needs to be an xts")
     }
     values = stats::diffinv(x[stats::complete.cases(x)], 
@@ -42,7 +42,7 @@ delete_29 <- function(x) {
     y = log(y)
   }
   if (Diff > 0) {
-    if (any(class(x) == "ts")) {
+    if (inherits(x, "ts")) {
       x <- stats::diffinv(x, differences = Diff, xi = y[1:(1 * 
                                                              Diff)])
     }
@@ -519,20 +519,22 @@ output <- function(x, fileName = NULL, filePath = NULL) {
 #' Generic for ACF
 #' 
 #' Generic for ACF
+#' @param x object for which ACF shall be plotted
 #' @param ... parameters 
 #' @author Daniel Ollech
 #' @export
 
-acf <- function(dsa2_object,  ...) {UseMethod("acf")} # This is how we define generics in S3
+acf <- function(x,  ...) {UseMethod("acf")} # This is how we define generics in S3
 
 #' Generic for spectrum
 #' 
 #' Generic for spectrum
+#' @param x input
 #' @param ... parameters 
 #' @author Daniel Ollech
 #' @export
 
-spectrum <- function(dsa2_object,  ...) {UseMethod("spectrum")} # This is how we define generics in S3
+spectrum <- function(x,  ...) {UseMethod("spectrum")} # This is how we define generics in S3
 
 #' ACF for ts object
 #' 
@@ -650,6 +652,9 @@ acf.dsa2 <- function(x,
 #'
 #' Plot the PACF for a seasonally adjusted time series extracted from a dsa2 object 
 #' @param x object as calculated by dsa2()
+#' @param lag.max maximum lags, included for consistency with pacf.default
+#' @param plot should it be plotted, included for consistency with pacf.default
+#' @param na.action handling of missing observations
 #' @param lags which lags shall be shown 
 #' @param ylim limits of y-axis
 #' @param main title of plot
@@ -670,7 +675,10 @@ acf.dsa2 <- function(x,
 #' @importFrom stats pacf
 #' @export
 
-pacf.dsa2 <- function(x, 
+pacf.dsa2 <- function(x,
+                     lag.max = 730,
+                     plot = TRUE,
+                     na.action = stats::na.exclude,
                      lags = c(1:7, 30:31, 365, 730),
                      ylim = c(-1, 1),
                      main = "PACF for selected lags",
@@ -692,6 +700,7 @@ pacf.dsa2 <- function(x,
   ci <- stats::qnorm((1 + 0.95) / 2) / sqrt(length(residuals))
   
   # Plotting
+  if (plot) {
   graphics::barplot(
     pacf_res,
     ylim = ylim,
@@ -711,13 +720,14 @@ pacf.dsa2 <- function(x,
                    col = col2)
   graphics::abline(v = 52.5, col = col3)
   graphics::abline(v = 65, col = col3)
+  }
 }
 
 
 #' Plot the periodogram of a daily time series
 #'
 #' Plot the periodogram of a daily time series
-#' @param dsa2_object dsa2-object
+#' @param x dsa2-object
 #' @param ... further options to par()
 #' @details The spectrum is build around the spec.pgram() function
 #' @author Daniel Ollech
@@ -726,13 +736,13 @@ pacf.dsa2 <- function(x,
 #' spectrum(res)
 #' @export
 
-spectrum.dsa2 <- function(dsa2_object, ...) {
+spectrum.dsa2 <- function(x, ...) {
   # Calculations before
-  original_diff <- diff(dsa2_object$series$original)
+  original_diff <- diff(x$series$original)
   original_diff <- stats::ts(original_diff[!is.na(original_diff)], frequency = 365.2524)
   df <- data.frame(freq = stats::spec.pgram(original_diff, plot = F)$freq, spectrum = (stats::spec.pgram(original_diff, plot = F)$spec))
   
-  seasadj_diff <- diff(dsa2_object$series$seas_adj)
+  seasadj_diff <- diff(x$series$seas_adj)
   seasadj_diff <- stats::ts(seasadj_diff[!is.na(seasadj_diff)], frequency = 365.2524)
   df2 <- data.frame(freq = stats::spec.pgram(seasadj_diff, plot = F)$freq, spectrum = (stats::spec.pgram(seasadj_diff, plot = F)$spec))
   
@@ -771,5 +781,99 @@ spectrum.dsa2 <- function(dsa2_object, ...) {
   graphics::lines(df)
 }
 
-#plot_spectrum(dsa2_object) #CH: keine Ahnung was die Zeile tun soll. 
+#' Generic for interactive plots
+#' 
+#' Generic for interactive plots
+#' @param x object to be plotted
+#' @param ... parameters 
+#' @author Daniel Ollech
+#' @export
 
+plot_interactive <- function(x,  ...) {UseMethod("plot_interactive")} # This is how we define generics in S3
+
+
+#' Interactive plot for dsa2
+#' 
+#' Creates a plot of original and seasonally adjusted series.
+#' @param x dsa2-output object
+#' @param ... additional parameters for dygraphs::dyOptions
+#' @details The function uses the dygraphs package. 
+#' @author Martin Stefan, Daniel Ollech
+#' @export
+
+plot_interactive.dsa2 <- function(x, ...) {
+  # auxiliary variables
+  dates      <- zoo::index(x$series)
+  shadeEnd   <- dates[length(dates)]
+  shadeStart <- dates[length(dates) - x$parameters$h]
+  
+  # set colors
+  cols <- c(.dsa2color("petrol"), .dsa2color("orange"))
+  
+  # create plot
+  dygraphs::dygraph(x$series) |>
+    dygraphs::dyOptions(colors = cols, ...) |>
+    dygraphs::dyAxis("x", drawGrid = FALSE) |>
+    dygraphs::dyAxis("y", axisLabelWidth = 25) |>
+    dygraphs::dySeries("original", label = "Original") |>
+    dygraphs::dySeries("seas_adj", label = "Adjusted") |>
+    dygraphs::dyShading(from = shadeStart, to = shadeEnd) |>
+    dygraphs::dyLegend(labelsSeparateLines = TRUE,
+                       width = 125,
+                       show = "follow") |>
+    dygraphs::dyRangeSelector(height = 70, 
+                              strokeColor = "", 
+                              fillColor = .dsa2color("petrol"))
+}
+
+#' Interactive plot for xts
+#' 
+#' Creates a plot for xts time series
+#' @param x xts time series
+#' @param ... additional parameters for dygraphs::dyOptions
+#' @details The function uses the dygraphs package. 
+#' @author Daniel Ollech
+#' @export
+
+plot_interactive.xts <- function(x, ...) {
+
+  # set colors
+  cols <- .dsa2color("petrol", "orange", "darkgreen", "pink", "darkblue", "red", "lightgreen", "violet", "black", "blue", "brown", "darkgrey", "yellow", "petrol", "orange", "darkgreen", "pink", "darkblue", "red", "lightgreen", "violet", "black", "blue", "brown", "darkgrey", "yellow")
+  
+  if (ncol(x) > 26) {
+    warning("We do not encourage plotting more than 26 time series")
+  }
+  
+  cols <- cols[1:ncol(x)]
+  
+  # create plot
+  dygraphs::dygraph(x) |>
+    dygraphs::dyOptions(colors = cols, ...) |>
+    dygraphs::dyAxis("x", drawGrid = FALSE) |>
+    dygraphs::dyAxis("y", axisLabelWidth = 25) |>
+    dygraphs::dyLegend(labelsSeparateLines = TRUE,
+                       width = 125,
+                       show = "follow") |>
+    dygraphs::dyRangeSelector(height = 70, 
+                              strokeColor = "", 
+                              fillColor = .dsa2color("petrol"))
+}
+
+
+
+#' Output table for dsa2
+#' 
+#' Creates a table to be used in output()
+#' @param df data.frame
+#' @param ... additional parameters for gt::tab_options
+#' @details The function uses the gt package. 
+#' @author Martin Stefan, Daniel Ollech
+#' @keywords internal
+
+
+.table <- function(df, ...) {
+
+  df |>
+    gt::gt() |>
+    gt::tab_options(column_labels.hidden = TRUE, ...) 
+}

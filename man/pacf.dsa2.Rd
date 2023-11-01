@@ -6,6 +6,9 @@
 \usage{
 \method{pacf}{dsa2}(
   x,
+  lag.max = 730,
+  plot = TRUE,
+  na.action = stats::na.exclude,
   lags = c(1:7, 30:31, 365, 730),
   ylim = c(-1, 1),
   main = "PACF for selected lags",
@@ -21,6 +24,12 @@
 }
 \arguments{
 \item{x}{object as calculated by dsa2()}
+
+\item{lag.max}{maximum lags, included for consistency with pacf.default}
+
+\item{plot}{should it be plotted, included for consistency with pacf.default}
+
+\item{na.action}{handling of missing observations}
 
 \item{lags}{which lags shall be shown}
 

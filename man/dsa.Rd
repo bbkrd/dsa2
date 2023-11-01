@@ -57,7 +57,6 @@ Is is not possible to use different decomposition schemes for the single dsa2 st
 }
 \examples{
 Sys.setenv("JAVA_HOME"="C:/Workspace/Java/JDK/jdk-17.0.3+7") ## Currently start with this
-.libPaths("C:/Workspace/R/JD_lib") ## Currently start with this
 ## Create time series 
 set.seed(2358)
 all <- tssim::sim_daily(N=5)

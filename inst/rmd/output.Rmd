@@ -30,58 +30,34 @@ knitr::opts_chunk$set(echo = FALSE, comment = NA)
 
 
 ```{r, fig.align = "left", fig.width = 10}
-# auxiliary variables
-dates      <- zoo::index(x$series)
-shadeEnd   <- dates[length(dates)]
-shadeStart <- dates[length(dates) - x$parameters$h]
 
-# graph
-cols <- c(.dsa2color("petrol"), .dsa2color("orange"))
-dygraphs::dygraph(x$series) |>
-  dygraphs::dyOptions(colors = cols) |>
-  dygraphs::dyAxis("x", drawGrid = FALSE) |>
-  dygraphs::dyAxis("y", axisLabelWidth = 25) |>
-  dygraphs::dySeries("original", label = "Original") |>
-  dygraphs::dySeries("seas_adj", label = "Adjusted") |>
-  dygraphs::dyShading(from = shadeStart, to = shadeEnd) |>
-  dygraphs::dyLegend(labelsSeparateLines = TRUE,
-                     width = 125,
-                     show = "follow") |>
-  dygraphs::dyRangeSelector(height = 70, 
-                  strokeColor = "", 
-                  fillColor = .dsa2color("petrol"))
+plot_interactive(x)
 ```
 
 
 ### Time series properties
 ```{r}
-# auxiliary variables
-name  <- x$parameters$name
-dates <- zoo::index(x$series)
-obs   <- length(dates) - x$parameters$h
-start <- as.character(dates[1])
-end   <- as.character(dates[obs])
 
-# create vector
-vec  <- c("Name:",          name,
-          "Start date:",    start,
-          "End date:",      end)
+ # auxiliary variables
+  name  <- x$parameters$name
+  dates <- zoo::index(x$series)
+  obs   <- length(dates) - x$parameters$h
+  start <- as.character(dates[1])
+  end   <- as.character(dates[obs])
+  
+  # create vector
+  vec  <- c("Name:",          name,
+            "Start date:",    start,
+            "End date:",      end)
+  
+  # turn into a matrix, then into a dataframe
+  mat <- matrix(vec, byrow = TRUE, ncol = 2)
+  df  <- as.data.frame(mat)
 
-# turn into a matrix, then into a dataframe
-mat <- matrix(vec, byrow = TRUE, ncol = 2)
-df  <- as.data.frame(mat)
-
-# create table for Rmd
-df |> 
-  gt::gt() |> 
-  gt::tab_options(column_labels.hidden = TRUE) |>
-  gt::cols_width(
-    V1 ~ px(250)
-  ) |>
-  gt::cols_align(
-    c(V1,V2),
-    align = "left"
-  )
+.table(df) |>
+    gt::cols_width(V1 ~ px(250)) |>
+    gt::cols_align(c(V1, V2),
+                   align = "left")
 ```
 
 
@@ -126,9 +102,7 @@ mat <- matrix(vec, byrow = TRUE, ncol = 2)
 df  <- as.data.frame(mat)
 
 # create table for Rmd
-df |> 
-  gt::gt() |> 
-  gt::tab_options(column_labels.hidden = TRUE) |>
+.table(df) |>
   gt::cols_width(
     V1 ~ px(250)
   ) |>
@@ -136,6 +110,7 @@ df |>
     c(V1,V2),
     align = "left"
     ) 
+
 ```
 
 

@@ -1,88 +1,240 @@
-library(saison)
-# Basisregressor
+---
+title: "Create Holiday Regressor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CreateHolidayRegressor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This script can be used to create holiday regressors, especially for German Holidays.
+
+```{r functions}
+### Convenience function to get the lags of a time series
+### Author: Daniel Ollech
+lag0 <- function (x, Lag = 1) {
+    y <- zoo::na.fill0(stats::lag(x, k = Lag), 0)
+    return(y)
+}
+
+### Creating daylight saving time regressor
+### Author: Jakob Oberhammer
+create_dst_regressor <- function (x, spring = TRUE, autumn = FALSE) {
+    if (!xts::is.xts(x)) {
+        stop("x must an xts object!")
+    }
+    if (!spring & !autumn) {
+        stop("You should set either spring or autumn to TRUE.")
+    }
+    dates <- zoo::index(x)
+    weekDay <- xts::xts(as.numeric(format(dates, "%w")), order.by = dates)
+    monthDay <- xts::xts(as.numeric(format(dates, "%d")), order.by = dates)
+    month <- xts::xts(as.numeric(format(dates, "%m")), order.by = dates)
+    year <- xts::xts(as.numeric(format(dates, "%Y")), order.by = dates)
+    dst <- xts::xts(rep(0, length(x)), order.by = dates)
+    dst[dates == "1916-04-30"] <- spring
+    dst[dates == "1916-10-01"] <- autumn
+    dst[dates == "1917-04-16"] <- spring
+    dst[dates == "1917-09-17"] <- autumn
+    dst[dates == "1918-04-15"] <- spring
+    dst[dates == "1918-09-16"] <- autumn
+    dst[dates == "1940-04-01"] <- spring
+    dst[dates == "1942-11-02"] <- autumn
+    dst[dates == "1943-04-06"] <- spring
+    dst[dates == "1943-09-28"] <- autumn
+    dst[dates == "1944-04-03"] <- spring
+    dst[dates == "1944-10-02"] <- autumn
+    dst[dates == "1945-04-02"] <- spring
+    dst[dates == "1945-09-16"] <- autumn
+    dst[dates == "1946-04-14"] <- spring
+    dst[dates == "1946-10-07"] <- autumn
+    dst[dates == "1947-04-06"] <- spring
+    dst[dates == "1947-10-05"] <- autumn
+    dst[dates == "1948-04-18"] <- spring
+    dst[dates == "1948-10-03"] <- autumn
+    dst[dates == "1949-04-06"] <- spring
+    dst[dates == "1949-10-02"] <- autumn
+    dst[dates == "1980-04-06"] <- spring
+    dst[dates == "1980-09-28"] <- autumn
+    dst[weekDay == 0 & monthDay > 24 & month == 3 & year > 1980] <- spring
+    dst[weekDay == 0 & monthDay > 24 & month == 10 & year > 1995] <- autumn
+    dst[weekDay == 0 & monthDay > 23 & month == 9 & year > 1980 & 
+        year < 1996] <- autumn
+    return(dst)
+}
+
+### Centering regressors
+### Author: Daniel Ollech
+center_regressor <- function (x) {
+    classX <- class(x)[1]
+    if (!classX %in% c("ts", "mts", "xts")) {
+        stop("x must be a 'ts-', 'mts-' or 'xts-object'!")
+    }
+    else if (classX == "ts" | classX == "mts") {
+        x <- xts::as.xts(x)
+    }
+    .substr_from <- function(x) {
+        dates <- as.character(zoo::index(x))
+        return(substr(dates, 6, nchar(dates)))
+    }
+    yearless_dates <- .substr_from(x)
+    Means <- stats::aggregate(x = x, by = yearless_dates, FUN = mean, 
+        na.rm = TRUE)
+    .subs <- function(y, Means) {
+        as.numeric(y) - as.numeric(Means[grep(.substr_from(y), 
+            zoo::index(Means))])
+    }
+    out <- sapply(seq_len(nrow(x)), function(y) .subs(x[y], Means = Means))
+    if (is.matrix(out)) {
+        out <- t(out)
+    }
+    out <- xts::xts(out, zoo::index(x))
+    colnames(out) <- colnames(x)
+    if (classX == "ts" | classX == "mts") {
+        out <- stats::as.ts(out)
+    }
+    return(out)
+}
+
+### Creating interaction regressors
+### Author: Daniel Ollech
+cross_seasonal <- function (reference = "12-24", span = 14, Day = c("0"), output = "xts", 
+    y = NULL, from = "2000", to = "2030") {
+    if (is.null(y)) {
+        dates <- seq(as.Date(paste0(as.character(from), "-01-01")), 
+            as.Date(paste0(as.character(to), "-12-31")), by = "days")
+        y <- xts::xts(rep(0, length(dates)), order.by = dates)
+    }
+    time <- seq.Date(from = as.Date(utils::head(zoo::index(y), 
+        1)), to = as.Date(utils::tail(zoo::index(y), 1)), by = "days")
+    seriesA <- xts::xts(rep(0, length(time)), time)
+    for (j in Day) {
+        seriesA[format(zoo::index(seriesA), "%w") == j] <- 1
+    }
+    seriesB <- xts::xts(rep(0, length(time)), time)
+    timespan <- format(seq.Date(as.Date(paste0("2015-", reference)), 
+        by = "days", length.out = span), "%m-%d")
+    seriesB[format(zoo::index(seriesB), "%m-%d") %in% timespan] <- 1
+    series <- seriesA * seriesB
+    
+        out <- series
+
+    return(out)
+}
+
+### Add to time series together filling up missing with 0
+### Author: Daniel Ollech
+.add <- function (x, y, ...) {
+    x[is.na(x)] <- 0
+    y[is.na(y)] <- 0
+    dots <- list(...)
+    for (j in dots) {
+        a <- j
+        a[is.na(a)] <- 0
+        x <- x + a
+    }
+    return(x + y)
+}
+
+
+
+```
+
+
+
+
+```{r}
+
+# Base regressor
 dates <- seq(as.Date("1950-01-01"), as.Date("2100-12-31"), by = "days")
 Base  <- xts::xts(rep(0, length(dates)), order.by = dates)
 
-### Bundeseinheitlich
+### Nation wide
 
-# Neujahr
+# New Years
 NewYearsEve <- NewYearsDay <- Base
 NewYearsEve[as.Date(timeDate::NewYearsDay(1950:2100)) - 1] <- 1
 NewYearsEve[length(NewYearsEve)] <- 1
 NewYearsDay[as.Date(timeDate::NewYearsDay(1950:2100))] <- 1
 
-# Ostern (Karfreitag, Ostersonntag, Ostermontag)
+# Easter related
 GoodFriday <- EasterSunday <- EasterMonday <- Base
 GoodFriday[as.Date(timeDate::GoodFriday(1950:2100))] <- 1
 EasterSunday[as.Date(timeDate::EasterSunday(1950:2100))] <- 1
 EasterMonday[as.Date(timeDate::EasterMonday(1950:2100))] <- 1
-HolySaturday <- saison:::lag0(EasterSunday,-1)
-HolyThursday <- saison:::lag0(EasterSunday,-3)
-EasterMondayAft1Day <- saison:::lag0(EasterMonday, 1)
+HolySaturday <- lag0(EasterSunday,-1)
+HolyThursday <- lag0(EasterSunday,-3)
+EasterMondayAft1Day <- lag0(EasterMonday, 1)
 
-# Rosenmontag
-CarnivalMonday <- saison:::lag0(EasterSunday,-48)
-MardiGras <- saison:::lag0(EasterSunday,-47)
+# CarnivalMonday and Mardi Gras
+CarnivalMonday <- lag0(EasterSunday,-48)
+MardiGras <- lag0(EasterSunday,-47)
 
-# Tag der Arbeit
+# German Labour Day
 LabourDay <- Base
 LabourDay[as.Date(timeDate::LaborDay(1950:2100))] <- 1
 
-# US, Tag der Arbeit
+# US Labour Day
 USLabourDay <- Base
 USLabourDay[as.Date(timeDate::USLaborDay(1950:2100))] <- 1
 
-# Christi Himmelfahrt
+# Ascension
 Ascension <- Base
 Ascension[as.Date(timeDate::Ascension(1950:2100))] <- 1
-AscensionBef1Day <- saison:::lag0(Ascension,-1)
-AscensionAft1Day <- saison:::lag0(Ascension, 1)
+AscensionBef1Day <- lag0(Ascension,-1)
+AscensionAft1Day <- lag0(Ascension, 1)
 
-# Pfingsten (Sonntag und Montag)
+# Pentecost
 Pentecost <- PentecostMonday <- Base
 Pentecost[as.Date(timeDate::Pentecost(1950:2100))] <- 1
 PentecostMonday[as.Date(timeDate::PentecostMonday(1950:2100))] <- 1
-PentecostAft1Day <- saison:::lag0(PentecostMonday, 1)
-PentecostBef1Day <- saison:::lag0(Pentecost,-1)
+PentecostAft1Day <- lag0(PentecostMonday, 1)
+PentecostBef1Day <- lag0(Pentecost,-1)
 
-# Tag der Deutschen Einheit
+# German Unity
 GermanUnity <- Base
 GermanUnity[as.Date(timeDate::DEGermanUnity(1950:2100))] <- 1
 
-# Weihnachten (Heiligabend, 1. und 2. Weihnachtsferiertag)
+# Christmas
 ChristmasEve <- ChristmasDay <- BoxingDay <- Base
 ChristmasEve[as.Date(timeDate::ChristmasEve(1950:2100))] <- 1
 ChristmasDay[as.Date(timeDate::ChristmasDay(1950:2100))] <- 1
 BoxingDay[as.Date(timeDate::BoxingDay(1950:2100))] <- 1
 
-# Reformationstag (2017)
+# Reformation Day (Martin Luther)
 ReformationDay2017 <- ReformationDay <- Base
 ReformationDay2017["2017-10-31"] <- 1
 
 ReformationDay[format(zoo::index(ReformationDay), "%m-%d") == "10-31"] <-
   1
 
-### Regionalfeiertage
+### Regional holidays
 
-# Heilige Drei Koenige (BW, BY, ST)
+# Epiphany (BW, BY, ST)
 Epiphany <- Base
 Epiphany[as.Date(timeDate::Epiphany(1950:2100))] <- 1
 
 
-# Fronleichnam (BW, BY, HE, NW, RP, SL)
+# Corpus Christi (BW, BY, HE, NW, RP, SL)
 CorpusChristi <- Base
 CorpusChristi[as.Date(timeDate::DECorpusChristi(1950:2100))] <- 1
-CorpusChristiAft1Day <- saison:::lag0(CorpusChristi)
-CorpusChristiBef1Day <- saison:::lag0(CorpusChristi,-1)
+CorpusChristiAft1Day <- lag0(CorpusChristi)
+CorpusChristiBef1Day <- lag0(CorpusChristi,-1)
 
-# Maria Himmelfahrt (BY, SL)
+# Assumption of Mary (BY, SL)
 AssumptionOfMary <- Base
 AssumptionOfMary[as.Date(timeDate::AssumptionOfMary(1950:2100))] <-
   1
 
 
-
-# Allerheiligen (BW, BY, NW, RP, SL)
+# All Saints (BW, BY, NW, RP, SL)
 AllSaints <- Base
 AllSaints[as.Date(timeDate::AllSaints(1950:2100))] <- 1
 
@@ -96,7 +248,7 @@ PreXmasSun3d <-
     span = 3,
     Day = c("0"),
     output = "xts"
-  ) # So in der Woche nach Weihnachten (inkl Heiligabend)
+  ) # Sunday in the days before Christmas
 PreXmasSat3d <-
   cross_seasonal(
     y = Base,
@@ -104,7 +256,7 @@ PreXmasSat3d <-
     span = 3,
     Day = c("6"),
     output = "xts"
-  ) # Sa in der woche nach Weihnachten (inkl Heiligabend)
+  ) # 
 
 PostXmasSun1w <-
   cross_seasonal(
@@ -113,7 +265,7 @@ PostXmasSun1w <-
     span = 7,
     Day = c("0"),
     output = "xts"
-  ) # So in der Woche nach Weihnachten (inkl Heiligabend)
+  ) # Sunday in the week after Christmas
 PostXmasSat1w <-
   cross_seasonal(
     y = Base,
@@ -121,7 +273,7 @@ PostXmasSat1w <-
     span = 7,
     Day = c("6"),
     output = "xts"
-  ) # Sa in der woche nach Weihnachten (inkl Heiligabend)
+  )  
 PostXmasSun10d <-
   cross_seasonal(
     y = Base,
@@ -129,7 +281,7 @@ PostXmasSun10d <-
     span = 10,
     Day = c("0"),
     output = "xts"
-  ) # So in der Woche nach Weihnachten (inkl Heiligabend)
+  ) # Sunday in the 10 days after Christmas
 PostXmasSat10d <-
   cross_seasonal(
     y = Base,
@@ -137,7 +289,7 @@ PostXmasSat10d <-
     span = 10,
     Day = c("6"),
     output = "xts"
-  ) # Sa in der woche nach Weihnachten (inkl Heiligabend)
+  )  
 PostNewEveSun1w <-
   cross_seasonal(
     y = Base,
@@ -145,7 +297,7 @@ PostNewEveSun1w <-
     span = 7,
     Day = c("0"),
     output = "xts"
-  ) # So in der zweiten Woche nach Weihnachten (inkl Silvester)
+  ) # Sunday at or after New Years Eve
 PostNewEveSat1w <-
   cross_seasonal(
     y = Base,
@@ -270,7 +422,7 @@ May1Mon <-
     output = "xts"
   )
 May1Bridge <-
-  dsa:::.add(saison:::lag0(May1Tue,-1), saison:::lag0(May1Thu, 1))
+  .add(lag0(May1Tue,-1), lag0(May1Thu, 1))
 
 Oct3Sun <-
   cross_seasonal(
@@ -329,7 +481,7 @@ Oct3Mon <-
     output = "xts"
   )
 Oct3Bridge <-
-  dsa:::.add(saison:::lag0(Oct3Tue,-1), saison:::lag0(Oct3Thu, 1))
+  .add(lag0(Oct3Tue,-1), lag0(Oct3Thu, 1))
 
 Oct31Sun <-
   cross_seasonal(
@@ -388,7 +540,7 @@ Oct31Mon <-
     output = "xts"
   )
 Oct31Bridge <-
-  dsa:::.add(saison:::lag0(Oct31Tue,-1), saison:::lag0(Oct31Thu, 1))
+  .add(lag0(Oct31Tue,-1), lag0(Oct31Thu, 1))
 
 Nov1Sun <-
   cross_seasonal(
@@ -447,7 +599,7 @@ Nov1Mon <-
     output = "xts"
   )
 Nov1Bridge <-
-  dsa:::.add(saison:::lag0(Nov1Tue,-1), saison:::lag0(Nov1Thu, 1))
+  .add(lag0(Nov1Tue,-1), lag0(Nov1Thu, 1))
 
 
 
@@ -859,25 +1011,25 @@ Jan6Mon <-
 
 
 PentecostPeriod <-
-  dsa:::.add(saison:::lag0(PentecostMonday,-1),
+  .add(lag0(PentecostMonday,-1),
              PentecostMonday,
-             saison:::lag0(PentecostMonday, 1)) # A negative value will create a dummy before the holiday, a positive number after the holiday
+             lag0(PentecostMonday, 1)) # A negative value will create a dummy before the holiday, a positive number after the holiday
 
 
 EasterPeriod <-
-  dsa:::.add(
-    saison:::lag0(EasterMonday,-4),
-    saison:::lag0(EasterMonday,-3),
-    saison:::lag0(EasterMonday,-2),
-    saison:::lag0(EasterMonday,-1),
+  .add(
+    lag0(EasterMonday,-4),
+    lag0(EasterMonday,-3),
+    lag0(EasterMonday,-2),
+    lag0(EasterMonday,-1),
     EasterMonday,
-    saison:::lag0(EasterMonday, 1)
+    lag0(EasterMonday, 1)
   )
 
-# Zeitumstellung
-DstSpring <- saison:::create_dst_regressor(Base, spring = 1, autumn = 0)
-DstAutumn <- saison:::create_dst_regressor(Base, spring = 0, autumn = 1)
-Dst <- saison:::create_dst_regressor(Base, spring = -1, autumn = 1)
+# Daylight Saving Time
+DstSpring <- create_dst_regressor(Base, spring = 1, autumn = 0)
+DstAutumn <- create_dst_regressor(Base, spring = 0, autumn = 1)
+Dst <- create_dst_regressor(Base, spring = -1, autumn = 1)
 
 
 
@@ -1019,10 +1171,12 @@ All <-
   )
 
 holidays <- All
-saveRDS(holidays, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidays.rds")
-save(holidays, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidays.rda")
+#saveRDS(holidays, file = "holidays.rds")  # Saving out the holiday regressors
 
 
-holidaysCentered <- saison::center_regressor(All)
-saveRDS(holidaysCentered, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidaysCentered.rds")
-save(holidaysCentered, file = "R:/Zentrale/ZB-S/Daten_S/S4/s45/s45_Ges/RPaket/holidaysCentered.rda")
+# holidaysCentered <- center_regressor(All) # NOT RUN HERE, TAKES QUITE SOME TIME
+# saveRDS(holidaysCentered, file = "holidaysCentered.rds")  # Saving out the centered regressors
+
+
+```
+

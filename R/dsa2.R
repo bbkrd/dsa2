@@ -17,12 +17,9 @@
 #' @details DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-month effect, and the day-of-the-year effect to get the seasonally adjusted series.
 #' For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
 #' Is is not possible to use different decomposition schemes for the single dsa2 steps. This means you cannot use a multiplicative model for the day-of-the-week and an additive model for the day-of-the-year. Therefore, the global specification og log = TRUE or log = FALSE is used for all steps.
-#' 
-#' 
 #' @author Daniel Ollech, Christiane Hofer, Martin Stefan, Thomas Witthohn
 #' @examples
 #' Sys.setenv("JAVA_HOME"="C:/Workspace/Java/JDK/jdk-17.0.3+7") ## Currently start with this
-#' .libPaths("C:/Workspace/R/JD_lib") ## Currently start with this
 #' ## Create time series 
 #' set.seed(2358)
 #' all <- tssim::sim_daily(N=5)
@@ -410,7 +407,7 @@ seats_method <- function(period = NA,  # NOTE(DO): Assumes use of rjd3highfreq::
 
 # Pre-tests ---------------------------------------------------------------
 if (!is.na(period)) {
-  if (class(period) != "numeric" & class(period) != "integer") {
+  if (!is.numeric(period) & !is.integer(period)) {
     stop("period in seats_method() needs to be of class numeric or integer")
   }
   if (period < 2) {warning("period in seats_method() should be at least 2")}
@@ -681,7 +678,7 @@ compute_seasadj <- function(series,
     stop("Series is too short to use dsa2 on it")
   }
   
-  if (!any(class(series)=="xts")) {
+  if (!inherits(series, "xts")) {
     stop("Class of series should be xts")
   }
   

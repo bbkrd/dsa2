@@ -4,10 +4,10 @@
 \alias{spectrum.dsa2}
 \title{Plot the periodogram of a daily time series}
 \usage{
-\method{spectrum}{dsa2}(dsa2_object, ...)
+\method{spectrum}{dsa2}(x, ...)
 }
 \arguments{
-\item{dsa2_object}{dsa2-object}
+\item{x}{dsa2-object}
 
 \item{...}{further options to par()}
 }
