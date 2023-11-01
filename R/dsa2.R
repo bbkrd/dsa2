@@ -102,6 +102,11 @@ dsa <- function(series,
     calComp <- xts::xts(fracAirline$model$component_userdef_reg_variables,
                                  order.by = dates)
 } else { 
+  
+    if (pre_processing$parameters$name != deparse(substitute(series))){
+      warning("Pre-processing used is not based on the time series to be adjusted")
+    }
+    
     fracAirline <- pre_processing$preProcessing
     xLinear <- pre_processing$preProcessing$model$linearized  
     calComp <- pre_processing$components$calComp
