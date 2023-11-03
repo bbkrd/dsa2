@@ -179,6 +179,8 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
   on.exit(graphics::par(opar))
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
   graphics::legend(...)
+  
+  ggvis::add_tooltip(vis = plot.dsa2(), "hover")
 }
 
 
@@ -192,6 +194,8 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
 
 summary.dsa2 <- function(object, ...) {
   print(object, ...)
+  
+  ggvis::add_tooltip(vis = summary.dsa2(), "hover")
 }
 
 
@@ -214,6 +218,7 @@ print.dsa2 <- function(x, ...) {
     y <- apply(y, 2, format)           # apply format over each column
     y <- paste(t(y), collapse = "\t")  # paste together
     return(y)
+   
   }
   
   # call auxiliary functions to prepare string outputs
@@ -250,6 +255,8 @@ print.dsa2 <- function(x, ...) {
   # print
   cat(out)
   invisible(out)
+  
+  ggvis::add_tooltip(vis = print.dsa2(), "hover")
   
 }
 
