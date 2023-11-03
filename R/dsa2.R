@@ -104,7 +104,7 @@ dsa <- function(series,
 } else { 
   
     if (pre_processing$parameters$name != deparse(substitute(series))){
-      warning("Pre-processing used is not based on the time series to be adjusted")
+      warning("The pre-processing result included is apparently not based on the time series to be adjusted. \nBe sure that you are not using a different time series")
     }
     
     fracAirline <- pre_processing$preProcessing

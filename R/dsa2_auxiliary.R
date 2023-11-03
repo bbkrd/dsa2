@@ -831,6 +831,7 @@ plot_interactive.dsa2 <- function(x, ...) {
     dygraphs::dyRangeSelector(height = 70, 
                               strokeColor = "", 
                               fillColor = .dsa2color("petrol"))
+   ggvis::add_tooltip(vis = plot_interactive.dsa2(), "hover")
 }
 
 #' Interactive plot for xts
