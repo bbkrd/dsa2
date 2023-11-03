@@ -10,8 +10,8 @@ default:
 
 build-job:       
   stage: build
-  script: 
-    - Rterm.exe -q -e 'devtools::build(binary = TRUE)'
+  script:     
+    - Rterm.exe -q -e 'devtools::install_dev_deps()' -e 'devtools::build(binary = TRUE)'
 
 document:
   stage: build
@@ -37,11 +37,11 @@ install:
     - Rterm.exe -q -e 'version <- paste(R.version$major, gsub(\"\\..+$\", \"\", R.version$minor), sep = \".\")'
       -e "baseURL <- '$BASE_URL'"
       -e 'binaryURL <- paste(baseURL,\"bin/windows/contrib/\",version,sep = \"\")'
-      -e 'source <- devtools::build(vignettes = FALSE)'
+      -e 'source <- devtools::build()'
       -e 'sourceURL <- paste(baseURL, \"src/contrib\", basename(source), sep = \"/\")'
       -e "status <- curl::curl_upload(file = source,url = sourceURL, verbose = FALSE, username='$USER', password='$PWD')`$status_code"
-      -e 'if(status!=200){stop(paste(\"Failed upload of source package with code\", status))}'
-      -e 'binary <- devtools::build(binary = TRUE)'
+      -e 'if(status!=200 && status!=201){stop(paste(\"Failed upload of source package with code\", status))}'
+      -e 'binary <- devtools::build(pkg = source, binary = TRUE)'
       -e 'binaryURL <- paste(baseURL, \"bin/windows/contrib\", version, basename(binary), sep = \"/\")'
       -e "status <-  curl::curl_upload(file = binary,url = binaryURL, verbose = FALSE, username='$USER', password='$PWD')`$status_code"
-      -e 'if(status!=200){  stop(paste(\"Failed upload of binary package with code\", status))}'
+      -e 'if(status!=200 && status!=201){stop(paste(\"Failed upload of binary package with code\", status))}'
