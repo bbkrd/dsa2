@@ -179,8 +179,7 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
   on.exit(graphics::par(opar))
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
   graphics::legend(...)
-  
-  ggvis::add_tooltip(vis = plot.dsa2(), "hover")
+
 }
 
 
@@ -194,8 +193,7 @@ plot.dsa2 <- function(x, main = "Result for seasonal adjustment of daily time se
 
 summary.dsa2 <- function(object, ...) {
   print(object, ...)
-  
-  ggvis::add_tooltip(vis = summary.dsa2(), "hover")
+
 }
 
 
@@ -255,8 +253,6 @@ print.dsa2 <- function(x, ...) {
   # print
   cat(out)
   invisible(out)
-  
-  ggvis::add_tooltip(vis = print.dsa2(), "hover")
   
 }
 
@@ -831,7 +827,6 @@ plot_interactive.dsa2 <- function(x, ...) {
     dygraphs::dyRangeSelector(height = 70, 
                               strokeColor = "", 
                               fillColor = .dsa2color("petrol"))
-   ggvis::add_tooltip(vis = plot_interactive.dsa2(), "hover")
 }
 
 #' Interactive plot for xts
