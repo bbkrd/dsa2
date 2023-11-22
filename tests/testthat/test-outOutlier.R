@@ -2,9 +2,9 @@
 # a = additive vs. m = multiplicative
 # o = with outliers vs. c = with calendar regressors
 r_ao <- readRDS(testthat::test_path("fixtures","r_ao.rds"))
-r_mo <- readRDS(testthat::test_path("fixtures","r_ao.rds"))
-r_aco <- readRDS(testthat::test_path("fixtures","r_ao.rds"))
-r_mco <- readRDS(testthat::test_path("fixtures","r_ao.rds"))
+r_mo <- readRDS(testthat::test_path("fixtures","r_mo.rds"))
+r_aco <- readRDS(testthat::test_path("fixtures","r_aco.rds"))
+r_mco <- readRDS(testthat::test_path("fixtures","r_mo.rds"))
 
 test_that("Order of outliers", {
   
