@@ -63,15 +63,21 @@ dsa <- function(series,
   # Preliminary checks -----------------------------------------------------
   .preliminary_checks(series, outliers, xreg, h)
   
-  if (any( (inherits(s7, "character") && s7 == "seats") |  # Note(DO): If-clause needs to be deleted once Seats can deal with multiplicative models
+  if ((inherits(s7, "character") && s7 == "seats") |  # Note(DO): If-clause needs to be deleted once Seats can deal with multiplicative models
            inherits(s7, "seats_method") |  
            (inherits(s31, "character") && s31 == "seats") | 
            inherits(s31, "seats_method") |  
            (inherits(s365, "character") && s365 == "seats") | 
-           inherits(s365, "seats_method")) & 
+           inherits(s365, "seats_method") & 
+      (inherits(s7, "character") && s7 == "stats_stl") |  # Note(DO): If-clause needs to be deleted once stats_stl can deal with multiplicative models
+      inherits(s7, "stats_stl_method") |  
+      (inherits(s31, "character") && s31 == "stats_stl") | 
+      inherits(s31, "stats_stl_method") |  
+      (inherits(s365, "character") && s365 == "stats_stl") | 
+      inherits(s365, "stats_stl_method") &
       log) {
     log <- FALSE
-    message("The log parameter has been set to FALSE. Thus, an additive model is employed for *all* steps of DSA2. \nThis is because Seats currently cannot handle multiplicative models.")
+    message("The log parameter has been set to FALSE. Thus, an additive model is employed for *all* steps of DSA2. \nThis is because Seats and stats_stl currently cannot handle multiplicative models.")
   } 
   
   # Vector of dates (needed for xts conversion) -------------------------------
@@ -227,6 +233,78 @@ dsa <- function(series,
   return(out)
 }
 
+#' Translation between input to dsa() and stats::stl-function
+#' 
+#' Handler for stats::stl
+#' @param swindow number of observations included in the local regressions calculated to obtain the seasonal component
+#' @param log log, ignored in dsa2
+#' @param twindow number of observations included in local regressions for trend component
+#' @param ninnerloop number of inner loops of STL
+#' @param nouterloop number of outer loops of STL
+#' @param weight.threshold threshold for weights, see ? rjd3stl::stlplus for details
+#' @param weight.function wfunction for weights, see ? rjd3stl::stlplus for details
+#' @details This functions is basically a translator between the dsa2 routines 
+#' and stats::stl.
+#' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
+#' @author Daniel Ollech
+#' @export
+
+stats_stl_method <- function(swindow = 13, 
+                        #log = NULL, 
+                        twindow = NA, 
+                        lwindow = NA,
+                        ninnerloop = 1, 
+                        nouterloop = 15, 
+                        sjump = NA,
+                        tjump = NA,
+                        ljump = NA
+) 
+{
+  
+  # Pre-tests ---------------------------------------------------------------
+
+    # if (!is.logical(log) & !is.null(log)) {
+    #   warning("log needs to be a boolean")
+    # }
+  
+  if (all(!is.na(sjump), !is.na(tjump), !is.na(ljump), !is.numeric(sjump) | !is.numeric(tjump) | !is.numeric(ljump))) {
+    warning("sjump, tjump and ljump need to be numericals")
+  }
+  
+  
+  
+  if ((!is.numeric(swindow) & !is.integer(swindow))) {
+    warning("swindow in stats_stl_method() need to be of class numeric or integer")
+  }
+  
+  if ((!is.numeric(twindow) & !is.integer(twindow)) |
+      (!is.numeric(ninnerloop) & !is.integer(ninnerloop)) |
+      (!is.numeric(nouterloop) & !is.integer(nouterloop))) {
+    warning("twindow, ninnerloop and nouterloop in 
+             stats_stl_method() need to be of class numeric or integer")
+  }
+  
+  
+  # Translation of parameters -----------------------------------------------
+
+  parameters <- list(s.window = swindow,
+                     t.window = twindow,
+                     l.window = lwindow,
+                     inner = ninnerloop,
+                     outer = nouterloop,
+                     s.jump = sjump,
+                     t.jump = tjump,
+                     l.jump = ljump)
+  
+  parameters <- parameters[!is.na(parameters)]
+
+  class(parameters) <- c("stats_stl_method")
+  
+  return(parameters)  
+}
+
+
+
 #' Translation between input to dsa() and rjd3-function
 #' 
 #' Handler for stl
@@ -234,11 +312,15 @@ dsa <- function(series,
 #' @param swindow number of observations included in the local regressions calculated to obtain the seasonal component
 #' @param log log, ignored in dsa2
 #' @param twindow number of observations included in local regressions for trend component
+#' @param lwindow number of observations included in local regressions for additional trend smoothing of seasonal
 #' @param ninnerloop number of inner loops of STL
 #' @param nouterloop number of outer loops of STL
-#' @param nojump impacts the precision of the estimation
+#' @param sjump number of jumps in the computation of the seasonal
+#' @param tjump number of jumps in the computation of the trend
+#' @param ljump number of jumps in the computation of the trend in the seasonal
 #' @param weight.threshold threshold for weights, see ? rjd3stl::stlplus for details
 #' @param weight.function wfunction for weights, see ? rjd3stl::stlplus for details
+#' @param legacy use of the legacy MAD
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and rjd3stl::stlplus, but its goal is to invoke the stl procedure.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
@@ -246,14 +328,18 @@ dsa <- function(series,
 #' @export
 
 stl_method <- function(period = NA, 
-                        swindow = 13, 
-                        log = NULL, # NOTE(DO): Umbenennung von multiplicative in rjd3stl::stlplus
-                        twindow = 0, 
-                        ninnerloop = 1, 
-                        nouterloop = 15, 
-                        nojump = FALSE, 
-                        weight.threshold = 0.001, 
-                        weight.function = c('BIWEIGHT')
+                      swindow = 13, 
+                      log = NULL, # NOTE(DO): Renaming of multiplicative
+                      twindow = 0, 
+                      lwindow = 0,
+                      ninnerloop = 1, 
+                      nouterloop = 15, 
+                      sjump = 0,
+                      tjump = 0,
+                      ljump = 0,
+                      weight.threshold = 0.001, 
+                      weight.function = c('BIWEIGHT'),
+                      legacy = FALSE
 ) 
 {
   
@@ -263,8 +349,8 @@ stl_method <- function(period = NA,
       warning("log needs to be a boolean")
     }
   
-  if (!is.logical(nojump)) {
-    warning("nojump needs to be a boolean")
+  if (!is.numeric(sjump) | !is.numeric(tjump) | !is.numeric(ljump)) {
+    warning("sjump, tjump and ljump need to be numericals")
   }
   
   if (!is.na(period)) {
@@ -297,17 +383,23 @@ stl_method <- function(period = NA,
                      swindow = swindow,
                      multiplicative = log,
                      twindow = twindow,
+                     lwindow = lwindow,
                      ninnerloop = ninnerloop,
                      nouterloop = nouterloop,
-                     nojump = nojump,
+                     sjump = sjump,
+                     tjump = tjump,
+                     ljump = ljump,
                      weight.threshold = weight.threshold,
-                     weight.function = weight.function)
+                     weight.function = weight.function,
+                     legacy = legacy)
 
   
   class(parameters) <- c("stl_method")
   
   return(parameters)  
 }
+
+
 
 #' Translation between input to dsa() and rjd3-function
 #' 
@@ -472,6 +564,28 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
   message("The method should either be one of 'x11', 'stl' or 'seats' or a call to stl_method(), x11_method() or seats_method()")
 }
 
+#' STL method for estimating seasonal component using stats::stl
+#' 
+#' STL method for estimating seasonal component using stats::stl
+#' @param method method to be employed
+#' @param series time series to be adjusted, class should be ts
+#' @param log should logs be used
+#' @author Daniel Ollech
+#' @keywords internal
+
+.estimate_component.stats_stl_method <- function(method, series, log = NULL) { 
+  # if (is.na(method$period)) {
+  #   method$period <- stats::frequency(series)
+  # }
+  
+  # if (!is.null(log)) {method$multiplicative <- log}
+  period <- stats::frequency(series)
+  adjustment <- do.call(stats::stl, append(list(ts(as.numeric(series), 
+                                                   frequency = period)),
+                                                 method))
+  return(list(adjustment = adjustment, seasComp = adjustment$time.series[,1]))
+}
+
 #' STL method for estimating seasonal component
 #' 
 #' STL method for estimating seasonal component
@@ -601,6 +715,8 @@ if ((!is.numeric(nbcasts) & !is.integer(nbcasts)) |
     method <- x11_method()
   } else if (method == "seats") {
     method <- seats_method()
+  } else if (method == "stats_stl") {
+    method <- stats_stl_method()
   } else{
     stop("Unknown method!")
   }
