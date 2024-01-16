@@ -237,12 +237,13 @@ dsa <- function(series,
 #' 
 #' Handler for stats::stl
 #' @param swindow number of observations included in the local regressions calculated to obtain the seasonal component
-#' @param log log, ignored in dsa2
 #' @param twindow number of observations included in local regressions for trend component
+#' @param lwindow number of observations included in local regressions for additional trend smoothing of seasonal
 #' @param ninnerloop number of inner loops of STL
 #' @param nouterloop number of outer loops of STL
-#' @param weight.threshold threshold for weights, see ? rjd3stl::stlplus for details
-#' @param weight.function wfunction for weights, see ? rjd3stl::stlplus for details
+#' @param sjump linear interpolation for seasonal component (see stats::stl)
+#' @param tjump sjump linear interpolation for trend component (see stats::stl)
+#' @param ljump linear interpolation for seasonal subseries component (see stats::stl)
 #' @details This functions is basically a translator between the dsa2 routines 
 #' and stats::stl.
 #' It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
@@ -250,7 +251,6 @@ dsa <- function(series,
 #' @export
 
 stats_stl_method <- function(swindow = 13, 
-                        #log = NULL, 
                         twindow = NA, 
                         lwindow = NA,
                         ninnerloop = 1, 

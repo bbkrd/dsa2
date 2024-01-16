@@ -20,15 +20,17 @@ stats_stl_method(
 
 \item{twindow}{number of observations included in local regressions for trend component}
 
+\item{lwindow}{number of observations included in local regressions for additional trend smoothing of seasonal}
+
 \item{ninnerloop}{number of inner loops of STL}
 
 \item{nouterloop}{number of outer loops of STL}
 
-\item{log}{log, ignored in dsa2}
+\item{sjump}{linear interpolation for seasonal component (see stats::stl)}
 
-\item{weight.threshold}{threshold for weights, see ? rjd3stl::stlplus for details}
+\item{tjump}{sjump linear interpolation for trend component (see stats::stl)}
 
-\item{weight.function}{wfunction for weights, see ? rjd3stl::stlplus for details}
+\item{ljump}{linear interpolation for seasonal subseries component (see stats::stl)}
 }
 \description{
 Handler for stats::stl
