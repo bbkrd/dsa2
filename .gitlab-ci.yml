@@ -33,6 +33,8 @@ unittests:
 
 install:
   stage: deploy
+  only:
+       - main
   script:
     - Rterm.exe -q -e 'version <- paste(R.version$major, gsub(\"\\..+$\", \"\", R.version$minor), sep = \".\")'
       -e "baseURL <- '$BASE_URL'"
