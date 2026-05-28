@@ -2,17 +2,17 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{.table}
 \alias{.table}
-\title{Output table for dsa2}
+\title{Output table for \code{dsa2} objects}
 \usage{
 .table(df, ...)
 }
 \arguments{
-\item{df}{data.frame}
+\item{df}{A data frame.}
 
-\item{...}{additional parameters for gt::tab_options}
+\item{...}{Additional parameters for \code{gt::tab_options}.}
 }
 \description{
-Creates a table to be used in output()
+Creates a table to be used in \code{output()}.
 }
 \details{
 The function uses the gt package.

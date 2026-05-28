@@ -5,7 +5,7 @@
 \alias{daily_data}
 \title{Exemplary time series}
 \format{
-An xts data set containing 3 time series:
+An \code{xts} data set containing 3 time series:
 \describe{
 \item{currency_circulation}{Currency in circulation in Germany, in billion Euros, sum of small denominations: i.e. 5 Euro + 10 Euro + 20 Euro + 50 Euro. Series compiled by Deutsche Bundesbank}
 \item{elec_consumption}{Electricity consumption in Germany in GWh. Compiled by Bundesnetzagentur (German Federal Network Agency)}

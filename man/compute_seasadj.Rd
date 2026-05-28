@@ -14,23 +14,20 @@ compute_seasadj(
 )
 }
 \arguments{
-\item{series}{original, xts time series}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{seasComp7}{day-of-the-week component, xts time series}
+\item{seasComp7}{An \code{xts} object containing the day-of-the-week component.}
 
-\item{seasComp31}{day-of-the-month component, xts time series}
+\item{seasComp31}{An \code{xts} object containing the day-of-the-month component.}
 
-\item{seasComp365}{day-of-the-year component, xts time series}
+\item{seasComp365}{An \code{xts} object containing the day-of-the-year component.}
 
-\item{calComp}{calendar component, xts time series}
+\item{calComp}{An \code{xts} object containing the calendar component.}
 
-\item{log}{do we use a multiplicative model}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 }
 \description{
 Compute calendar and seasonally adjusted time series
-}
-\details{
-All time series used should be of class xts or a numeric constant.
 }
 \author{
 Daniel Ollech

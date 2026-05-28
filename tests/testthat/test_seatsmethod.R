@@ -2,7 +2,8 @@
 
 testthat::test_that("seats_method Warning period length", {
   expect_warning(seats_method(period = 1),
-                 "period in seats_method\\() should be at least 2")
+                 "period in seats_method() should be at least 2.",
+                 fixed = TRUE)
 })
 
 
@@ -13,7 +14,7 @@ testthat::test_that("seats_method Warning log", {
                               stde = FALSE,
                               nbcasts = 0,
                               nfcasts = 0),
-                 "log needs to be a boolean")
+                 "log needs to contain a logical value.")
 })
 
 testthat::test_that("seats_method error class", {
@@ -23,7 +24,8 @@ testthat::test_that("seats_method error class", {
                               stde = FALSE,
                               nbcasts = 0,
                               nfcasts = 0),
-                 "period in seats_method\\() needs to be of class numeric or integer")
+                 "period in seats_method() must contain a numeric or integer value.",
+               fixed = TRUE)
 })
 
 
@@ -34,7 +36,8 @@ testthat::test_that("seats_method Warning sn", {
                               stde = FALSE,
                               nbcasts = 0,
                               nfcasts = 0),
-                 "sn and stde in seats_method\\() should be either TRUE or FALSE")
+                 "sn and stde in seats_method() should contain a logical value.",
+                  fixed = TRUE)
 })
 
 testthat::test_that("seats_method Warning stde", {
@@ -44,7 +47,8 @@ testthat::test_that("seats_method Warning stde", {
                               stde = 2,
                               nbcasts = 0,
                               nfcasts = 0),
-                 "sn and stde in seats_method\\() should be either TRUE or FALSE")
+                 "sn and stde in seats_method() should contain a logical value.",
+                 fixed = TRUE)
 })
 
 
@@ -55,7 +59,8 @@ testthat::test_that("seats_method Warning nbcasts", {
                               stde = FALSE,
                               nbcasts = "Zero",
                               nfcasts = 0), 
-                 "nbcasts and nfcasts in seats_method\\() need to be of class numeric or integer")
+                 "nbcasts and nfcasts in seats_method() need to contain a numeric or integer value.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("seats_method Warning nfcasts", {
@@ -65,6 +70,7 @@ testthat::test_that("seats_method Warning nfcasts", {
                               stde = FALSE,
                               nbcasts = 0,
                               nfcasts = "Zero"),
-                 "nbcasts and nfcasts in seats_method\\() need to be of class numeric or integer")
+                 "nbcasts and nfcasts in seats_method() need to contain a numeric or integer value.",
+                 fixed = TRUE)
 })
 

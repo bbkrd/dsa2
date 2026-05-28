@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa2.R
 \name{seats_method}
 \alias{seats_method}
-\title{Translation between input to dsa() and rjd3-function}
+\title{Translation between input to \code{dsa()} and rjd3-function}
 \usage{
 seats_method(
   period = NA,
@@ -14,25 +14,25 @@ seats_method(
 )
 }
 \arguments{
-\item{period}{frequency which shall be adjusted, numeric}
+\item{period}{A numeric value specifying the frequency to be adjusted.}
 
-\item{log}{log, ignored in dsa2}
+\item{log}{A logical value choosing whether to use a multiplicative model.}
 
-\item{sn}{shall the series be decomposed into two components (signal and noise)}
+\item{sn}{A logical value choosing whether the series should be decomposed into two components (signal and noise).}
 
-\item{stde}{boolean, shall standard deviations of components be computed}
+\item{stde}{A logical value choosing whether to compute standard deviations of components.}
 
-\item{nbcasts}{number of forecasts}
+\item{nbcasts}{A numeric scalar detailing the number of forecasts.}
 
-\item{nfcasts}{number of backcasts}
+\item{nfcasts}{A numeric scalar detailing the number of backcasts.}
 }
 \description{
-Handler for seats
+Handler for Seats
 }
 \details{
 This functions is basically a translator between the dsa2 routines
-and rjd3highfreq::fractionalAirlineDecomposition, but its goal is to invoke the Seats procedure.
-It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
+and \code{rjd3highfreq::fractionalAirlineDecomposition}, but its goal is to invoke the Seats procedure.
+It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in \code{dsa()}.
 }
 \author{
 Daniel Ollech

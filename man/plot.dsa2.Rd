@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{plot.dsa2}
 \alias{plot.dsa2}
-\title{Plot generic for dsa2}
+\title{Plot the results of \code{dsa2} objects}
 \usage{
 \method{plot}{dsa2}(
   x,
@@ -18,25 +18,25 @@
 )
 }
 \arguments{
-\item{x}{dsa2-output object}
+\item{x}{A \code{dsa2} object.}
 
-\item{main}{title of the plot}
+\item{main}{A character value detailing the title of the plot.}
 
-\item{include_forecasts}{display forecast data}
+\item{include_forecasts}{A logical value indicating whether to display forecast data.}
 
-\item{type}{line type}
+\item{type}{A single character indicating the line type (see \code{plot()}).}
 
-\item{xlab}{label of x-axis}
+\item{xlab}{A character value detailing the label of x-axis.}
 
-\item{ylab}{label of y-axis, you may need to change the margins using mar}
+\item{ylab}{A character value detailing the label of y-axis (possibly change the margins using parameter \code{mar}).}
 
-\item{cex.axis}{cex.axis see ?par}
+\item{cex.axis}{see \code{par()}.}
 
-\item{bty}{bty see ?par}
+\item{bty}{see \code{par()}.}
 
-\item{mar}{margins of the plot}
+\item{mar}{A numerical vector indicating the number of lines of margin to be specified on the four sides of the plot (see \code{par()}).}
 
-\item{...}{additional parameters from plot() function}
+\item{...}{Additional parameters from \code{plot()}}
 }
 \description{
 Creates a plot of original and seasonally adjusted series.

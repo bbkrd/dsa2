@@ -2,8 +2,10 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{acf.numeric}
 \alias{acf.numeric}
-\title{ACF for numeric object}
+\title{ACF for numeric objects}
 \usage{
+\method{acf}{numeric}(x, ...)
+
 \method{acf}{numeric}(x, ...)
 }
 \arguments{
@@ -12,6 +14,11 @@
 \item{...}{parameters}
 }
 \description{
-See ?stats::acf for details
+See \code{stats::acf} for details.
+
+See \link[stats]{acf} for details
+}
+\author{
+Daniel Ollech
 }
 \keyword{internal}

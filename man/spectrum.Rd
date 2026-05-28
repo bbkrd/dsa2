@@ -2,17 +2,18 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{spectrum}
 \alias{spectrum}
-\title{Generic for spectrum}
+\title{Plot the spectrum}
 \usage{
 spectrum(x, ...)
 }
 \arguments{
-\item{x}{input}
+\item{x}{A \code{ts} or numeric object.}
 
-\item{...}{parameters}
+\item{...}{Additional parameters.}
 }
 \description{
-Generic for spectrum
+It can be applied to both \code{ts} and numerics (as before), and \code{dsa2} and \code{wsa} output, i.e. the results of a call to \code{dsa()} or \code{wsa()}.
+The y-axis is a dB-type scale, analogous to \code{log="dB"} in \code{stats::spectrum()}.
 }
 \author{
 Daniel Ollech

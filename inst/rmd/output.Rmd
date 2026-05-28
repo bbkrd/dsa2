@@ -1,8 +1,13 @@
 ---
-title: "`r paste0('DSA2: ', x$parameters$name)`"
+title: "`r paste0('Calendar and seasonal adjustment of: ', x$parameters$title)`"
 pagetitle: "`r fileName`"
 date: "`r Sys.Date()`"
-output: html_document
+output:  
+  html_document:  
+    theme: flatly
+    toc: true  
+    toc_float: true
+    self_contained: true
 ---
 
 
@@ -39,14 +44,16 @@ plot_interactive(x)
 ```{r}
 
  # auxiliary variables
-  name  <- x$parameters$name
+  name  <- x$parameters$name 
   dates <- zoo::index(x$series)
   obs   <- length(dates) - x$parameters$h
   start <- as.character(dates[1])
   end   <- as.character(dates[obs])
+  method <- class(x)
   
   # create vector
   vec  <- c("Name:",          name,
+            "Method:",        toupper(method),
             "Start date:",    start,
             "End date:",      end)
   
@@ -64,6 +71,7 @@ plot_interactive(x)
 ### Estimation parameters
 
 ```{r}
+if (class(x) == "dsa2") {
 # auxiliary variables
 p    <- x$parameters
 s7   <- p$s7
@@ -78,13 +86,42 @@ outlierTypes    <- ifelse(is.null(p$outliers),
                           paste(p$outliers, collapse = ", "))
 externalPre     <- ifelse(is.null(p$pre_processing), 
                           niu, 
-                          p$pre_processing)
+                          "External pre-processing used")
 interpolMethod  <- ifelse(is.null(p$interpolator), 
                           niu, 
                           p$interpolator)
-dowAdjustment   <- ifelse(is.null(s7),   "None", s7)
-domAdjustment   <- ifelse(is.null(s31),  "None", s31)
-doyAdjustment   <- ifelse(is.null(s365), "None", s365)
+dowAdjustment   <- gsub("^: ", "", ifelse(
+                                          is.null(s7),
+                                          "None",
+                                          paste(
+                                            names(unlist(s7)),
+                                            unlist(s7),
+                                            collapse = " <br> ", 
+                                            sep = ": "
+                                          )
+                                        ))
+
+domAdjustment   <- gsub("^: ", "", ifelse(
+                        is.null(s31),
+                        "None",
+                        paste(
+                          names(unlist(s31)),
+                          unlist(s31),
+                          collapse = " <br> ",
+                          sep = ": "
+                        )
+                      ))
+
+doyAdjustment   <- gsub("^: ", "", ifelse(
+                                          is.null(s365),
+                                          "None",
+                                          paste(
+                                            names(unlist(s365)),
+                                            unlist(s365),
+                                            collapse = " <br> ",
+                                            sep = ": "
+                                          )
+                                        ))
 
 # create vector
 vec  <- c("Number of iterations:",    iterations,
@@ -103,6 +140,7 @@ df  <- as.data.frame(mat)
 
 # create table for Rmd
 .table(df) |>
+  gt::fmt_markdown(columns = c(V2)) |>
   gt::cols_width(
     V1 ~ px(250)
   ) |>
@@ -110,6 +148,43 @@ df  <- as.data.frame(mat)
     c(V1,V2),
     align = "left"
     ) 
+
+}
+
+if (class(x) == "wsa") {
+  # auxiliary variables
+p    <- x$parameters
+niu  <- "Not in use"
+
+modelType       <- ifelse(p$log, "Multiplicative", "Additive")
+fcastLength     <- p$h
+outlierTypes    <- ifelse(is.null(p$outliers), 
+                          niu, 
+                          paste(p$outliers, collapse = ", "))
+
+
+# create vector
+vec  <- c("Model type:",              modelType,
+          "Forecast length:",         fcastLength,
+          "Outlier types:",           outlierTypes)
+
+# turn into a matrix, then into a dataframe
+mat <- matrix(vec, byrow = TRUE, ncol = 2)
+df  <- as.data.frame(mat)
+
+# create table for Rmd
+.table(df) |>
+  gt::fmt_markdown(columns = c(V2)) |>
+  gt::cols_width(
+    V1 ~ px(250)
+  ) |>
+  gt::cols_align(
+    c(V1,V2),
+    align = "left"
+    ) 
+
+}
+
 
 ```
 
@@ -166,6 +241,13 @@ if (is.null(outliers)) {
     )
 }
 ```
+
+### Diagnostics
+
+```{r, fig.width = 10, fig.height = 6}
+spectrum(x)
+```
+
 
 </br>
 </br>

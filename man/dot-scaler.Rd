@@ -2,22 +2,22 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{.scaler}
 \alias{.scaler}
-\title{Internal function to take logs and differences of  a time series}
+\title{Internal function to take logs and differences of a time series}
 \usage{
 .scaler(x, Diff = 0, log = FALSE)
 }
 \arguments{
-\item{x}{time series}
+\item{x}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{Diff}{number of differences to be taken}
+\item{Diff}{An integer value detailing the number of differences to be taken.}
 
-\item{log}{Should time series be logarithmised}
+\item{log}{A logical value indicating whether the time series should be logarithmised.}
 }
 \description{
 Logarithmise and / or difference a time series
 }
 \details{
-Function is used in dsa to handle the users choice of logs and levels.
+The function is used in \code{dsa()} to handle the users choice of logs and levels.
 }
 \author{
 Daniel Ollech

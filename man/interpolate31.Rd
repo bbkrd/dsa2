@@ -7,12 +7,13 @@
 interpolate31(series, interpolator = "CUBIC_SPLINE")
 }
 \arguments{
-\item{series}{time series}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{interpolator}{Either "CUBIC_SPLINE" or "NONE"}
+\item{interpolator}{A character value set to \code{"CUBIC_SPLINE"} or \code{"NONE"} (\code{"NONE"} if STL is used, \code{"CUBIC_SPLINES"} else) to define the
+interpolation method for the day-of-the-month effect (see details).}
 }
 \description{
-Interpolates values for non-existent dates e.g. 29.02.2000
+Interpolates values for non-existent dates e.g. 29.02.2000.
 }
 \author{
 Thomas Witthohn

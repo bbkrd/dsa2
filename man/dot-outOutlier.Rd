@@ -2,17 +2,19 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{.outOutlier}
 \alias{.outOutlier}
-\title{Internal function for outliers}
+\title{Display outlier results for \code{dsa2} and \code{wsa} objects}
 \usage{
-.outOutlier(dsa2_object, digits = 3)
+.outOutlier(x, digits = 3)
 }
 \arguments{
-\item{dsa2_object}{dsa2 output object}
+\item{x}{A \code{dsa2} object.}
+
+\item{digits}{An integer value specifying the number of digits to be displayed.}
 }
 \description{
-Internal function to polish the output for outliers
+Display outlier results for \code{dsa2} and \code{wsa} objects.
 }
 \author{
-Sindy Brakemeier, Lea Hengen
+Daniel Ollech
 }
 \keyword{internal}

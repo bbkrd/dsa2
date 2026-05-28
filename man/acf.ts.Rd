@@ -2,8 +2,10 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{acf.ts}
 \alias{acf.ts}
-\title{ACF for ts object}
+\title{ACF for \code{ts} objects}
 \usage{
+\method{acf}{ts}(x, ...)
+
 \method{acf}{ts}(x, ...)
 }
 \arguments{
@@ -12,6 +14,11 @@
 \item{...}{parameters}
 }
 \description{
-See ?stats::acf for details
+See \code{stats::acf} for details.
+
+See \link[stats]{acf} for details
+}
+\author{
+Daniel Ollech
 }
 \keyword{internal}

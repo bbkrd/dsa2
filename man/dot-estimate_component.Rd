@@ -7,11 +7,11 @@
 .estimate_component(method, series, log = NULL)
 }
 \arguments{
-\item{method}{method to be employed}
+\item{method}{A character value detailing which method or specification is used for adjustment (defined in \code{dsa()}).}
 
-\item{series}{time series to be adjusted}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{log}{should logs be used}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 }
 \description{
 Generic for estimating seasonal component

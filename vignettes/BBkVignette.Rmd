@@ -32,15 +32,9 @@ Steps 2 to 4 may be iterated several times to improve the estimation of the peri
 To get started, ensure that you have Java 17 or higher. If not automatically detected, 
 you can set your Java home using the following command.
  
-```{r start}
-Sys.setenv("JAVA_HOME" = "C:\\Workspace\\Java\\JDK\\jdk-17.0.3+7") ## Always start with this
+```{r start, eval = FALSE}
+Sys.setenv("JAVA_HOME" = "your_path") 
 ```
-
-**At the Bundesbank, you can get Java 17 here:** 
-
-**R:/Zentrale/Projekte/FB-S/Daten/DA/JDemetra/Anwendungen/VC/Java/JDK**
-
-**Move and unpack the zip file to the right path: C:/Workspace/Java/JDK/**
 
 ## Getting started with dsa2
 
@@ -85,7 +79,7 @@ series_withMonthlySeasonality <- allm$original
 ## Default adjustment
 
 Currently, by default, STL is used for the seasonal adjustments and no automatic calendar adjustment is conducted
-```{r Default, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r Default, fig.width=10, fig.height=4.5, fig.align = 'center'}
 result0 <- dsa(series)
 result0
 plot(result0)
@@ -96,7 +90,7 @@ plot(result0)
 
 To create an HTML output you can use the following code
 
-```{r output, fig.width=11, fig.height=4.5, eval = FALSE}
+```{r output, fig.width=10, fig.height=4.5, eval = FALSE}
 output(result0) # Create HTML output
 ```
 
@@ -104,7 +98,7 @@ output(result0) # Create HTML output
 
 To conduct a calendar adjustment, you have to include your pre-defined regressors, as follows
 
-```{r DefaultRegs, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r DefaultRegs, fig.width=10, fig.height=4.5, fig.align = 'center'}
 result <- dsa(series,
               xreg = regs)
 result
@@ -115,7 +109,7 @@ plot(result)
 ## Adjustment with missing values
 dsa() handles missing values automatically, they are filled up using the fractional airline model
 
-```{r AdjustmentMissing, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r AdjustmentMissing, fig.width=10, fig.height=4.5, fig.align = 'center'}
 seriesx <- series
 seriesx[c(1, 499, 1010, 1748)] <- NA
 
@@ -136,7 +130,7 @@ The function compare_plot() allows you to compare results from two different adj
 
 If you only want to change the seasonal adjustment part and leave the pre-adjustment unchanged, you can plug-in the previous result to pre_adjustment, to speed up the computation.
 
-```{r, AdjustmentX11, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r, AdjustmentX11, fig.width=10, fig.height=4.5, fig.align = 'center'}
 result2 <-  dsa(series, 
                 s7 = "x11",
                 s365 = x11_method(sma = "S3x1", 
@@ -152,7 +146,7 @@ compare_plot(result, result2)
 ## Adjustment with Seats
 The adjustment called Seats is in fact just an Extended Airline based decomposition. Note that currently, multiplicative decompositions are not implemented in dsa().
 
-```{r SeatsAdjustment, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r SeatsAdjustment, fig.width=10, fig.height=4.5, fig.align = 'center'}
 result3 <- dsa(series, 
                s7 = seats_method(),
                s365 = seats_method(), 
@@ -169,7 +163,7 @@ The currency in circulation series analysed by Ollech (2018) included noticeable
 If you want to include it, you have to set the s31 parameter to a method of your choice
 
 
-```{r DayOfMonth, fig.width=15, fig.height=4.5, fig.align = 'center'}
+```{r DayOfMonth, fig.width=10, fig.height=4.5, fig.align = 'center'}
 resultm <- dsa(series_withMonthlySeasonality, 
                s7 = NULL,
                s31 = seats_method(), 
@@ -185,6 +179,26 @@ resultm2 <- dsa(series_withMonthlySeasonality,
 
 compare_plot(resultm, resultm2)
 ```
+
+## WSA
+
+```{r, fig.width=10, fig.height=4.5, fig.align = 'center'}
+to_week <- function (x) {
+  ep <- xts::endpoints(x, on = "weeks")
+  out <- xts::period.apply(x, 
+                          INDEX = ep[ep >= 0 & 
+                                     ep <= length(x)], FUN = mean)
+  return(out)
+}
+
+seriesw <- to_week(series)
+
+resultw <- wsa(seriesw)
+resultw
+plot(resultw)
+```
+
+
 
 
 ## References

@@ -1,7 +1,7 @@
 #' Data set for frequently used regressors
 #' 
-#' Daily time series in xts format containing many regressors for holidays potentially used in the adjustment of daily time series
-#' @format An xts data set containing 131 regressors for the time span 1950 to 2075:
+#' Daily time series in `xts` format containing many regressors for holidays potentially used in the adjustment of daily time series
+#' @format An `xts` data set containing 131 regressors for the time span 1950 to 2075:
 #' \describe{
 #' \item{AllSaints}{AllSaints, Nov 1}
 #' \item{Ascension}{Ascension}
@@ -74,7 +74,7 @@
 #' Exemplary time series
 #' 
 #' Three time series that have been analysed by Ollech (2021) and their seasonally and calendar adjusted variants.
-#' @format An xts data set containing 3 time series:
+#' @format An `xts` data set containing 3 time series:
 #' \describe{
 #' \item{currency_circulation}{Currency in circulation in Germany, in billion Euros, sum of small denominations: i.e. 5 Euro + 10 Euro + 20 Euro + 50 Euro. Series compiled by Deutsche Bundesbank}
 #' \item{elec_consumption}{Electricity consumption in Germany in GWh. Compiled by Bundesnetzagentur (German Federal Network Agency)}
@@ -88,9 +88,9 @@
 #' @author Daniel Ollech
 "daily_data"
 
-#' Centered version of xts of all German regressors used for daily time series
+#' Centered version of `xts` of all German regressors used for daily time series.
 #' 
-#' This is the centered version of the holidays regressors. See ?dsa2::holidays for details
+#' This is the centered version of the holidays regressors. See `dsa2::holidays` for details.
 #' @author Daniel Ollech
 "holidaysCentered"
 

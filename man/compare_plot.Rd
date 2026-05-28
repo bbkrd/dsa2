@@ -2,27 +2,19 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{compare_plot}
 \alias{compare_plot}
-\title{Function to compare two dsa2 results}
+\title{Plot a comparison between two \code{dsa2} or two \code{wsa} objects}
 \usage{
-compare_plot(dsa2_object1, dsa2_object2, include_forecasts = FALSE)
+compare_plot(x1, x2 = NULL, include_forecasts = FALSE)
 }
 \arguments{
-\item{dsa2_object1}{first dsa2 output object}
+\item{x1}{The first \code{dsa2} or \code{wsa} object.}
 
-\item{dsa2_object2}{second dsa2 output object}
+\item{x2}{The second \code{dsa2} or \code{wsa} object.}
 
-\item{include_forecasts}{should forecasts be depicted?}
+\item{include_forecasts}{A logical value indicating whether to display forecast data.}
 }
 \description{
-Create a plot of the original and adjusted series from two different adjustments
-}
-\examples{
-set.seed(2358)
-all <- tssim::sim_daily(N = 5)
-series <- all$original
-result <- dsa(series, outliers = NULL)
-result2 <- dsa(series,s7 = "x11", pre_processing = result)
-compare_plot(result, result2)
+Compare plot can be applied to \code{dsa2} and \code{wsa} objects, i.e. the results from a call to \code{dsa()} or \code{wsa()}.
 }
 \author{
 Daniel Ollech

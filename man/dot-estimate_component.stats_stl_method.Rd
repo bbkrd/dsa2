@@ -2,19 +2,19 @@
 % Please edit documentation in R/dsa2.R
 \name{.estimate_component.stats_stl_method}
 \alias{.estimate_component.stats_stl_method}
-\title{STL method for estimating seasonal component using stats::stl}
+\title{STL method for estimating seasonal component using \code{stats::stl}}
 \usage{
 \method{.estimate_component}{stats_stl_method}(method, series, log = NULL)
 }
 \arguments{
-\item{method}{method to be employed}
+\item{method}{A character value detailing which method or specification is used for adjustment (defined in \code{dsa()}).}
 
-\item{series}{time series to be adjusted, class should be ts}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{log}{should logs be used}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 }
 \description{
-STL method for estimating seasonal component using stats::stl
+STL method for estimating seasonal component using \code{stats::stl}
 }
 \author{
 Daniel Ollech

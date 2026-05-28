@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa2.R
 \name{stl_method}
 \alias{stl_method}
-\title{Translation between input to dsa() and rjd3-function}
+\title{Translation between input to \code{dsa()} and rjd3-function}
 \usage{
 stl_method(
   period = NA,
@@ -21,39 +21,39 @@ stl_method(
 )
 }
 \arguments{
-\item{period}{frequency which shall be adjusted, numeric}
+\item{period}{A numeric value specifying the frequency to be adjusted.}
 
-\item{swindow}{number of observations included in the local regressions calculated to obtain the seasonal component}
+\item{swindow}{Number of observations included in the local regressions calculated to obtain the seasonal component.}
 
-\item{log}{log, ignored in dsa2}
+\item{log}{A logical value indicating whether to use a multiplicative model., ignored in dsa2. ## MR2: How is it ignored??}
 
-\item{twindow}{number of observations included in local regressions for trend component}
+\item{twindow}{A numeric value for the number of observations included in local regressions for trend component.}
 
-\item{lwindow}{number of observations included in local regressions for additional trend smoothing of seasonal}
+\item{lwindow}{A numeric value for the number of observations included in local regressions for additional trend smoothing of seasonal component.}
 
-\item{ninnerloop}{number of inner loops of STL}
+\item{ninnerloop}{A numeric value for the number of inner loops of STL.}
 
-\item{nouterloop}{number of outer loops of STL}
+\item{nouterloop}{A numeric value for the number of outer loops of STL.}
 
-\item{sjump}{number of jumps in the computation of the seasonal}
+\item{sjump}{A numeric value for the number of jumps in the computation of the seasonal component.}
 
-\item{tjump}{number of jumps in the computation of the trend}
+\item{tjump}{A numeric value for the number of jumps in the computation of the trend component.}
 
-\item{ljump}{number of jumps in the computation of the trend in the seasonal}
+\item{ljump}{A numeric value for the number of jumps in the computation of the trend in the seasonal component.}
 
-\item{weight.threshold}{threshold for weights, see ? rjd3stl::stlplus for details}
+\item{weight.threshold}{A numeric value detailing the threshold for weights (see \code{?rjd3stl::stlplus}).}
 
-\item{weight.function}{wfunction for weights, see ? rjd3stl::stlplus for details}
+\item{weight.function}{Function for weights (see \code{?rjd3stl::stlplus}).}
 
-\item{legacy}{use of the legacy MAD}
+\item{legacy}{Use of the legacy MAD.}
 }
 \description{
-Handler for stl
+Handler for STL
 }
 \details{
-This functions is basically a translator between the dsa2 routines
-and rjd3stl::stlplus, but its goal is to invoke the stl procedure.
-It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
+This functions is basically a translator between the dsa2 routines and \code{rjd3stl::stlplus},
+but its goal is to invoke the STL-procedure. It cannot be used to change the decomposition scheme
+(additive/multiplicative) for a single step in \code{dsa()}.
 }
 \author{
 Daniel Ollech

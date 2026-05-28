@@ -2,20 +2,20 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{spectrum.dsa2}
 \alias{spectrum.dsa2}
-\title{Plot the periodogram of a daily time series}
+\title{Plot the periodogram for \code{dsa2} objects}
 \usage{
 \method{spectrum}{dsa2}(x, ...)
 }
 \arguments{
-\item{x}{dsa2-object}
+\item{x}{A \code{dsa2} object.}
 
-\item{...}{further options to par()}
+\item{...}{Further options to \code{par()}.}
 }
 \description{
-Plot the periodogram of a daily time series
+Plot the periodogram of the adjustment result of a daily time series.
 }
 \details{
-The spectrum is build around the spec.pgram() function
+The spectrum is build around the \code{spec.pgram()} function.
 }
 \examples{
 x <- tssim::sim_daily(3)$original

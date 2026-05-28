@@ -3,7 +3,7 @@
 \docType{data}
 \name{holidaysCentered}
 \alias{holidaysCentered}
-\title{Centered version of xts of all German regressors used for daily time series}
+\title{Centered version of \code{xts} of all German regressors used for daily time series.}
 \format{
 An object of class \code{xts} (inherits from \code{zoo}) with 55152 rows and 132 columns.
 }
@@ -11,7 +11,7 @@ An object of class \code{xts} (inherits from \code{zoo}) with 55152 rows and 132
 holidaysCentered
 }
 \description{
-This is the centered version of the holidays regressors. See ?dsa2::holidays for details
+This is the centered version of the holidays regressors. See \code{dsa2::holidays} for details.
 }
 \author{
 Daniel Ollech

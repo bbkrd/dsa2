@@ -2,8 +2,10 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{spectrum.numeric}
 \alias{spectrum.numeric}
-\title{Spectrum for numeric object}
+\title{Spectrum for numeric objects}
 \usage{
+\method{spectrum}{numeric}(x, ...)
+
 \method{spectrum}{numeric}(x, ...)
 }
 \arguments{
@@ -12,6 +14,11 @@
 \item{...}{parameters}
 }
 \description{
-See ?stats::spectrum  for details
+See \code{stats::spectrum} for details.
+
+See \link[stats]{spectrum} for details
+}
+\author{
+Daniel Ollech
 }
 \keyword{internal}

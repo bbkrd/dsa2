@@ -2,18 +2,20 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{print.dsa2}
 \alias{print.dsa2}
-\title{Print generic for dsa2}
+\title{Print for \code{dsa2} objects}
 \usage{
 \method{print}{dsa2}(x, ...)
 }
 \arguments{
-\item{x}{dsa2-output object}
+\item{x}{A \code{dsa2} object.}
 
-\item{...}{further arguments to print}
+\item{...}{Further arguments to print.}
 }
 \description{
-Print generic for dsa2, lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
+Print for \code{dsa2} objects, lists the coefficients of the fractional airline model as well as the coefficients and
+t-values of all outliers and calendar effects.
 }
 \author{
 Sindy Brakemeier, Lea Hengen
 }
+\keyword{internal}

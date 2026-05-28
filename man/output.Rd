@@ -2,23 +2,27 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{output}
 \alias{output}
-\title{HTML output for dsa2}
+\title{HTML output for \code{dsa2} objects}
 \usage{
-output(x, fileName = NULL, filePath = NULL)
+output(x, fileName = NULL, filePath = NULL, title = NULL, open = TRUE)
 }
 \arguments{
-\item{x}{output object}
+\item{x}{A \code{dsa2} object.}
 
-\item{fileName}{name for HTML output}
+\item{fileName}{A character value detailing the file name for HTML output.}
 
-\item{filePath}{path for HTML output}
+\item{filePath}{A character value detailing the file path for HTML output.}
+
+\item{title}{A character value detailing the title of the HTML document.}
+
+\item{open}{A logical value indicating whether the rendered HTML is opened.}
 }
 \description{
-HTML output for dsa2
+HTML output for \code{dsa2} objects.
 }
 \details{
-Generates an .Rmd file that is rendered into an .html document saved in the working directory.
+The function generates an .Rmd file that is rendered into an .html document saved in the working directory.
 }
 \author{
-Lea Hengen, Sindy Brakemeier, Martin Stefan, Daniel Ollech
+Lea Hengen, Sindy Brakemeier, Martin Stefan, Jan Heller, Daniel Ollech
 }

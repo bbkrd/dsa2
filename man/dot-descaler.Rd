@@ -7,21 +7,21 @@
 .descaler(x, y = NA, Diff = 0, log = FALSE, Lag = NA)
 }
 \arguments{
-\item{x}{time series}
+\item{x}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{y}{reference time series for inverting differencing}
+\item{y}{An \code{xts} object containing the reference time series for inverting differencing.}
 
-\item{Diff}{number of differences to be taken}
+\item{Diff}{An integer value detailing the number of differences to be taken.}
 
-\item{log}{should time series be logarithmised}
+\item{log}{A logical value indicating whether the time series should be logarithmised.}
 
-\item{Lag}{which Lag of differencing needs to be inverted}
+\item{Lag}{An integer value detailing which lag of differencing needs to be inverted.}
 }
 \description{
 For a series that has been logged and/or differenced, this function reverses these transformations.
 }
 \details{
-Function is used in dsa to handle the users choice of logs and levels.
+The function is used in \code{dsa()} to handle the users choice of logs and levels.
 }
 \author{
 Daniel Ollech

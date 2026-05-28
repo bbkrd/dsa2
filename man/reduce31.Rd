@@ -7,12 +7,12 @@
 reduce31(originalSeries, interpolatedVector)
 }
 \arguments{
-\item{originalSeries}{reference series}
+\item{originalSeries}{An \code{xts} object containing the reference time series.}
 
-\item{interpolatedVector}{series including interpolated values}
+\item{interpolatedVector}{An \code{xts} object containing the reference time series including interpolated values.}
 }
 \description{
-Removes interpolated values for non-existent dates e.g. 29.02.2000
+Removes interpolated values for non-existent dates e.g. 29.02.2000.
 }
 \author{
 Thomas Witthohn

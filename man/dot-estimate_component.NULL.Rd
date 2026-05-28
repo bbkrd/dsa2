@@ -2,19 +2,19 @@
 % Please edit documentation in R/dsa2.R
 \name{.estimate_component.NULL}
 \alias{.estimate_component.NULL}
-\title{NULL method for estimating seasonal component}
+\title{\code{NULL} method for estimating seasonal component}
 \usage{
 \method{.estimate_component}{`NULL`}(method, series, log = NULL)
 }
 \arguments{
-\item{method}{method to be employed}
+\item{method}{A character value detailing which method or specification is used for adjustment (defined in \code{dsa()}).}
 
-\item{series}{time series to be adjusted}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{log}{multiplicative models used}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 }
 \description{
-NULL method for estimating seasonal component
+\code{NULL} method for estimating seasonal component
 }
 \author{
 Daniel Ollech

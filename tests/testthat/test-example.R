@@ -34,14 +34,15 @@ test_that("STL SA with tolerance", {
 
 test_that("x11_method Warning log", {
   expect_warning(x11_method(period = 12,log = 5),
-                 "log needs to be a boolean")
+                 "log needs to contain a logical value.")
 })
 
 
 # Beispiel für escape characters
 test_that("x11_method Warning period", {
   expect_warning(x11_method(period = 1,log = T),
-                 "period in x11_method\\() should be at least 2")
+                 "period in x11_method() should be at least 2.",
+                 fixed = TRUE)
 })
 
 test_that("dsa", {

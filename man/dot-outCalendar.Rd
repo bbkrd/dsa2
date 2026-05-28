@@ -2,17 +2,19 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{.outCalendar}
 \alias{.outCalendar}
-\title{Internal function for calendars}
+\title{Display calendar regression results for \code{dsa2} and \code{wsa} objects}
 \usage{
-.outCalendar(dsa2_object, digits = 3)
+.outCalendar(x, digits = 3)
 }
 \arguments{
-\item{dsa2_object}{dsa2 output object}
+\item{x}{A \code{dsa2} object.}
+
+\item{digits}{An integer value specifying the number of digits to be displayed.}
 }
 \description{
-Internal function to polish the output for calendars
+Display calendar regression results for \code{dsa2} and \code{wsa} objects.
 }
 \author{
-Sindy Brakemeier, Lea Hengen
+Daniel Ollech
 }
 \keyword{internal}

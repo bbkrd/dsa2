@@ -2,17 +2,17 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{acf}
 \alias{acf}
-\title{Generic for ACF}
+\title{Plot the ACF}
 \usage{
 acf(x, ...)
 }
 \arguments{
-\item{x}{object for which ACF shall be plotted}
+\item{x}{A \code{dsa2} or \code{wsa} object for which the ACF should be plotted.}
 
-\item{...}{parameters}
+\item{...}{Additional Parameters.}
 }
 \description{
-Generic for ACF
+It can be applied to both \code{ts} and numerics (as before), and \code{dsa2} and \code{wsa} output, i.e. the results of a call to \code{dsa()} or \code{wsa()}.
 }
 \author{
 Daniel Ollech

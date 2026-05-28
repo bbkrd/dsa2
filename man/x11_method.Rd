@@ -2,43 +2,43 @@
 % Please edit documentation in R/dsa2.R
 \name{x11_method}
 \alias{x11_method}
-\title{Translation between input to dsa() and rjd3-function}
+\title{Translation between input to \code{dsa()} and rjd3-function}
 \usage{
 x11_method(
   period = NA,
   log = NULL,
-  sma = c("S3X9", "S3X1", "S3X3", "S3X5", "S3X15")[1],
-  trend.horizon = 6,
-  trend.degree = 2,
+  sma = c("MSR", "S3X9", "S3X1", "S3X3", "S3X5", "S3X15")[1],
+  trend.horizon = NULL,
+  trend.degree = NULL,
   trend.kernel = c("Henderson"),
   trend.asymmetric = c("CutAndNormalize"),
   sigma = c(1.5, 2.5)
 )
 }
 \arguments{
-\item{period}{frequency which shall be adjusted, numeric}
+\item{period}{A numeric value specifying the frequency to be adjusted.}
 
-\item{log}{log, ignored in dsa2}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 
-\item{sma}{seasonal moving average used}
+\item{sma}{Seasonal moving average used.}
 
-\item{trend.horizon}{band.width of trend filters, see ?rjd3x11plus::x11plus for details}
+\item{trend.horizon}{Band width of trend filters (see \code{?rjd3x11plus::x11plus}).}
 
-\item{trend.degree}{polynomial order of the local trend model, see ?rjd3x11plus::x11plus for details}
+\item{trend.degree}{Polynomial order of the local trend model (see \code{?rjd3x11plus::x11plus}).}
 
-\item{trend.kernel}{kernel weights in objective function, see ?rjd3x11plus::x11plus for details}
+\item{trend.kernel}{Kernel weights in objective function (see \code{?rjd3x11plus::x11plus}).}
 
-\item{trend.asymmetric}{truncation type to obtain asymmetric from symmetric filter, see ?rjd3x11plus::x11plus for details}
+\item{trend.asymmetric}{Truncation type to obtain asymmetric from symmetric filter (see \code{?rjd3x11plus::x11plus}).}
 
-\item{sigma}{lower and upper limit for the extreme value detection}
+\item{sigma}{Lower and upper limit for the extreme value detection.}
 }
 \description{
 Handler for x-11
 }
 \details{
 This functions is basically a translator between the dsa2 routines
-and rjd3x11plus::x11plus, but its goal is to invoke the X-11 procedure.
-It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
+and \code{rjd3x11plus::x11plus}, but its goal is to invoke the X-11 procedure.
+It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in \code{dsa()}.
 }
 \author{
 Daniel Ollech

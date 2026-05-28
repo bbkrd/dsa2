@@ -5,7 +5,7 @@
 \alias{holidays}
 \title{Data set for frequently used regressors}
 \format{
-An xts data set containing 131 regressors for the time span 1950 to 2075:
+An \code{xts} data set containing 131 regressors for the time span 1950 to 2075:
 \describe{
 \item{AllSaints}{AllSaints, Nov 1}
 \item{Ascension}{Ascension}
@@ -77,7 +77,7 @@ Own calculations
 holidays
 }
 \description{
-Daily time series in xts format containing many regressors for holidays potentially used in the adjustment of daily time series
+Daily time series in \code{xts} format containing many regressors for holidays potentially used in the adjustment of daily time series
 }
 \author{
 Daniel Ollech

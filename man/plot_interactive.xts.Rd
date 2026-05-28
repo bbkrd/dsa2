@@ -2,17 +2,17 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{plot_interactive.xts}
 \alias{plot_interactive.xts}
-\title{Interactive plot for xts}
+\title{Interactive plot for \code{xts} objects}
 \usage{
 \method{plot_interactive}{xts}(x, ...)
 }
 \arguments{
-\item{x}{xts time series}
+\item{x}{An \code{xts} object to be plotted.}
 
-\item{...}{additional parameters for dygraphs::dyOptions}
+\item{...}{Additional parameters for \code{dygraphs::dyOptions}.}
 }
 \description{
-Creates a plot for xts time series
+Creates a plot of original and seasonally adjusted series.
 }
 \details{
 The function uses the dygraphs package.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{acf.dsa2}
 \alias{acf.dsa2}
-\title{Plot the ACF based on dsa2 object}
+\title{Plot the ACF based on \code{dsa2} objects}
 \usage{
 \method{acf}{dsa2}(
   x,
@@ -20,36 +20,35 @@
 )
 }
 \arguments{
-\item{x}{object as calculated by dsa2()}
+\item{x}{A \code{dsa2} object.}
 
-\item{lags}{which lags shall be shown}
+\item{lags}{An integer value specifying which lags are shown.}
 
-\item{ylim}{limits of y-axis}
+\item{ylim}{A numeric vector indicating the limits of y-axis.}
 
-\item{main}{title of plot}
+\item{main}{A character value detailing the title of the plot.}
 
-\item{xlab}{x-axis label}
+\item{xlab}{A character value detailing the label of x-axis.}
 
-\item{ylab}{y-axis label}
+\item{ylab}{A character value detailing the label of y-axis.}
 
-\item{col}{color of lines}
+\item{col}{A character value detailing the color of the line.}
 
-\item{col2}{color of horizontal lines for confidence interval}
+\item{col2}{A character value detailing the color of horizontal lines for the confidence interval.}
 
-\item{col3}{color of vertical lines to separate lags of interest}
+\item{col3}{A character value detailing the color of vertical lines to separate lags of interest.}
 
-\item{space}{space before each bar}
+\item{space}{A numeric value detailing the space before each bar (see \code{barplot()}).}
 
-\item{border}{color of border}
+\item{border}{A character value detailing the color of the border.}
 
-\item{...}{further arguments for barplot()}
+\item{...}{Further arguments for \code{barplot()}.}
 }
 \description{
-Plot the ACF for a seasonally adjusted time series extracted from a dsa2 object
+Plot the ACF for a seasonally adjusted time series extracted from a \code{dsa2} object.
 }
 \details{
-Wrapper around the stats::acf() function. See ?barplot for details
-on changing the look of the plot
+Wrapper around the \code{stats::acf}() function. See \code{barplot()} for details on changing the look of the plot
 }
 \examples{
 x <- tssim::sim_daily(3)$original

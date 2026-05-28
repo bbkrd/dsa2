@@ -2,14 +2,14 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{plot_interactive.dsa2}
 \alias{plot_interactive.dsa2}
-\title{Interactive plot for dsa2}
+\title{Interactive plot for \code{dsa2} objects}
 \usage{
 \method{plot_interactive}{dsa2}(x, ...)
 }
 \arguments{
-\item{x}{dsa2-output object}
+\item{x}{An \code{dsa2} object to be plotted.}
 
-\item{...}{additional parameters for dygraphs::dyOptions}
+\item{...}{Additional parameters for \code{dygraphs::dyOptions}.}
 }
 \description{
 Creates a plot of original and seasonally adjusted series.

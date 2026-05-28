@@ -2,7 +2,7 @@
 % Please edit documentation in R/dsa2.R
 \name{stats_stl_method}
 \alias{stats_stl_method}
-\title{Translation between input to dsa() and stats::stl-function}
+\title{Translation between input to \code{dsa()} and \code{stats::stl()}-function}
 \usage{
 stats_stl_method(
   swindow = 13,
@@ -16,29 +16,31 @@ stats_stl_method(
 )
 }
 \arguments{
-\item{swindow}{number of observations included in the local regressions calculated to obtain the seasonal component}
+\item{swindow}{A numeric value for the number of observations included in the local regressions calculated to obtain the seasonal component.}
 
-\item{twindow}{number of observations included in local regressions for trend component}
+\item{twindow}{A numeric value for the number of observations included in local regressions for trend component.}
 
-\item{lwindow}{number of observations included in local regressions for additional trend smoothing of seasonal}
+\item{lwindow}{A numeric value for the number of observations included in local regressions for additional trend smoothing of seasonal component.}
 
-\item{ninnerloop}{number of inner loops of STL}
+\item{ninnerloop}{A numeric value for the number of inner loops of STL.}
 
-\item{nouterloop}{number of outer loops of STL}
+\item{nouterloop}{A numeric value for the number of outer loops of STL.}
 
-\item{sjump}{linear interpolation for seasonal component (see stats::stl)}
+\item{sjump}{An integer value to set "jump speed" for the linear interpolation for the seasonal component.
+Linear interpolation happens between every *.jump-th value (see \code{stats::stl()}).}
 
-\item{tjump}{sjump linear interpolation for trend component (see stats::stl)}
+\item{tjump}{An integer value to set "jump speed" for the linear interpolation for the trend component (see \code{stats::stl()}).#
+Linear interpolation happens between every *.jump-th value (see \code{stats::stl()}).}
 
-\item{ljump}{linear interpolation for seasonal subseries component (see stats::stl)}
+\item{ljump}{An integer value to set "jump speed" for the linear interpolation for the seasonal subseries component (see \code{stats::stl()}).
+Linear interpolation happens between every *.jump-th value (see \code{stats::stl()}).}
 }
 \description{
-Handler for stats::stl
+Handler for \code{stats::stl()}
 }
 \details{
-This functions is basically a translator between the dsa2 routines
-and stats::stl.
-It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in DSA2.
+This functions is basically a translator between the dsa2 routines and \code{stats::stl()}.
+It cannot be used to change the decomposition scheme (additive/multiplicative) for a single step in \code{dsa()}.
 }
 \author{
 Daniel Ollech

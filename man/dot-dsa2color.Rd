@@ -7,16 +7,14 @@
 .dsa2color(color, ...)
 }
 \arguments{
-\item{color}{name of color}
+\item{color}{A character value specifying the name of the color.}
 
-\item{...}{additional colors}
+\item{...}{Additional colors}
 }
 \description{
-This function defines the colors to be used troughout the dsa2 package
-}
-\examples{
-dsa2:::.dsa2color("darkblue")
+This function defines the colors to be used throughout dsa2.
 }
 \author{
 Daniel Ollech
 }
+\keyword{internal}

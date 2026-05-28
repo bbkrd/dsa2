@@ -7,7 +7,7 @@
 delete_29(x)
 }
 \arguments{
-\item{x}{time series}
+\item{x}{An \code{xts} object containing the time series to be adjusted.}
 }
 \description{
 Delete the observation on February 29 from a time series
@@ -15,3 +15,4 @@ Delete the observation on February 29 from a time series
 \author{
 Daniel Ollech
 }
+\keyword{internal}

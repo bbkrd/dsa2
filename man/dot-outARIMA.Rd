@@ -2,17 +2,19 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{.outARIMA}
 \alias{.outARIMA}
-\title{Internal function for Fractional Airline model}
+\title{Display ARIMA results for \code{dsa2} and \code{wsa} objects}
 \usage{
-.outARIMA(dsa2_object, digits = 3)
+.outARIMA(x, digits = 3)
 }
 \arguments{
-\item{dsa2_object}{dsa2 output object}
+\item{x}{A \code{dsa2} or \code{wsa} object.}
+
+\item{digits}{An integer value specifying the number of digits to be displayed.}
 }
 \description{
-Internal function to polish the output for the fractional airline model
+Display ARIMA results for \code{dsa2} and \code{wsa} objects.
 }
 \author{
-Jakob Oberhammer, Martin Stefan, Sindy Brakemeier, Lea Hengen
+Daniel Ollech
 }
 \keyword{internal}

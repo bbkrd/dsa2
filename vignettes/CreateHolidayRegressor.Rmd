@@ -2,7 +2,7 @@
 title: "Create Holiday Regressor"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CreateHolidayRegressor}
+  %\VignetteIndexEntry{Create Holiday Regressor}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

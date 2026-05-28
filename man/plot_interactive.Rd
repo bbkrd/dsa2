@@ -2,17 +2,17 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{plot_interactive}
 \alias{plot_interactive}
-\title{Generic for interactive plots}
+\title{Interactive plots}
 \usage{
 plot_interactive(x, ...)
 }
 \arguments{
-\item{x}{object to be plotted}
+\item{x}{An \code{dsa2}, \code{wsa} or \code{xts} object to be plotted.}
 
-\item{...}{parameters}
+\item{...}{Additonal parameters.}
 }
 \description{
-Generic for interactive plots
+The interactive plot can be applied to a \code{dsa2}, \code{wsa} and \code{xts} object. Is it based on dygraphs.
 }
 \author{
 Daniel Ollech

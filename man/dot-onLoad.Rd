@@ -7,10 +7,11 @@
 .onLoad(libname, pkgname)
 }
 \arguments{
-\item{libname}{name of library}
+\item{libname}{A character value containing the name of the library.}
 
-\item{pkgname}{name of package}
+\item{pkgname}{A character value containing the name of the package.}
 }
 \description{
-Functions to be run when package is loaded
+Functions to be run when package is loaded.
 }
+\keyword{internal}

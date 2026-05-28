@@ -2,18 +2,20 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{summary.dsa2}
 \alias{summary.dsa2}
-\title{Summary generic for dsa2}
+\title{Summary for \code{dsa2} objects}
 \usage{
 \method{summary}{dsa2}(object, ...)
 }
 \arguments{
-\item{object}{dsa2 output object}
+\item{object}{A \code{dsa2} output object.}
 
-\item{...}{further arguments handed to print.dsa2}
+\item{...}{Further arguments handed to \code{print.dsa2}.}
 }
 \description{
-Summary.dsa2 lists the coefficients of the fractional airline model as well as the coefficients and t-values of all outliers and calendar effects.
+\code{summary.dsa2} lists the coefficients of the fractional airline model as well as the coefficients and
+t-values of all outliers and calendar effects.
 }
 \author{
 Sindy Brakemeier, Lea Hengen
 }
+\keyword{internal}

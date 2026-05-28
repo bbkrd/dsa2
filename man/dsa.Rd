@@ -21,53 +21,62 @@ dsa(
 )
 }
 \arguments{
-\item{series}{input time series in xts format}
+\item{series}{An \code{xts} object containing the time series to be adjusted.}
 
-\item{xreg}{regressors used for calendar adjustment}
+\item{xreg}{A numeric matrix of regressors used for calendar adjustment; see \code{dsa2:holidays} for a predefined object of potential holidays.}
 
-\item{log}{should multiplicative time series model be used}
+\item{log}{A logical value indicating whether to use a multiplicative model.}
 
-\item{s7}{method or specification used for adjustment of day-of-the-week}
+\item{s7}{A character value detailing which method or specification is used for adjustment of day-of-the-week (see details).}
 
-\item{s31}{method or specification used for adjustment of day-of-the-month}
+\item{s31}{A character value detailing which method or specification is used for adjustment of day-of-the-month (see details).}
 
-\item{s365}{method or specification used for adjustment of day-of-the-year}
+\item{s365}{A character value detailing which method or specification is used for adjustment of day-of-the-year (see details).}
 
-\item{outliers}{which outliers should be identified (LS, AO, WO). Set NULL if none shall be searched}
+\item{outliers}{Identifying outliers (LS - leve shift, AO - additive outlier, WO - ???); set \code{NULL} if none shall be searched.}
 
-\item{critical_value}{threshold to include outliers to be used in the automatic outlier estimation}
+\item{critical_value}{A numerical value specifying the threshold to include outliers used in the automatic outlier estimation (see also
+\code{rjd3highfreq::fractionalAirlineEstimation}).}
 
-\item{n_iterations}{number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1}
+\item{n_iterations}{A numerical value specifying the number of iterations of step 2 to 4 (i.e. s7, s31 and s365), at least 1 .}
 
-\item{h}{number of days to forecast}
+\item{h}{A numeric value specifying the number of days to forecast.}
 
-\item{interpolator}{either "default" ("NONE" if stl is used, "CUBIC_SPLINES" else), "CUBIC_SPLINE" or "NONE". See details}
+\item{interpolator}{A character value set to \code{"default"}, \code{"CUBIC_SPLINE"} or \code{"NONE"} (\code{"NONE"} if STL is used, \code{"CUBIC_SPLINES"} else) to define the
+interpolation method for the day-of-the-month effect (see details).}
 
-\item{pre_processing}{Optionally include pre-processing results computed earlier using dsa2 result (see examples)}
+\item{pre_processing}{A logical value indicating whether to include pre-processing results computed earlier using \code{dsa2} result (see examples).}
 
-\item{...}{additional parameters from fractionalAirlineEstimation}
+\item{...}{Additional parameters from \code{rjd3highfreq::fractionalAirlineEstimation}.}
 }
 \description{
 Seasonal adjustment of daily time series
 }
 \details{
-DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect, if selected: the day-of-the-month effect, and the day-of-the-year effect to get the seasonally adjusted series.
-For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each months. This is done by filling up the artificial days (e.g. 31st of April) by NAs and then - if so chosen - filling up the missing values using spline interpolation. By default, if STL is used, the NAs are not filled up, if X-11 or Seats is used- the NAs are filled up.
-Is is not possible to use different decomposition schemes for the single dsa2 steps. This means you cannot use a multiplicative model for the day-of-the-week and an additive model for the day-of-the-year. Therefore, the global specification og log = TRUE or log = FALSE is used for all steps.
+DSA iteratively estimates and adjusts the calendar component, the day-of-the-week effect (\code{s7}), if selected
+the day-of-the-month effect (\code{s31}), and the day-of-the-year effect (\code{s365}) to get the seasonally adjusted series.
+
+For the estimation of the day-of-the-month effect, the months are extended to include 31 days in each month.
+This is done by filling up the artificial days (e.g. 31st of April) with \code{NA} and then - if chosen - filling up
+the missing values using spline interpolation. By default, if STL is used, \code{NA} are not filled up; if X-11
+or Seats is used, \code{NA} are filled up.
+
+It is not possible to use different decomposition schemes for the single \code{dsa()} steps. This means you cannot use a
+multiplicative model for the day-of-the-week and an additive model for the day-of-the-year.
+Therefore, the global specification of \code{log = TRUE} or \code{log = FALSE} is used for all steps.
 }
 \examples{
-Sys.setenv("JAVA_HOME"="C:/Workspace/Java/JDK/jdk-17.0.3+7") ## Currently start with this
 ## Create time series 
 set.seed(2358)
-all <- tssim::sim_daily(N=5)
-series <- all$original 
+all     <- tssim::sim_daily(N=5)
+series  <- all$original 
 
 ## Default adjustment
-result <- dsa(series)
+result  <- dsa(series)
 plot(result)
 
 ## Set STL parameters to be used
-result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow=9), pre_processing = result)
+result2 <- dsa(series, s7 = stl_method(swindow = 31, twindow = 9), pre_processing = result)
 
 ## Use STL and X11 in combination
 result3 <- dsa(series, s7 = "x11", s365 = "stl", pre_processing = result) 

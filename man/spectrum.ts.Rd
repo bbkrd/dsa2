@@ -2,8 +2,10 @@
 % Please edit documentation in R/dsa2_auxiliary.R
 \name{spectrum.ts}
 \alias{spectrum.ts}
-\title{Spectrum for ts object}
+\title{Spectrum for \code{ts} objects}
 \usage{
+\method{spectrum}{ts}(x, ...)
+
 \method{spectrum}{ts}(x, ...)
 }
 \arguments{
@@ -12,6 +14,11 @@
 \item{...}{parameters}
 }
 \description{
-See ?stats::acf for details
+See \code{stats::spectrum} for details.
+
+See \link[stats]{spectrum} for details
+}
+\author{
+Daniel Ollech
 }
 \keyword{internal}

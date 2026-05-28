@@ -13,7 +13,7 @@ testthat::test_that("stl_method Warning log", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "log needs to be a boolean")
+                 "log needs to contain a logical value.")
 })
 
 testthat::test_that("stl_method Warning sjump", {
@@ -29,7 +29,7 @@ testthat::test_that("stl_method Warning sjump", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "sjump, tjump and ljump need to be numericals")
+                 "sjump, tjump and ljump need to be of class numeric or integer.")
 })
 
 testthat::test_that("stl_method Warning tjump", {
@@ -45,7 +45,7 @@ testthat::test_that("stl_method Warning tjump", {
                             weight.threshold = 0.001, 
                             weight.function = c('BIWEIGHT'),
                             legacy = FALSE),
-                 "sjump, tjump and ljump need to be numericals")
+                 "sjump, tjump and ljump need to be of class numeric or integer.")
 })
 
 testthat::test_that("stl_method Warning ljump", {
@@ -61,7 +61,7 @@ testthat::test_that("stl_method Warning ljump", {
                             weight.threshold = 0.001, 
                             weight.function = c('BIWEIGHT'),
                             legacy = FALSE),
-                 "sjump, tjump and ljump need to be numericals")
+                 "sjump, tjump and ljump need to be of class numeric or integer.")
 })
 
 testthat::test_that("stl_method Warning class period", {
@@ -77,7 +77,8 @@ testthat::test_that("stl_method Warning class period", {
                           weight.threshold = 0.001, 
                           weight.function = c('BIWEIGHT'),
                           legacy = FALSE),
-                 "period in stl_method\\() needs to be of class numeric or integer")
+                 "period in stl_method() must contain a numeric or integer value.",
+               fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning period length", {
@@ -93,7 +94,8 @@ testthat::test_that("stl_method Warning period length", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "period in stl_method\\() should be at least 2")
+                 "period in stl_method() should be at least 2.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class swindow", {
@@ -109,7 +111,8 @@ testthat::test_that("stl_method Warning class swindow", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "swindow in stl_method\\() need to be of class numeric or integer")
+                 "swindow in stl_method() needs to contain a numeric or integer value.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class twindow", {
@@ -125,8 +128,8 @@ testthat::test_that("stl_method Warning class twindow", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "twindow, ninnerloop, nouterloop and weight.threshold in 
-             stl_method\\() need to be of class numeric or integer")
+                 "twindow, ninnerloop, nouterloop and weight.threshold in stl_method() need to contain numeric or integer values.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class ninnerloop", {
@@ -142,8 +145,8 @@ testthat::test_that("stl_method Warning class ninnerloop", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "twindow, ninnerloop, nouterloop and weight.threshold in 
-             stl_method\\() need to be of class numeric or integer")
+                 "twindow, ninnerloop, nouterloop and weight.threshold in stl_method() need to contain numeric or integer values.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class nouterloop", {
@@ -159,8 +162,8 @@ testthat::test_that("stl_method Warning class nouterloop", {
                               weight.threshold = 0.001, 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "twindow, ninnerloop, nouterloop and weight.threshold in 
-             stl_method\\() need to be of class numeric or integer")
+                 "twindow, ninnerloop, nouterloop and weight.threshold in stl_method() need to contain numeric or integer values.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class weight.threshold", {
@@ -176,8 +179,8 @@ testthat::test_that("stl_method Warning class weight.threshold", {
                               weight.threshold = "verysmall", 
                               weight.function = c('BIWEIGHT'),
                               legacy = FALSE),
-                 "twindow, ninnerloop, nouterloop and weight.threshold in 
-             stl_method\\() need to be of class numeric or integer")
+                 "twindow, ninnerloop, nouterloop and weight.threshold in stl_method() need to contain numeric or integer values.",
+                 fixed = TRUE)
 })
 
 testthat::test_that("stl_method Warning class weigth.function", {
@@ -193,6 +196,7 @@ testthat::test_that("stl_method Warning class weigth.function", {
                               weight.threshold = 0.001, 
                               weight.function = c(5),
                               legacy = FALSE),
-                 "weight.function in stl_method\\() need to be of class character")
+                 "weight.function in stl_method() needs to contain a character value.",
+                 fixed = TRUE)
 })
 

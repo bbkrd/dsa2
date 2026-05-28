@@ -1,6 +1,6 @@
 Package: dsa2
-Title: Seasonal adjustment of daily time series
-Version: 0.2.5
+Title: Seasonal adjustment of higher frequency time series
+Version: 0.2.46
 Authors@R: 
     c(person(given = "Daniel",
              family = "Ollech",
@@ -35,24 +35,19 @@ Description: This package contains functions to conduct a seasonal adjustment of
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Imports: 
-    xts,
-    zoo,
-    rJava,
-    stats,
-    rjd3highfreq (>= 1.0.0),
-    rjd3stl,
-    rjd3x11plus,
-    rmarkdown,
-    gt,
-    dygraphs
-Suggests:
-    knitr,
-    tssim,
-    testthat,
-    timeDate
-Depends: 
-    R (>= 2.10)
+Imports: xts, zoo, rJava, stats, rjd3highfreq (>= 1.0.0), rjd3stl,
+        rjd3x11plus, rjd3filters, rmarkdown, gt, dygraphs
+Suggests: knitr, tssim, testthat, timeDate
+Depends: R (>= 4.1.0)
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2026-05-26 10:03:25 UTC; s3504do
+Author: Daniel Ollech [aut, cre],
+  Martin Stefan [aut],
+  Julian LeCrone [aut],
+  Hofer Christiane [aut],
+  Witthohn Thomas [aut],
+  Brakemeier Sindy [aut],
+  Hengen Lea [aut]
